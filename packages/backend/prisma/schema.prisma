@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  name        String
+  username    String
+  password    String
+  deleteFlag  Boolean  @default(false)
+  createdTime DateTime @default(now()) @map("createdTime")
+  updatedTime DateTime @default(now()) @updatedAt @map("updatedTime")
+  hanId       Int      @default(autoincrement())
+  role        ERole?   @default(USER)
+}
+
+enum ERole {
+  USER
+  OPERATOR
+  ADMIN
+}
+
+model Login {
+  id               Int      @id @default(autoincrement()) @map("id")
+  syainIdd         Int      @map("syain_id")
+  userId           String   @map("user_id") @db.VarChar(40)
+  password         String   @map("password")
+  mail             String?  @map("mail") @db.VarChar(250)
+  mail_alert1_flag Boolean  @default(false) @map("mail_alert1_flag")
+  mail_alert2_flag Boolean  @default(false) @map("mail_alert2_flag")
+  syainName        String?  @map("syain_name") @db.VarChar(250)
+  mainClass        Int?     @map("main_class")
+  forceChange      Boolean? @map("force_change")
+  passHusiyoFlag   Boolean? @map("pass_husiyo_flag")
+}

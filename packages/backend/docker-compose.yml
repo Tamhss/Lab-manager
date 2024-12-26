@@ -1,0 +1,25 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    env_file:
+      - docker.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: -p 5432
+
+  pgadmin:
+    depends_on:
+      - postgres
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - '8080:80'
+    env_file:
+      - docker.env
+
+volumes:
+  postgres_data:
+  mongo_data:

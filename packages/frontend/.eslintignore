@@ -1,0 +1,4 @@
+generated/
+codegen-output/*
+openapitools.json
+

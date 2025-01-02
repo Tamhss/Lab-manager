@@ -46,7 +46,7 @@ export class SwaggerResponseUnauthorizedDto {
 
   @ApiProperty({
     type: String,
-    default: ErrorMessage.UNAUTHORIZED.lab(/^error./, ''),
+    default: ErrorMessage.UNAUTHORIZED.replace(/^error./, ''),
   })
   errorMessage!: string;
 
@@ -65,7 +65,7 @@ export class SwaggerResponseForbiddenDto {
 
   @ApiProperty({
     type: String,
-    default: ErrorMessage.FORBIDDEN.lab(/^error./, ''),
+    default: ErrorMessage.FORBIDDEN.replace(/^error./, ''),
   })
   errorMessage!: string;
 

@@ -36,7 +36,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let errorCode = '';
 
     if (typeof message === 'string') {
-      errorCode = message.lab('error.', '');
+      errorCode = message.replace('error.', '');
       message = await this.i18n.translate(message, {
         lang: this.constanceService.getFallbackLanguage() || EAppLanguage.EN,
       });

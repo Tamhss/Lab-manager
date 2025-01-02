@@ -17,7 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   async getLoginById(id: number) {
     return this.prisma.login.findFirst({
@@ -111,7 +111,7 @@ export class AuthService {
       where: { userId },
     });
 
-    if (!login || !login.passHusiyoFlag) {
+    if (!login) {
       throw new HttpException(
         ErrorMessage.ID_OR_PASSWORD_INCORRECT,
         HttpStatus.BAD_REQUEST,

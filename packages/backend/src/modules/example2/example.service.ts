@@ -4,9 +4,9 @@ import { PrismaService } from '@core/global/prisma/prisma.service';
 import { IPaginationResponse } from '@core/interface';
 import { returnPagingData } from '@helper/utils';
 
-import { VCreateExampleDto } from './dto/createExample.dto';
-import { VUpdateExampleDto } from './dto/updateExample.dto';
-import { VGetExamplesPropertyResponse } from './swagger/output/getExamples.response';
+import { VCreateExampleDto2 } from './dto/createExample.dto';
+import { VUpdateExampleDto2 } from './dto/updateExample.dto';
+import { VGetExamplesPropertyResponse2 } from './swagger/output/getExamples.response';
 import { TypeFile } from '@core/enum/default.enum';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ExampleService {
     private readonly prisma: PrismaService,
   ) { }
 
-  create(createExampleDto: VCreateExampleDto) {
+  create(createExampleDto: VCreateExampleDto2) {
     return createExampleDto;
   }
 
@@ -47,7 +47,7 @@ export class ExampleService {
     return `This action returns a #${id} example`;
   }
 
-  update(id: number, updateExampleDto: VUpdateExampleDto) {
+  update(id: number, updateExampleDto: VUpdateExampleDto2) {
     return `This action updates a #${id} example ${updateExampleDto}`;
   }
 

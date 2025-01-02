@@ -55,7 +55,7 @@ import { ApiModule } from '@core/global/api/api.module';
       username: 'root',
       password: 'root',
       entities: [PostgresExample],
-      database: 'replace',
+      database: 'lab',
       synchronize: true,
       logging: true,
     }),

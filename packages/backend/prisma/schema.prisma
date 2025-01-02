@@ -11,34 +11,82 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  name        String
-  username    String
-  password    String
-  deleteFlag  Boolean  @default(false)
-  createdTime DateTime @default(now()) @map("createdTime")
-  updatedTime DateTime @default(now()) @updatedAt @map("updatedTime")
-  hanId       Int      @default(autoincrement())
-  role        ERole?   @default(USER)
+  id           String        @id @default(uuid())
+  userName     String
+  email        String        @unique
+  password     String
+  role         Role
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  accounts     Account?
+  reservations Reservation[]
 }
 
-enum ERole {
-  USER
-  OPERATOR
+model Device {
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  status       DeviceStatus
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+}
+
+model Reservation {
+  id        String            @id @default(uuid())
+  userId    String
+  deviceId  String?
+  startTime DateTime
+  endTime   DateTime
+  status    ReservationStatus
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  device Device? @relation(fields: [deviceId], references: [id])
+}
+
+model Account {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  LECTURER
+  STUDENT
   ADMIN
 }
 
+enum DeviceStatus {
+  AVAILABLE
+  IN_USE
+  DAMAGED
+}
+
+enum LabStatus {
+  AVAILABLE
+  IN_USE
+  UNDER_MAINTENANCE
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
 model Login {
-  id               Int      @id @default(autoincrement()) @map("id")
-  syainIdd         Int      @map("syain_id")
-  userId           String   @map("user_id") @db.VarChar(40)
-  password         String   @map("password")
-  mail             String?  @map("mail") @db.VarChar(250)
-  mail_alert1_flag Boolean  @default(false) @map("mail_alert1_flag")
-  mail_alert2_flag Boolean  @default(false) @map("mail_alert2_flag")
-  syainName        String?  @map("syain_name") @db.VarChar(250)
-  mainClass        Int?     @map("main_class")
-  forceChange      Boolean? @map("force_change")
-  passHusiyoFlag   Boolean? @map("pass_husiyo_flag")
+  id               Int     @id @default(autoincrement()) @map("id")
+  userId           String  @map("user_id") @db.VarChar(40)
+  password         String  @map("password")
+  mail             String? @map("mail") @db.VarChar(250)
+  mail_alert1_flag Boolean @default(false) @map("mail_alert1_flag")
+  mail_alert2_flag Boolean @default(false) @map("mail_alert2_flag")
 }

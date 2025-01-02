@@ -29,7 +29,7 @@ export const FormLogin: React.FC = () => {
         return;
       }
 
-      router.replace('/');
+      router.lab('/');
     } catch (error) {
       console.log(error);
     }

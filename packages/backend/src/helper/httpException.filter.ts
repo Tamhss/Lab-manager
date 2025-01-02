@@ -17,7 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   constructor(
     private readonly i18n: I18nService,
     private constanceService: ConstanceService,
-  ) {}
+  ) { }
 
   async catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -36,9 +36,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let errorCode = '';
 
     if (typeof message === 'string') {
-      errorCode = message.replace('error.', '');
+      errorCode = message.lab('error.', '');
       message = await this.i18n.translate(message, {
-        lang: this.constanceService.getFallbackLanguage() || EAppLanguage.JA,
+        lang: this.constanceService.getFallbackLanguage() || EAppLanguage.EN,
       });
     }
 
@@ -46,7 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       errorCode = ErrorMessage.INVALID_PARAM;
       if (message[`statusCode`] === HttpStatus.NOT_ACCEPTABLE) {
         message = await this.i18n.translate(ErrorMessage.INVALID_PARAM, {
-          lang: this.constanceService.getFallbackLanguage() || EAppLanguage.JA,
+          lang: this.constanceService.getFallbackLanguage() || EAppLanguage.EN,
         });
       }
     }

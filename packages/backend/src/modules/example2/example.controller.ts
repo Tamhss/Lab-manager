@@ -22,10 +22,10 @@ import {
   SwaggerResponseUnauthorizedDto,
 } from '@core/swagger/response/index.response';
 
-import { VCreateExampleDto } from './dto/createExample.dto';
-import { VUpdateExampleDto } from './dto/updateExample.dto';
+import { VCreateExampleDto2 } from './dto/createExample.dto';
+import { VUpdateExampleDto2 } from './dto/updateExample.dto';
 import { ExampleService } from './example.service';
-import { VGetExamplesInput } from './swagger/input/getExample.response';
+import { VGetExamplesInput2 } from './swagger/input/getExample.response';
 import { VCreateExampleResponse } from './swagger/output/createExample.response';
 import { VGetExamplesResponse } from './swagger/output/getExamples.response';
 
@@ -34,7 +34,7 @@ export class ExampleController {
   constructor(private readonly exampleService: ExampleService) { }
 
   @Post()
-  @ApiBody({ type: VCreateExampleDto })
+  @ApiBody({ type: VCreateExampleDto2 })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The record has been successfully created.',
@@ -49,12 +49,12 @@ export class ExampleController {
     description: 'Unauthorized.',
     type: () => SwaggerResponseUnauthorizedDto,
   })
-  create(@Body() createExampleDto: VCreateExampleDto) {
+  create(@Body() createExampleDto: VCreateExampleDto2) {
     return this.exampleService.create(createExampleDto);
   }
 
   @Get()
-  @ApiQuery({ type: VGetExamplesInput })
+  @ApiQuery({ type: VGetExamplesInput2 })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Response successfully.',
@@ -78,7 +78,7 @@ export class ExampleController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateExampleDto: VUpdateExampleDto) {
+  update(@Param('id') id: string, @Body() updateExampleDto: VUpdateExampleDto2) {
     return this.exampleService.update(+id, updateExampleDto);
   }
 

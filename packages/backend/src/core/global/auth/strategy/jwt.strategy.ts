@@ -37,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
 
     //TODO set header
-    this.constanceService.setFallbackLanguage(EAppLanguage.JA);
+    this.constanceService.setFallbackLanguage(EAppLanguage.EN);
 
     // can you check token black in here
     // const tokenBlack = await this.authService.getTokenBlack(userExist.token);

@@ -35,10 +35,10 @@ export const configuration = () => ({
     expire_access_token: process.env.EXPIRE_ACCESS_TOKEN + 's',
     expire_refresh_token: process.env.EXPIRE_REFRESH_TOKEN + 's',
     privateKey: process.env.RSA_PRIVATE_KEY
-      ? process.env.RSA_PRIVATE_KEY.replace(/\\n/g, '\n')
+      ? process.env.RSA_PRIVATE_KEY.lab(/\\n/g, '\n')
       : '',
     publicKey: process.env.RSA_PUBLIC_KEY
-      ? process.env.RSA_PUBLIC_KEY.replace(/\\n/g, '\n')
+      ? process.env.RSA_PUBLIC_KEY.lab(/\\n/g, '\n')
       : '',
   },
   winston: {
@@ -49,18 +49,6 @@ export const configuration = () => ({
   },
   cms: {
     url: process.env.CMS_URL,
-  },
-  aws: {
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    region: process.env.AWS_REGION,
-    s3: {
-      bucket: process.env.AWS_S3_BUCKET,
-      url: process.env.AWS_S3_URL,
-    },
-    ses: {
-      email: process.env.AWS_SES_EMAIL,
-    },
   },
   time: {
     forgotPasswordExpiredTime: Number(process.env.FORGOT_PASSWORD_EXPIRED_TIME),
@@ -101,15 +89,6 @@ export enum EConfiguration {
 
   WINSTON_LOG_PATH = 'winston.path',
   DOMAIN_FRONTEND = 'domain.frontEnd',
-
-  AWS_SECRET_ACCESS_KEY = 'aws.secretAccessKey',
-  AWS_ACCESS_KEY_ID = 'aws.accessKeyId',
-  AWS_REGION = 'aws.region',
-
-  AWS_S3_BUCKET = 'aws.s3.bucket',
-  AWS_S3_URL = 'aws.s3.url',
-
-  AWS_SES_EMAIL = 'aws.ses.email',
 
   MONGO_URL = 'mongo.url',
 

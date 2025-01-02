@@ -14,7 +14,7 @@ export class ConstanceService {
   constructor(private configService: ConfigService) {
     this.appName = configService.get(EConfiguration.APP_NAME);
     this.environment = configService.get(EConfiguration.ENVIRONMENT);
-    this.fallbackLanguage = EAppLanguage.JA;
+    this.fallbackLanguage = EAppLanguage.EN;
   }
 
   getKeyCacheRedis(): IKeyRedisCache {

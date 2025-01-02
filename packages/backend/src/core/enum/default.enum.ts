@@ -46,7 +46,6 @@ export enum EGender {
 }
 
 export enum EAppLanguage {
-  JA = 'ja',
   EN = 'en',
 }
 
@@ -262,18 +261,18 @@ export enum ESubscriptionStatus {
 }
 
 export enum FORMAT_TYPE {
-  YEAR_MONTH = 'yyyy年M月',
-  YEAR_MONTH_DAY = 'yyyy-MM-dd',
-  YEAR_DAY_TIME_DATE_NO_PADDING = 'yyyy年L月d日(EEE曜日) H時mm分',
-  YEAR_DAY_WEEKDAY_NO_PADDING = 'yyyy年L月d日(EEE曜日)',
-  YEAR_DAY_NO_PADDING = 'yyyy年LL月dd日',
-  YEAR_DAY_HYPHEN = 'yyyy-LL-dd',
-  YEAR_DAY_SLASH = 'yyyy/LL/dd',
-  YEAR_DAY_TIME_SLASH = 'yyyy/LL/dd HH:mm',
-  YEAR_DAY_TIME_SECOND_NOT_SEPARATE = 'yyyyLLddHHmmss',
-  TIME = 'H時mm分',
-  FULL_TIME = 'HH:MM:ss',
-  YEAR_DAY_NO_PADDING_TIME = 'yyyy年LL月dd日 HH:mm',
+  YEAR_MONTH = 'MM/yyyy',
+  YEAR_MONTH_DAY = 'dd-MM-yyyy',
+  YEAR_DAY_TIME_DATE_NO_PADDING = 'd/M/yyyy (EEE) H:mm',
+  YEAR_DAY_WEEKDAY_NO_PADDING = 'd/M/yyyy (EEE)',
+  YEAR_DAY_NO_PADDING = 'dd/MM/yyyy',
+  YEAR_DAY_HYPHEN = 'dd-MM-yyyy',
+  YEAR_DAY_SLASH = 'dd/MM/yyyy',
+  YEAR_DAY_TIME_SLASH = 'dd/MM/yyyy HH:mm',
+  YEAR_DAY_TIME_SECOND_NOT_SEPARATE = 'ddMMyyyyHHmmss',
+  TIME = 'H:mm',
+  FULL_TIME = 'HH:mm:ss',
+  YEAR_DAY_NO_PADDING_TIME = 'dd/MM/yyyy HH:mm',
 }
 
 export enum EDeviceType {

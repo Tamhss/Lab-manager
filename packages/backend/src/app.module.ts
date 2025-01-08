@@ -29,6 +29,8 @@ import { PostgresExampleModule } from '@modules/postgres_example/postgres_exampl
 import { AuthModule } from '@core/global/auth/auth.module';
 import { CronjobModule } from '@core/global/schedule/schedule.module';
 import { ApiModule } from '@core/global/api/api.module';
+import { UserModule } from '@modules/user/user.module';
+import { DeviceModule } from '@modules/device/device.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { ApiModule } from '@core/global/api/api.module';
     ApiModule,
     ExampleModule,
     PostgresExampleModule,
+    UserModule,
+    DeviceModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

@@ -30,11 +30,10 @@ export const metadata: Metadata = {
   openGraph: siteConfig.openGraph,
   authors: [
     {
-      name: 'wanosoft',
-      url: 'https://wanosoft.com',
+      name: 'Tam',
     },
   ],
-  creator: 'wanosoft',
+  creator: 'Tam',
   alternates: {
     canonical: 'https://repicle.com',
     types: {

@@ -1,4 +1,4 @@
-import { Navbar } from '@/components/molecules/Navbar';
+import { Navbar } from "@/components/molecules/Navbar";
 import { ToastContainer } from 'react-toastify';
 
 const MainPageLayout = ({ children }: { children: React.ReactNode }) => {

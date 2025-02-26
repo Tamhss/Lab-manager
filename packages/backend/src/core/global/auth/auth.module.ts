@@ -1,36 +1,22 @@
-import { Global, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-
-import { EConfiguration } from '@core/config';
-
-import { AuthController } from './auth.controller';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategy/jwt.strategy';
+import { AuthController } from './auth.controller';
 
-// import { UserModule } from '@modules/user/user.module';
-
-@Global()
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
   imports: [
-    // UserModule,
-    PassportModule,
+    ConfigModule.forRoot(), // 👈 Đảm bảo ConfigModule được import
     JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        privateKey: configService.get(EConfiguration.RSA_PRIVATE_KEY),
-        publicKey: configService.get(EConfiguration.RSA_PUBLIC_KEY),
-        signOptions: {
-          expiresIn: configService.get(EConfiguration.AUTH_TOKEN_EXPIRE),
-          algorithm: 'RS256',
-        },
-      }),
+      imports: [ConfigModule], // 👈 Đảm bảo import ConfigModule
       inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
   ],
-  exports: [AuthService, JwtStrategy],
+  controllers: [AuthController],
+  providers: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

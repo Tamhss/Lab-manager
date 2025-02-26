@@ -8,7 +8,7 @@ type Options = {
 
 export default class ApiServerSide {
   static async Get<T extends TApiResponse>(endpoint: string, options?: Options): Promise<T> {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const apiToken = cookieStore.get('next-auth.api-token')?.value;
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
@@ -31,7 +31,7 @@ export default class ApiServerSide {
   }
 
   static async Post<T, U extends TApiResponse>(endpoint: string, data: T): Promise<U> {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const apiToken = cookieStore.get('next-auth.api-token')?.value;
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {

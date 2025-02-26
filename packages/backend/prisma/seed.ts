@@ -1,35 +1,23 @@
-// import { PrismaClient } from '@prisma/client';
-// const prisma = new PrismaClient();
-// async function main() {
-//   const alice = await prisma.user.upsert({
-//     where: { email: 'alice@prisma.io' },
-//     update: {},
-//     create: {
-//       email: 'alice@prisma.io',
-//       id: 'Alice',
-//       username: 'Alice',
-//       password: 'testtest',
-//     },
-//   });
-//   const bob = await prisma.user.upsert({
-//     where: { email: 'bob@prisma.io' },
-//     update: {},
-//     create: {
-//       email: 'bob@prisma.io',
-//       name: 'Bob',
-//       username: 'Bob',
-//       password: 'testtest',
-//     },
-//   });
-//   console.log({ alice, bob });
-// }
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
-// main()
-//   .then(async () => {
-//     await prisma.$disconnect();
-//   })
-//   .catch(async (e) => {
-//     console.error(e);
-//     await prisma.$disconnect();
-//     process.exit(1);
-//   });
+const prisma = new PrismaClient();
+
+async function main() {
+    const hashedPassword = await bcrypt.hash("123456", 10);
+
+    await prisma.user.create({
+        data: {
+            email: "admin@example.com",
+            password: hashedPassword,
+            userName: "ADMIN",
+            role: "ADMIN"
+        },
+    });
+
+    console.log("User đã được tạo!");
+}
+
+main()
+    .catch((e) => console.error(e))
+    .finally(() => prisma.$disconnect());

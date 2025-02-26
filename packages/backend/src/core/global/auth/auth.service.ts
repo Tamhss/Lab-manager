@@ -1,147 +1,25 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-
-import { ErrorMessage } from '@core/enum';
-import { handleBCRYPTCompare } from '@helper/utils';
 import { PrismaService } from '../prisma/prisma.service';
-import { VLoginDto } from './dto';
-import { IResponseAuth } from '@core/interface';
-import { IJwtPayload } from '@core/global/auth/interface';
-import { ConfigService } from '@nestjs/config';
-import { EConfiguration } from '@core/config';
-import { Login } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private jwtService: JwtService,
-    private configService: ConfigService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService, private jwtService: JwtService) { }
 
-  async getLoginById(id: number) {
-    return this.prisma.login.findFirst({
-      where: { id },
-    });
+  async validateUser(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
+    return user;
   }
 
-  // async signUp(body: VSignUpDto) {
-  //   const { username, email, name, password } = body;
-  //
-  //   const existUserName = await this.prisma.user.findFirst({
-  //     where: {
-  //       username,
-  //     },
-  //   });
-  //
-  //   if (existUserName) {
-  //     throw new HttpException(
-  //       ErrorMessage.USERNAME_EXISTED,
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  //
-  //   const existEmail = await this.prisma.user.findFirst({
-  //     where: {
-  //       email: email,
-  //     },
-  //   });
-  //
-  //   if (existEmail) {
-  //     throw new HttpException(
-  //       ErrorMessage.EMAIL_EXISTS,
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  //
-  //   const passwordHash = await handleBCRYPTHash(password);
-  //
-  //   const newUser = await this.prisma.user.create({
-  //     data: {
-  //       username,
-  //       email,
-  //       name,
-  //       password: passwordHash,
-  //     },
-  //   });
-  //
-  //   return {
-  //     newUser,
-  //   };
-  // }
-
-  async login(body: VLoginDto) {
-    const { userId, password } = body;
-
-    const login = !password
-      ? await this.handleGeneralUserLogin(userId)
-      : await this.handleManagerUserLogin(userId, password);
-
-    const payload: IJwtPayload = {
-      loginId: login.id,
-    };
-
-    return await this.returnResponseAuth(payload, login);
-  }
-
-  private async returnResponseAuth(
-    payload: IJwtPayload,
-    login: Partial<Login>,
-  ): Promise<IResponseAuth> {
-    const accessToken = this.jwtService.sign(payload, {
-      expiresIn: this.configService.get(
-        EConfiguration.AUTH_ACCESS_TOKEN_EXPIRE,
-      ),
-    });
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: this.configService.get(
-        EConfiguration.AUTH_REFRESH_TOKEN_EXPIRE,
-      ),
-    });
-
+  generateToken(user: any) {
+    const payload = { id: user.id, email: user.email };
     return {
-      accessToken,
-      refreshToken,
-      data: login,
+      token: this.jwtService.sign(payload),
+      user: { id: user.id, email: user.email, name: user.name },
     };
-  }
-
-  private async handleGeneralUserLogin(userId: string) {
-    const login = await this.prisma.login.findFirst({
-      where: { userId },
-    });
-
-    if (!login || !login.passHusiyoFlag) {
-      throw new HttpException(
-        ErrorMessage.ID_OR_PASSWORD_INCORRECT,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    delete login.password;
-
-    return login;
-  }
-
-  private async handleManagerUserLogin(userId: string, password: string) {
-    const login = await this.prisma.login.findFirst({
-      where: { userId },
-    });
-
-    if (!login)
-      throw new HttpException(
-        ErrorMessage.ID_OR_PASSWORD_INCORRECT,
-        HttpStatus.BAD_REQUEST,
-      );
-
-    const isPasswordHash = await handleBCRYPTCompare(password, login.password);
-
-    if (!isPasswordHash) {
-      throw new HttpException(
-        ErrorMessage.ID_OR_PASSWORD_INCORRECT,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    delete login.password;
-    return login;
   }
 }

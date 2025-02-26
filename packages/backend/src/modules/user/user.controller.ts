@@ -19,6 +19,7 @@ export class UserController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   createUser(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
+    console.log('createUserDto:', createUserDto);
     return this.usersService.createUser(createUserDto);
   }
 

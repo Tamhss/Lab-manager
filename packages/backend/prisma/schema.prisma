@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,15 +15,48 @@ model User {
   role         Role
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  accounts     Account?
   reservations Reservation[]
 }
 
+model DeviceCategory {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  devices Device[]
+}
+
 model Device {
+  id          String         @id @default(uuid())
+  deviceName  String
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  categoryId  String
+  category    DeviceCategory @relation(fields: [categoryId], references: [id])
+
+  Reservation   Reservation[]
+  ServerDevice  ServerDevice?
+  MonitorDevice MonitorDevice?
+}
+
+model ServerDevice {
+  id      String @id @default(uuid())
+  cpu     String
+  ram     String
+  storage String
+  device  Device @relation(fields: [id], references: [id])
+}
+
+model MonitorDevice {
+  id         String @id @default(uuid())
+  screenSize String
+  resolution String
+  device     Device @relation(fields: [id], references: [id])
+}
+
+model Lab {
   id           String        @id @default(uuid())
-  name         String
-  description  String?
-  status       DeviceStatus
+  Labname      String        @default("LabRoom")
+  status       LabStatus
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   reservations Reservation[]
@@ -36,6 +66,7 @@ model Reservation {
   id        String            @id @default(uuid())
   userId    String
   deviceId  String?
+  labId     String?
   startTime DateTime
   endTime   DateTime
   status    ReservationStatus
@@ -44,17 +75,7 @@ model Reservation {
 
   user   User    @relation(fields: [userId], references: [id])
   device Device? @relation(fields: [deviceId], references: [id])
-}
-
-model Account {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  lab    Lab?    @relation(fields: [labId], references: [id])
 }
 
 enum Role {
@@ -84,7 +105,7 @@ enum ReservationStatus {
 
 model Login {
   id               Int     @id @default(autoincrement()) @map("id")
-  userId           String  @map("user_id") @db.VarChar(40)
+  email            String  @map("email") @db.VarChar(40)
   password         String  @map("password")
   mail             String? @map("mail") @db.VarChar(250)
   mail_alert1_flag Boolean @default(false) @map("mail_alert1_flag")

@@ -24,7 +24,7 @@ const Page = () => {
   return (
     <>
       <Modal
-        className="!w-full"
+        className="w-full"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}

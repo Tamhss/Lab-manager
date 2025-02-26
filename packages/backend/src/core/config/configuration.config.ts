@@ -35,10 +35,10 @@ export const configuration = () => ({
     expire_access_token: process.env.EXPIRE_ACCESS_TOKEN + 's',
     expire_refresh_token: process.env.EXPIRE_REFRESH_TOKEN + 's',
     privateKey: process.env.RSA_PRIVATE_KEY
-      ? process.env.RSA_PRIVATE_KEY.lab(/\\n/g, '\n')
+      ? process.env.RSA_PRIVATE_KEY.replace(/\\n/g, '\n')
       : '',
     publicKey: process.env.RSA_PUBLIC_KEY
-      ? process.env.RSA_PUBLIC_KEY.lab(/\\n/g, '\n')
+      ? process.env.RSA_PUBLIC_KEY.replace(/\\n/g, '\n')
       : '',
   },
   winston: {

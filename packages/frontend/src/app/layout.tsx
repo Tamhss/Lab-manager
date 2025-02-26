@@ -48,7 +48,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     <html lang="en" suppressHydrationWarning>
       <head />
       <HeaderProvider>
-        <body className={clsx('min-h-screen bg-white font-sans antialiased', fontSans.variable)}>
+        <body className={clsx('min-h-screen w-full bg-white font-sans antialiased', fontSans.variable)}>
           <div className="relative h-screen overflow-hidden">
             {children}
 

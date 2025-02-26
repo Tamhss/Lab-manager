@@ -1,27 +1,19 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { Public } from '@core/decorator';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { VLoginDto } from './dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
-  @Public()
   @Post('login')
-  async systemLogin(@Body() body: VLoginDto) {
-    return this.authService.login(body);
-  }
+  async login(@Body() loginDto: LoginDto) {
+    console.log("Login Request:", loginDto);
+    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+    if (!user) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
 
-  // @Public()
-  // @Post('/system/refresh-token')
-  // async systemRefreshToken(@Body() body: VSystemRefreshToken) {
-  //   return body;
-  // }
-  //
-  // @Public()
-  // @Post('/system/sign-up')
-  // async signUp(@Body() body: VSignUpDto) {
-  //   return this.authService.signUp(body);
-  // }
+    return this.authService.generateToken(user);
+  }
 }

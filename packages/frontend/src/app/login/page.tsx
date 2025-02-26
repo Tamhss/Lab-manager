@@ -1,4 +1,4 @@
-import { SignIn } from "@/components/molecules/FormLogin";
+import SignIn from "@/components/molecules/FormLogin";
 import { Props } from '@/types';
 
 const Page = async ({ params }: Props) => {

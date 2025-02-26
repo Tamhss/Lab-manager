@@ -11,8 +11,6 @@ import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { configuration, EConfiguration } from '@core/config';
-import { JwtAuthGuard } from '@core/global/auth/guard/jwtAuth.guard';
-import { RolesGuard } from '@core/global/auth/guard/roles.guard';
 import { ConstanceModule } from '@core/global/constance/constance.module';
 import { I18nCustomModule } from '@core/global/i18nCustom/i18nCustom.module';
 import { PrismaModule } from '@core/global/prisma/prisma.module';
@@ -30,7 +28,7 @@ import { AuthModule } from '@core/global/auth/auth.module';
 import { CronjobModule } from '@core/global/schedule/schedule.module';
 import { ApiModule } from '@core/global/api/api.module';
 import { UserModule } from '@modules/user/user.module';
-import { DeviceModule } from '@modules/device/device.module';
+import { ServerDeviceModule } from '@modules/server/server.module';
 
 @Module({
   imports: [
@@ -51,7 +49,7 @@ import { DeviceModule } from '@modules/device/device.module';
     ExampleModule,
     PostgresExampleModule,
     UserModule,
-    DeviceModule,
+    ServerDeviceModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -84,14 +82,6 @@ import { DeviceModule } from '@modules/device/device.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: PostInterceptor,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
     },
     {
       provide: APP_GUARD,

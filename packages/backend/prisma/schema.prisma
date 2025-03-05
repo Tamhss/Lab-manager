@@ -30,27 +30,11 @@ model Device {
   description String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  status      DeviceStatus   @default(AVAILABLE)
   categoryId  String
   category    DeviceCategory @relation(fields: [categoryId], references: [id])
 
-  Reservation   Reservation[]
-  ServerDevice  ServerDevice?
-  MonitorDevice MonitorDevice?
-}
-
-model ServerDevice {
-  id      String @id @default(uuid())
-  cpu     String
-  ram     String
-  storage String
-  device  Device @relation(fields: [id], references: [id])
-}
-
-model MonitorDevice {
-  id         String @id @default(uuid())
-  screenSize String
-  resolution String
-  device     Device @relation(fields: [id], references: [id])
+  Reservation Reservation[]
 }
 
 model Lab {

@@ -28,7 +28,8 @@ import { AuthModule } from '@core/global/auth/auth.module';
 import { CronjobModule } from '@core/global/schedule/schedule.module';
 import { ApiModule } from '@core/global/api/api.module';
 import { UserModule } from '@modules/user/user.module';
-import { ServerDeviceModule } from '@modules/server/server.module';
+import { DeviceModule } from '@modules/Device/device.module';
+import { DeviceCategoryModule } from '@modules/devices_category/category.module';
 
 @Module({
   imports: [
@@ -49,7 +50,8 @@ import { ServerDeviceModule } from '@modules/server/server.module';
     ExampleModule,
     PostgresExampleModule,
     UserModule,
-    ServerDeviceModule,
+    DeviceModule,
+    DeviceCategoryModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

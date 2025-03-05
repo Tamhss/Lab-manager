@@ -3,34 +3,34 @@ import { PrismaService } from '@core/global/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
-export class ServerDeviceService {
+export class DeviceCategoryService {
     constructor(private prisma: PrismaService) { }
 
     // Lấy danh sách Server Devices
     async getAll() {
-        return this.prisma.serverDevice.findMany({
-            include: { device: true },
+        return this.prisma.deviceCategory.findMany({
+            include: { devices: true },
         });
     }
 
     // Lấy một Server Device theo ID
     async getById(id: string) {
-        return this.prisma.serverDevice.findUnique({
+        return this.prisma.deviceCategory.findUnique({
             where: { id },
-            include: { device: true },
+            include: { devices: true },
         });
     }
 
     // Tạo mới Server Device
-    async create(data: Prisma.ServerDeviceCreateInput) {
-        return this.prisma.serverDevice.create({
+    async create(data: Prisma.DeviceCategoryCreateInput) {
+        return this.prisma.deviceCategory.create({
             data,
         });
     }
 
     // Cập nhật Server Device
-    async update(id: string, data: Prisma.ServerDeviceUpdateInput) {
-        return this.prisma.serverDevice.update({
+    async update(id: string, data: Prisma.DeviceCategoryUpdateInput) {
+        return this.prisma.deviceCategory.update({
             where: { id },
             data,
         });
@@ -38,7 +38,7 @@ export class ServerDeviceService {
 
     // Xóa Server Device
     async delete(id: string) {
-        return this.prisma.serverDevice.delete({
+        return this.prisma.deviceCategory.delete({
             where: { id },
         });
     }

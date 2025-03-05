@@ -2,43 +2,20 @@ import React, { useState } from 'react';
 import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
-import ServerDevice from '../../ServerDevice';
+import Device from '../../Device';
+import DeviceCategory from '../../DeviceCategory';
+import UserM from '../../UserM';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 const items: MenuItem[] = [
     {
-        key: 'sub1',
-        label: 'Quản lý thiết bị',
-        icon: <MailOutlined />,
-        children: [
-            {
-                key: 'g1',
-                label: 'Danh mục loại thiết bị',
-                type: 'group',
-                children: [
-                    { key: '1', label: 'Server' },
-                    { key: '2', label: 'Màn hình' },
-                ],
-            },
-            {
-                key: 'g2',
-                label: 'Item 2',
-                type: 'group',
-                children: [
-                    { key: '3', label: 'Option 3' },
-                    { key: '4', label: 'Option 4' },
-                ],
-            },
-        ],
-    },
-    {
         key: 'sub2',
-        label: 'Navigation Two',
+        label: 'Quản lý thiết bị',
         icon: <AppstoreOutlined />,
         children: [
-            { key: '5', label: 'Option 5' },
-            { key: '6', label: 'Option 6' },
+            { key: '1', label: 'Loại thiết bị' },
+            { key: '2', label: 'Thiết bị' },
 
         ],
     },
@@ -61,21 +38,29 @@ const items: MenuItem[] = [
         label: 'Group',
         type: 'group',
         children: [
-            { key: '13', label: 'Option 13' },
-            { key: '14', label: 'Option 14' },
+            { key: '14', label: 'Quản lý người dùng' },
         ],
     },
 ];
 
 const DashBoard: React.FC = () => {
-    const [selectServer, setSelectServer] = useState<React.ReactNode>(null)
+    const [content, setContent] = useState<React.ReactNode>();
+
 
     const onClick: MenuProps['onClick'] = (e) => {
         console.log('click ', e);
-        if (e.key === '1') {
-            setSelectServer(<ServerDevice />);
-        } else {
-            setSelectServer(null);
+        switch (e.key) {
+            case '1':
+                setContent(<DeviceCategory />);
+                break;
+            case '2':
+                setContent(<Device />);
+                break;
+            case '14':
+                setContent(<UserM />);
+                break;
+            default:
+                setContent(<h2>Chọn một mục từ menu</h2>);
         }
     };
     return (
@@ -90,7 +75,7 @@ const DashBoard: React.FC = () => {
             />
 
             <div style={{ flex: 1, padding: '20px', width: '1000px' }}>
-                {selectServer || <h2>Chọn một mục từ menu</h2>}
+                {content}
             </div>
         </div>
 

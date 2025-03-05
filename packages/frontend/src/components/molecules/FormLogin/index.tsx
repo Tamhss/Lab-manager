@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "antd";
 
 const SignIn = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    // Khi component mount, kiểm tra xem có thông tin đăng nhập đã lưu không
+    useEffect(() => {
+        const savedEmail = localStorage.getItem("rememberEmail");
+        const savedPassword = localStorage.getItem("rememberPassword");
+        if (savedEmail && savedPassword) {
+            setEmail(savedEmail);
+            setPassword(savedPassword);
+            setRememberMe(true);
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,6 +44,15 @@ const SignIn = () => {
 
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Nếu người dùng chọn "Nhớ thông tin", lưu email và password vào localStorage
+        if (rememberMe) {
+            localStorage.setItem("rememberEmail", email);
+            localStorage.setItem("rememberPassword", password);
+        } else {
+            localStorage.removeItem("rememberEmail");
+            localStorage.removeItem("rememberPassword");
+        }
 
         router.push("/DashBoard");
     };
@@ -62,6 +84,12 @@ const SignIn = () => {
                             placeholder="Mật khẩu"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                         />
+                    </div>
+
+                    <div className="mb-4 flex items-center justify-between">
+                        <Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}>
+                            Nhớ thông tin đăng nhập
+                        </Checkbox>
                     </div>
 
                     <button

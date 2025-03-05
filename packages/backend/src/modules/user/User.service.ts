@@ -1,44 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@core/global/prisma/prisma.service';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UpdateUserDto } from './dto/updateUser.dto';
-import { UserDto } from './dto/user.dto';  // Import UserDto
+import { Prisma } from '@prisma/client';
 
 @Injectable()
-export class UsersService {
-  constructor(private prisma: PrismaService) { }
+export class UserService {
+    constructor(private prisma: PrismaService) { }
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
-    const user = await this.prisma.user.create({
-      data: createUserDto,
-    });
-    return user; // Ensure returning UserDto
-  }
+    async getAll() {
+        return this.prisma.user.findMany();
+    }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: updateUserDto,
-    });
-    return user; // Ensure returning UserDto
-  }
+    async getById(id: string) {
+        return this.prisma.user.findUnique({
+            where: { id },
+        });
+    }
 
-  async getUsers(): Promise<UserDto[]> {
-    const users = await this.prisma.user.findMany();
-    return users; // Ensure returning UserDto[]
-  }
+    async create(data: Prisma.UserCreateInput) {
+        return this.prisma.user.create({
+            data,
+        });
+    }
 
-  async getUserById(id: string): Promise<UserDto> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return user; // Ensure returning UserDto
-  }
+    async update(id: string, data: Prisma.UserUpdateInput) {
+        return this.prisma.user.update({
+            where: { id },
+            data,
+        });
+    }
 
-  async deleteUser(id: string): Promise<UserDto> {
-    const user = await this.prisma.user.delete({
-      where: { id },
-    });
-    return user; // Ensure returning UserDto
-  }
+    async delete(id: string) {
+        return this.prisma.user.delete({
+            where: { id },
+        });
+    }
 }

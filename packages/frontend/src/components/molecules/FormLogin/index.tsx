@@ -42,8 +42,16 @@ const SignIn = () => {
             return;
         }
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        const token = data.data?.token;
+        console.log("Received token:", token);
+
+        if (!token) {
+            console.error("Token is missing in API response");
+            return;
+        }
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(data.data?.user));
 
         // Nếu người dùng chọn "Nhớ thông tin", lưu email và password vào localStorage
         if (rememberMe) {

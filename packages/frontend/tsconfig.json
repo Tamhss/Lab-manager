@@ -1,9 +1,15 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
-    "types": ["antd"],
+    "types": [
+      "antd"
+    ],
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -20,17 +26,41 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@/codegen/*": ["./codegen-output/*"],
+      "@/*": [
+        "./src/*"
+      ],
+      "@/codegen/*": [
+        "./codegen-output/*"
+      ],
       // "@/i18n": ["./src/app/[lang]/dictionaries.ts"],
-      "@/components": ["./src/components/*"],
-      "@/libs": ["./src/libs/*"],
-      "@/styles": ["./src/styles/globals.css"],
-      "@/types": ["./src/types/index.ts"],
-      "@/utils": ["./src/types/*"],
-      "@/config": ["./src/config/*"]
+      "@/components": [
+        "./src/components/*"
+      ],
+      "@/libs": [
+        "./src/libs/*"
+      ],
+      "@/styles": [
+        "./src/styles/globals.css"
+      ],
+      "@/types": [
+        "./src/types/index.ts"
+      ],
+      "@/utils": [
+        "./src/types/*"
+      ],
+      "@/config": [
+        "./src/config/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/components/molecules/Reservations"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

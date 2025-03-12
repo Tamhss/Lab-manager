@@ -30,6 +30,8 @@ import { ApiModule } from '@core/global/api/api.module';
 import { UserModule } from '@modules/user/user.module';
 import { DeviceModule } from '@modules/Device/device.module';
 import { DeviceCategoryModule } from '@modules/devices_category/category.module';
+import { ReservationController } from '@modules/reservation/reservation.controller';
+import { ReservationModule } from '@modules/reservation/reservation.module';
 
 @Module({
   imports: [
@@ -52,14 +54,16 @@ import { DeviceCategoryModule } from '@modules/devices_category/category.module'
     UserModule,
     DeviceModule,
     DeviceCategoryModule,
+    ReservationModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
       port: 5432,
       username: 'root',
       password: 'root',
-      entities: [PostgresExample],
       database: 'lab',
+      entities: [PostgresExample],
       synchronize: true,
       logging: true,
     }),

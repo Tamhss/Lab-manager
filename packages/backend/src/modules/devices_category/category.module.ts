@@ -4,8 +4,8 @@ import { DeviceCategoryController } from './category.controller';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 
 @Module({
-    controllers: [DeviceCategoryController], // 👈 Đúng vị trí của Controller
-    providers: [DeviceCategoryService, PrismaService], // 👈 Đúng vị trí của Service
-    exports: [DeviceCategoryService], // 👈 Nếu module khác cần sử dụng service này
+    controllers: [DeviceCategoryController],
+    providers: [DeviceCategoryService, PrismaService],
+    exports: [DeviceCategoryService],
 })
 export class DeviceCategoryModule { }

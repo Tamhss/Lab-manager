@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
-import Device from '../../Device';
-import DeviceCategory from '../../DeviceCategory';
-import UserM from '../../UserM';
+import Device from '../Device';
+import DeviceCategory from '../DeviceCategory';
+import UserM from '../UserM';
+import DeviceReservation from '../DeviceReservation';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -24,13 +25,11 @@ const items: MenuItem[] = [
     },
     {
         key: 'sub4',
-        label: 'Navigation Three',
+        label: 'Quản lý đăng ký',
         icon: <SettingOutlined />,
         children: [
-            { key: '9', label: 'Option 9' },
-            { key: '10', label: 'Option 10' },
-            { key: '11', label: 'Option 11' },
-            { key: '12', label: 'Option 12' },
+            { key: '9', label: 'Đăng ký thiết bị' },
+            { key: '10', label: 'Đăng ký phòng lab' },
         ],
     },
     {
@@ -58,6 +57,9 @@ const DashBoard: React.FC = () => {
                 break;
             case '14':
                 setContent(<UserM />);
+                break;
+            case '9':
+                setContent(<DeviceReservation />);
                 break;
             default:
                 setContent(<h2>Chọn một mục từ menu</h2>);

@@ -3,12 +3,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), // 👈 Đảm bảo ConfigModule được import
+    ConfigModule.forRoot(),
     JwtModule.registerAsync({
-      imports: [ConfigModule], // 👈 Đảm bảo import ConfigModule
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
@@ -17,6 +18,8 @@ import { AuthController } from './auth.controller';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtAuthGuard],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule { }
+

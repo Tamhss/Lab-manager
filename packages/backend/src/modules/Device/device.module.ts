@@ -3,6 +3,7 @@ import { DeviceService } from './device.service';
 import { DeviceController } from './device.controller';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 
+
 @Module({
     controllers: [DeviceController],
     providers: [DeviceService, PrismaService],

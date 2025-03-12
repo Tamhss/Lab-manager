@@ -34,4 +34,5 @@ export class DeviceController {
     async delete(@Param('id') id: string) {
         return this.DeviceService.delete(id);
     }
+
 }

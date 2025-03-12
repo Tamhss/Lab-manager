@@ -1,15 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@nextui-org/button';
-import {
-    Navbar as NextUINavbar,
-    NavbarContent,
-    NavbarBrand,
-    NavbarItem,
-} from '@nextui-org/navbar';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/dropdown';
-import NextLink from 'next/link';
+import { Button, Tooltip, Dropdown, Menu } from 'antd';
+import { HomeOutlined, DashboardOutlined, AppstoreAddOutlined, UserOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export const Navbar: React.FC = () => {
@@ -17,9 +11,18 @@ export const Navbar: React.FC = () => {
     const [user, setUser] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        setUser(storedUser);
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                console.log("User:", parsedUser);
+                setUser(parsedUser.email || "");
+            } catch (error) {
+                console.error("Lỗi khi parse user:", error);
+            }
+        }
     }, []);
+
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -27,50 +30,62 @@ export const Navbar: React.FC = () => {
         router.push('/');
     };
 
-    return (
-        <NextUINavbar className="bg-gradient-to-r from-orange-400 to-rose-400 px-6 w-screen">
-            <NavbarContent>
-                <NavbarBrand as="li" className="justify-start gap-3">
-                    <span className="text-white font-bold text-lg">LAB-DNU</span>
-                </NavbarBrand>
-            </NavbarContent>
+    const menuItems = [
+        { key: "profile", icon: <UserOutlined />, label: "Profile" },
+        { key: "settings", icon: <SettingOutlined />, label: "Settings" },
+        { key: "logout", icon: <LogoutOutlined />, label: "Logout", onClick: handleLogout },
+    ];
 
-            <NavbarContent className="hidden lg:flex basis-full justify-center">
-                <ul className="flex space-x-8">
-                    <NavbarItem className="flex">
-                        <NextLink href="/" className="text-white font-semibold hover:opacity-80">HOME</NextLink>
-                    </NavbarItem>
+    return (
+        <nav className="bg-gradient-to-r from-orange-400 to-rose-400 px-6 flex justify-between items-center h-[50px]">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+                <span className="text-white font-bold text-lg">LAB-DNU</span>
+            </div>
+
+            {/* Menu chính */}
+            <div className="hidden lg:flex">
+                <ul className="flex space-x-14">
                     {user && (
                         <>
-                            <NavbarItem>
-                                <NextLink href="/DashBoard" className="text-white font-semibold hover:opacity-80">DASHBOARD</NextLink>
-                            </NavbarItem>
-                            <NavbarItem>
-                                <NextLink href="#" className="text-white font-semibold hover:opacity-80">ĐĂNG KÝ THIẾT BỊ</NextLink>
-                            </NavbarItem>
+                            <Tooltip title="HOME">
+                                <li>
+                                    <Link href="/">
+                                        <HomeOutlined className="text-white text-3xl hover:opacity-80 cursor-pointer" />
+                                    </Link>
+                                </li>
+                            </Tooltip>
+                            <Tooltip title="DASHBOARD">
+                                <li>
+                                    <Link href="/DashBoard">
+                                        <DashboardOutlined className="text-white text-3xl hover:opacity-80 cursor-pointer" />
+                                    </Link>
+                                </li>
+                            </Tooltip>
+                            <Tooltip title="ĐĂNG KÝ THIẾT BỊ">
+                                <li>
+                                    <Link href="/DeviceReservation">
+                                        <AppstoreAddOutlined className="text-white text-3xl hover:opacity-80 cursor-pointer" />
+                                    </Link>
+                                </li>
+                            </Tooltip>
                         </>
                     )}
                 </ul>
-            </NavbarContent>
+            </div>
 
-            <NavbarContent justify="end" className="hidden lg:flex space-x-3 text-right">
+            {/* Thông tin người dùng */}
+            <div className="hidden lg:flex space-x-3">
                 {user ? (
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button className="bg-transparent text-white font-semibold bg-slate-600">
-                                {user}
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu>
-                            <DropdownItem key="profile" className="text-black">Profile</DropdownItem>
-                            <DropdownItem key="settings" className="text-black">Settings</DropdownItem>
-                            <DropdownItem key="logout" onClick={handleLogout} className="text-black">Logout</DropdownItem>
-                        </DropdownMenu>
+                    <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+                        <Button className="bg-slate-600 text-white font-semibold">
+                            {user}
+                        </Button>
                     </Dropdown>
                 ) : (
-                    <Button onPress={() => router.push('/login')}>Login</Button>
+                    <Button onClick={() => router.push('/login')}>Login</Button>
                 )}
-            </NavbarContent>
-        </NextUINavbar>
+            </div>
+        </nav>
     );
 };

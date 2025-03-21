@@ -1,87 +1,53 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Param,
-    Delete,
-    Put,
-    UseGuards,
-    Request,
-} from "@nestjs/common";
-import { ReservationService } from "./reservation.service";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
-import { CreateReservationDto } from "./dto/create-reservation";
-import { User } from "src/auth/user.interface";
-import { UpdateReservationDto } from "./dto/update-reservation";
-import { ReservationStatus, Role } from "@prisma/client";
+import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import { ReservationService } from './reservation.service';
+import { CreateReservationDto } from './dto/create-reservation.dto';
+import { UpdateReservationDto } from './dto/update-reservation.dto';
 
-@Controller("reservations")
+@Controller('reservations')
 export class ReservationController {
-    constructor(private readonly reservationService: ReservationService) { }
+  constructor(private readonly reservationService: ReservationService) {}
 
-    // Lấy danh sách đặt chỗ
-    @UseGuards(JwtAuthGuard)
-    @Get()
-    async getReservations() {
-        return this.reservationService.getAllReservations();
-    }
+  @Post()
+  async create(@Body() createReservationDto: CreateReservationDto) {
+    return this.reservationService.create(createReservationDto);
+  }
 
-    // Lấy thông tin đặt chỗ theo ID
-    @UseGuards(JwtAuthGuard)
-    @Get(":id")
-    async getReservationById(@Param("id") id: string) {
-        return this.reservationService.getReservationById(id);
-    }
+  @Get()
+  async findAll(
+    @Query('status') status?: string,
+    @Query('userId') userId?: string,
+  ) {
+    return this.reservationService.findAll({ status, userId });
+  }
 
-    // Tạo mới đặt chỗ
-    @UseGuards(JwtAuthGuard)
-    @Post()
-    async createReservation(
-        @Body() createReservationDto: CreateReservationDto,
-        @Request() req
-    ) {
-        const user: User = req.user; // Lấy user từ request
-        return this.reservationService.createReservation(createReservationDto, user.id);
-    }
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.reservationService.findOne(id);
+  }
 
-    // Cập nhật đặt chỗ
-    @UseGuards(JwtAuthGuard)
-    @Put(":id")
-    async updateReservation(
-        @Param("id") id: string,
-        @Body() updateReservationDto: UpdateReservationDto
-    ) {
-        return this.reservationService.updateReservation(id, updateReservationDto);
-    }
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateReservationDto: UpdateReservationDto,
+  ) {
+    return this.reservationService.update(id, updateReservationDto);
+  }
 
-    // Xóa đặt chỗ
-    @UseGuards(JwtAuthGuard)
-    @Delete(":id")
-    async deleteReservation(@Param("id") id: string) {
-        return this.reservationService.deleteReservation(id);
-    }
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.reservationService.remove(id);
+  }
 
-    // Kiểm tra xung đột lịch trước khi đặt
-    @UseGuards(JwtAuthGuard)
-    @Post("check-conflict")
-    async checkConflict(@Body() dto: CreateReservationDto) {
-        return this.reservationService.checkTimeConflict(dto.deviceId, new Date(dto.startTime), new Date(dto.endTime));
-    }
+  @Put(':id/approve-lecturer')
+  async approveByLecturer(
+    @Param('id') id: string,
+    @Body('lecturerId') lecturerId: string,
+  ) {
+    return this.reservationService.approveByLecturer(id, lecturerId);
+  }
 
-    // Cập nhật trạng thái đặt chỗ (duyệt, từ chối, hoàn thành)
-    @UseGuards(JwtAuthGuard)
-    @Put(":id/status")
-    async updateReservationStatus(@Param("id") id: string, @Body("status") status: ReservationStatus) {
-        return this.reservationService.updateReservationStatus(id, status);
-    }
-
-    // Hủy đặt chỗ (người dùng có thể hủy lịch của mình, admin có thể hủy mọi lịch)
-    @UseGuards(JwtAuthGuard)
-    @Put(":id/cancel")
-    async cancelReservation(@Param("id") id: string, @Request() req) {
-        const user: User = req.user;
-        const userRole = user.role as Role;
-        return this.reservationService.cancelReservation(id, user.id, userRole);
-    }
+  @Put(':id/approve-admin')
+  async approveByAdmin(@Param('id') id: string) {
+    return this.reservationService.approveByAdmin(id);
+  }
 }

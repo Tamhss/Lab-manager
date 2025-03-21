@@ -250,3 +250,15 @@ a:hover {
 .custom-switch:not(.ant-switch-checked) {
   background-color: #9E9E9E !important;
 }
+
+.custom-button {
+  background-color: white !important;
+  color: #2441e7 !important;
+  border-color: #2441e7 !important;
+  transition: all 0.3s ease;
+}
+
+.custom-button:hover {
+  background-color: #2441e7 !important;
+  color: white !important;
+}

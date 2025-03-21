@@ -8,38 +8,51 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  userName     String
-  email        String        @unique
-  password     String
-  role         Role
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id        String   @id @default(uuid())
+  userName  String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   reservations Reservation[]
+
+  lecturerId String?
+  lecturer   User?   @relation("LecturerStudent", fields: [lecturerId], references: [id])
+  students   User[]  @relation("LecturerStudent")
+
+  approvedReservations Reservation[] @relation("LecturerApprovals")
+
+  history       UserHistory[]
+  borrowHistory BorrowHistory[]
 }
 
 model DeviceCategory {
-  id      String   @id @default(uuid())
-  name    String   @unique
-  devices Device[]
+  id       String   @id @default(uuid())
+  name     String   @unique
+  quantity Int      @default(0) // Số lượng thiết bị theo loại
+  devices  Device[]
 }
 
 model Device {
-  id          String         @id @default(uuid())
-  deviceName  String
-  description String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  status      DeviceStatus   @default(AVAILABLE)
-  categoryId  String
-  category    DeviceCategory @relation(fields: [categoryId], references: [id])
+  id           String         @id @default(uuid())
+  deviceName   String
+  description  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  status       DeviceStatus   @default(NOT_IN_USE)
+  borrowStatus BorrowStatus   @default(COMPLETED)
+  categoryId   String
+  category     DeviceCategory @relation(fields: [categoryId], references: [id])
 
-  Reservation Reservation[]
+  reservations  Reservation[]
+  borrowHistory BorrowHistory[]
 }
 
 model Lab {
   id           String        @id @default(uuid())
-  Labname      String        @default("LabRoom")
+  labName      String        @default("LabRoom")
   status       LabStatus
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -53,25 +66,64 @@ model Reservation {
   labId     String?
   startTime DateTime
   endTime   DateTime
-  status    ReservationStatus
+  status    ReservationStatus @default(PENDING)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
-  user   User    @relation(fields: [userId], references: [id])
-  device Device? @relation(fields: [deviceId], references: [id])
-  lab    Lab?    @relation(fields: [labId], references: [id])
+  lecturerId    String? // Giảng viên xét duyệt
+  adminApproved Boolean? @default(false) // Admin duyệt lần cuối
+
+  user     User    @relation(fields: [userId], references: [id])
+  device   Device? @relation(fields: [deviceId], references: [id])
+  lab      Lab?    @relation(fields: [labId], references: [id])
+  lecturer User?   @relation(fields: [lecturerId], references: [id], name: "LecturerApprovals")
+
+  borrowHistory BorrowHistory?
+  history       UserHistory[]
+}
+
+model BorrowHistory {
+  id              String    @id @default(uuid())
+  reservationId   String    @unique
+  userId          String
+  deviceId        String
+  borrowTime      DateTime
+  returnTime      DateTime?
+  deviceCondition String?
+  createdAt       DateTime  @default(now())
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  device      Device      @relation(fields: [deviceId], references: [id])
+}
+
+model UserHistory {
+  id            String   @id @default(uuid())
+  userId        String
+  reservationId String
+  createdAt     DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  reservation Reservation @relation(fields: [reservationId], references: [id])
 }
 
 enum Role {
-  LECTURER
   STUDENT
+  LECTURER
   ADMIN
 }
 
 enum DeviceStatus {
-  AVAILABLE
   IN_USE
+  NOT_IN_USE
   DAMAGED
+  DISPOSING
+}
+
+enum BorrowStatus {
+  PENDING_BORROW
+  BORROWED
+  COMPLETED
 }
 
 enum LabStatus {
@@ -82,9 +134,9 @@ enum LabStatus {
 
 enum ReservationStatus {
   PENDING
+  APPROVED_BY_LECTURER
   APPROVED
   REJECTED
-  COMPLETED
 }
 
 model Login {

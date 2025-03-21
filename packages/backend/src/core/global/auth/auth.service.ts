@@ -1,14 +1,23 @@
+import { Role } from '@prisma/client';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
-
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService, private jwtService: JwtService) { }
 
   async validateUser(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique(
+      { where: { email },
+        select: {
+          id: true,
+          email: true,
+          password: true,
+          userName: true,
+          role: true,
+      }, 
+    });
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
     }
@@ -16,10 +25,10 @@ export class AuthService {
   }
 
   generateToken(user: any) {
-    const payload = { id: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, Role: user.Role };
     return {
       token: this.jwtService.sign(payload),
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, userName: user.userName, role: user.role},
     };
   }
 }

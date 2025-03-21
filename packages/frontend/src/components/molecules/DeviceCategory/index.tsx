@@ -1,7 +1,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+    SearchOutlined,
+    PlusOutlined,
+    EyeOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    UploadOutlined,
+} from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, Upload } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
@@ -9,6 +16,18 @@ import axios from 'axios';
 interface DeviceCategoryType {
     id: string;
     name: string;
+    quantity: number;
+}
+interface DeviceType {
+    id: string;
+    deviceName: string;
+    description: string;
+    category: {
+        id: string;
+        name: string;
+    };
+    categoryId: string;
+    status: string;
 }
 
 type DataIndex = keyof DeviceCategoryType;
@@ -23,6 +42,11 @@ const DeviceCategory: React.FC = () => {
     const [form] = Form.useForm();
     const [isEditing, setIsEditing] = useState(false); // Kiểm tra trạng thái
     const [currentId, setCurrentId] = useState<string | null>(null); // Lưu ID khi sửa
+    const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
+    const [deviceList, setDeviceList] = useState<DeviceType[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [api, contextHolder] = notification.useNotification();
+    const [file, setFile] = useState<File | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -38,8 +62,25 @@ const DeviceCategory: React.FC = () => {
                 setData([]);
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
-            message.error("Lỗi khi tải dữ liệu từ server!");
+            console.error('Error fetching data:', error);
+            message.error('Lỗi khi tải dữ liệu từ server!');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchDevicesByCategory = async (categoryId: string) => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`http://localhost:3009/api/v1/devices?categoryId=${categoryId}`);
+            if (Array.isArray(response.data?.data)) {
+                setDeviceList(response.data.data);
+            } else {
+                setDeviceList([]);
+            }
+            setIsDeviceModalOpen(true);
+        } catch (error) {
+            message.error('Lỗi khi tải danh sách thiết bị!');
         } finally {
             setLoading(false);
         }
@@ -47,6 +88,55 @@ const DeviceCategory: React.FC = () => {
 
     const showModal = () => {
         setIsModalOpen(true);
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setFile(event.target.files[0]);
+        }
+    };
+
+    const handleUpload = async (pauseOnHover: boolean) => {
+        if (!file) {
+            message.error('Vui lòng chọn file!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post('http://localhost:3009/api/v1/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            api.success({
+                message: 'Upload thành công',
+                description: `File ${file.name} đã được upload`,
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+
+            setFile(null);
+            fetchData();
+        } catch (error) {
+            api.error({
+                message: 'Lỗi khi Upload file',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+        }
+    };
+
+    const props = {
+        accept: '.xlsx, .xls',
+        beforeUpload: (file: File) => {
+            setFile(file);
+            return false;
+        },
+        showUploadList: false,
     };
 
     const handleCancel = () => {
@@ -58,21 +148,20 @@ const DeviceCategory: React.FC = () => {
         try {
             setLoading(true);
             if (isEditing && currentId) {
-                // Nếu đang sửa thì gọi API cập nhật (PUT)
                 await axios.put(`http://localhost:3009/api/v1/devices-category/${currentId}`, values);
-                message.success("Cập nhật thiết bị thành công!");
+                message.success('Cập nhật thiết bị thành công!');
             } else {
                 // Nếu không có ID thì tạo mới (POST)
                 await axios.post('http://localhost:3009/api/v1/devices-category', values);
-                message.success("Tạo mới thiết bị thành công!");
+                message.success('Tạo mới thiết bị thành công!');
             }
-            fetchData(); // Load lại danh sách sau khi lưu
+            fetchData();
             setIsModalOpen(false);
             form.resetFields();
-            setIsEditing(false); // Reset trạng thái chỉnh sửa
-            setCurrentId(null); // Xóa ID hiện tại
+            setIsEditing(false);
+            setCurrentId(null);
         } catch (error) {
-            message.error("Lỗi khi lưu thiết bị!");
+            message.error('Lỗi khi lưu thiết bị!');
         } finally {
             setLoading(false);
         }
@@ -84,31 +173,50 @@ const DeviceCategory: React.FC = () => {
             setSearchText(selectedKeys[0]);
             setSearchedColumn(dataIndex);
         },
-        []
+        [],
     );
 
     const handleReset = (clearFilters: () => void) => {
         clearFilters();
         setSearchText('');
     };
+
     const handleDetail = (record: DeviceCategoryType) => {
-        message.info(`Chi tiết: ${record.name}`);
+        setSelectedCategory(record.name);
+        fetchDevicesByCategory(record.id);
     };
 
     const handleEdit = (record: DeviceCategoryType) => {
         form.setFieldsValue(record);
-        setCurrentId(record.id); // Lưu ID của mục đang sửa
+        setCurrentId(record.id);
         setIsEditing(true);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: string, pauseOnHover: boolean) => {
         try {
             await axios.delete(`http://localhost:3009/api/v1/devices-category/${id}`);
-            message.success("Xóa thành công!");
-            setData(prevData => prevData.filter(item => item.id !== id));
+            setTimeout(() => {
+                api.success({
+                    message: 'Xoá thành công',
+                    description: `Mục có ID ${id} đã được xoá.`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+
+            setData((prevData) => prevData.filter((item) => item.id !== id));
         } catch (error) {
-            message.error("Lỗi khi xóa dữ liệu!");
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá dữ liệu. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
         }
     };
 
@@ -144,7 +252,10 @@ const DeviceCategory: React.FC = () => {
         ),
         filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
         onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
+            record[dataIndex]
+                ?.toString()
+                .toLowerCase()
+                .includes((value as string).toLowerCase()),
         filterDropdownProps: {
             onOpenChange(open) {
                 if (open) {
@@ -165,6 +276,35 @@ const DeviceCategory: React.FC = () => {
             ),
     });
 
+    const deviceColumns: TableColumnsType<DeviceType> = [
+        {
+            title: 'Mã thiết bị',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Tên thiết bị',
+            dataIndex: 'deviceName', // Phải khớp với thuộc tính trong `DeviceType`
+            key: 'deviceName',
+        },
+        {
+            title: 'Mô tả',
+            dataIndex: 'description',
+            key: 'description',
+        },
+        {
+            title: 'Loại thiết bị',
+            dataIndex: 'category',
+            key: 'category',
+            render: (category) => category?.name || 'Không xác định',
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            key: 'status',
+        },
+    ];
+
     const columns: TableColumnsType<DeviceCategoryType> = [
         {
             title: 'Mã loại thiết bị',
@@ -181,6 +321,13 @@ const DeviceCategory: React.FC = () => {
             ...getColumnSearchProps('name'),
         },
         {
+            title: 'Số lượng',
+            dataIndex: 'quantity',
+            key: 'quantity',
+            width: '20%',
+            ...getColumnSearchProps('quantity'),
+        },
+        {
             title: 'Hành động',
             key: 'actions',
             width: '15%',
@@ -189,7 +336,7 @@ const DeviceCategory: React.FC = () => {
                 <Space size="middle">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id, true)} />
                 </Space>
             ),
         },
@@ -197,17 +344,30 @@ const DeviceCategory: React.FC = () => {
 
     return (
         <Spin spinning={loading}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
-                Tạo mới
-            </Button>
-            <Table<DeviceCategoryType> columns={columns} dataSource={data} rowKey="id" />
+            {contextHolder}
+            <div className="space-x-3 flex justify-normal">
+                <Button className="custom-button" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
+                    Tạo mới
+                </Button>
+                <Upload {...props}>
+                    <Button icon={<UploadOutlined />} className="custom-button">
+                        {file ? file.name : 'Chọn File'}
+                    </Button>
+                </Upload>
+                <Button onClick={() => handleUpload(true)} className="custom-button">
+                    Upload
+                </Button>
+            </div>
 
-            <Modal title={isEditing ? "Chỉnh sửa loại thiết bị" : "Tạo mới loại thiết bị"} open={isModalOpen} onCancel={handleCancel} footer={null}>
+            <Table<DeviceCategoryType> columns={columns} dataSource={data} rowKey="id" />
+            <Modal
+                title={isEditing ? 'Chỉnh sửa loại thiết bị' : 'Tạo mới loại thiết bị'}
+                open={isModalOpen}
+                onCancel={handleCancel}
+                footer={null}
+            >
                 <Form form={form} layout="vertical" onFinish={handleSave}>
-                    <Form.Item
-                        label="Mã loại thiết bị"
-                        name="id"
-                    >
+                    <Form.Item label="Mã loại thiết bị" name="id">
                         <Input placeholder="Nhập mã loại thiết bị" />
                     </Form.Item>
                     <Form.Item
@@ -224,6 +384,19 @@ const DeviceCategory: React.FC = () => {
                         </Button>
                     </Space>
                 </Form>
+            </Modal>
+            <Modal
+                title={`Danh sách thiết bị của ${selectedCategory}`}
+                open={isDeviceModalOpen}
+                onCancel={() => setIsDeviceModalOpen(false)}
+                footer={null}
+                width={800}
+            >
+                <Table<DeviceType>
+                    columns={deviceColumns}
+                    dataSource={deviceList.filter((device) => selectedCategory && device.category.name === selectedCategory)}
+                    rowKey="id"
+                />
             </Modal>
         </Spin>
     );

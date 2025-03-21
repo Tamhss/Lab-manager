@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { SearchOutlined,DeleteOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, Select } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, Tooltip } from 'antd';
 import axios from 'axios';
 import { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-
 interface DeviceReservationType {
     id: string;
     userId: string;
@@ -287,19 +286,26 @@ const DeviceReservation: React.FC = () => {
             render: (_, record) => (
                 <Space size="middle">
                     {/* <Button type="text" icon={<EyeOutlined />} onClick={() => message.info(`Chi tiết: ${record.id}`)} /> */}
-                    <Button type="text" icon={<CheckOutlined />}
-                        onClick={() => updateStatus(record.id, 'APPROVED', record.device.id)}
-                        style={{ color: 'green' }}
-                    />
-                    <Button type="text" icon={<CloseOutlined />}
-                        onClick={() => updateStatus(record.id, 'REJECTED', record.device.id)}
-                        style={{ color: 'red' }}
-                    />
-                    <Button type="text" icon={<CheckOutlined />}
-                        onClick={() => markAsCompleted(record.id, record.device.id)}
-                        style={{ color: 'blue' }}
-                    >
-                    </Button>
+                    <Tooltip title="Phê duyệt">
+                        <Button type="text" icon={<CheckOutlined />}
+                            onClick={() => updateStatus(record.id, 'APPROVED', record.device.id)}
+                            style={{ color: 'green' }}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Từ chối">
+                        <Button type="text" icon={<CloseOutlined />}
+                            onClick={() => updateStatus(record.id, 'REJECTED', record.device.id)}
+                            style={{ color: 'red' }}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Hoàn thành">
+                        <Button type="text" icon={<CheckOutlined />}
+                            onClick={() => markAsCompleted(record.id, record.device.id)}
+                            style={{ color: 'blue' }}
+                        >
+                        </Button>
+                    </Tooltip>
+
                     <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id, record.device.id)} />
                 </Space>
             ),

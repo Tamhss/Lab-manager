@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, Select } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
-import bcrypt from 'bcryptjs';
-
 interface DeviceType {
     id: string;
     deviceName: string;
@@ -17,6 +15,7 @@ interface DeviceType {
     };
     categoryId: string;
     status: string;
+    borrowStatus: string;
 }
 
 type DataIndex = keyof DeviceType;
@@ -29,9 +28,11 @@ const Device: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
-    const [isEditing, setIsEditing] = useState(false); // Kiểm tra trạng thái
-    const [currentId, setCurrentId] = useState<string | null>(null); // Lưu ID khi sửa
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentId, setCurrentId] = useState<string | null>(null);
     const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+    const [api, contextHolder] = notification.useNotification();
+
     useEffect(() => {
         fetchData();
         fetchCategories();
@@ -81,19 +82,17 @@ const Device: React.FC = () => {
         try {
             setLoading(true);
             if (isEditing && currentId) {
-                // Nếu đang sửa thì gọi API cập nhật (PUT)
                 await axios.put(`http://localhost:3009/api/v1/devices/${currentId}`, values);
                 message.success("Cập nhật thiết bị thành công!");
             } else {
-                // Nếu không có ID thì tạo mới (POST)
                 await axios.post('http://localhost:3009/api/v1/devices', values);
                 message.success("Tạo mới thiết bị thành công!");
             }
-            fetchData(); // Load lại danh sách sau khi lưu
+            fetchData();
             setIsModalOpen(false);
             form.resetFields();
-            setIsEditing(false); // Reset trạng thái chỉnh sửa
-            setCurrentId(null); // Xóa ID hiện tại
+            setIsEditing(false);
+            setCurrentId(null);
         } catch (error) {
             message.error("Lỗi khi lưu thiết bị!");
         } finally {
@@ -120,15 +119,24 @@ const Device: React.FC = () => {
 
     const handleEdit = (record: DeviceType) => {
         form.setFieldsValue(record);
-        setCurrentId(record.id); // Lưu ID của mục đang sửa
+        setCurrentId(record.id);
         setIsEditing(true);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: string, pauseOnHover: boolean) => {
         try {
             await axios.delete(`http://localhost:3009/api/v1/devices/${id}`);
-            message.success("Xóa thành công!");
+            setTimeout(() => {
+                api.success({
+                    message: "Xóa thành công",
+                    description: `Mục có id ${id} đã được xóa`,
+                    placement: 'topRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+
             setData(prevData => prevData.filter(item => item.id !== id));
         } catch (error) {
             message.error("Lỗi khi xóa dữ liệu!");
@@ -193,14 +201,14 @@ const Device: React.FC = () => {
             title: 'Mã thiết bị',
             dataIndex: 'id',
             key: 'id',
-            width: '20%',
+            width: '15%',
             ...getColumnSearchProps('id'),
         },
         {
             title: 'Tên thiết bị',
             dataIndex: 'deviceName',
             key: 'deviceName',
-            width: '20%',
+            width: '15%',
             ...getColumnSearchProps('deviceName'),
         },
         {
@@ -214,15 +222,22 @@ const Device: React.FC = () => {
             title: 'Loại thiết bị',
             dataIndex: 'category',
             key: 'category',
-            width: '20%',
+            width: '15%',
             render: (category) => category?.name || 'Không xác định', // Kiểm tra và hiển thị
         },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            width: '20%',
+            width: '15%',
             ...getColumnSearchProps('status'),
+        },
+        {
+            title: 'Trạng thái mượn',
+            dataIndex: 'borrowStatus',
+            key: 'borrowStatus',
+            width: '20%',
+            ...getColumnSearchProps('borrowStatus'),
         },
         {
             title: 'Hành động',
@@ -233,7 +248,7 @@ const Device: React.FC = () => {
                 <Space size="middle">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id, true)} />
                 </Space>
             ),
         },
@@ -241,6 +256,7 @@ const Device: React.FC = () => {
 
     return (
         <Spin spinning={loading}>
+            {contextHolder}
             <Button type="primary" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
                 Tạo mới
             </Button>
@@ -286,9 +302,10 @@ const Device: React.FC = () => {
                         rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                     >
                         <Select placeholder="Chọn trạng thái">
-                            <Select.Option value="AVAILABLE">Có sẵn</Select.Option>
+                            <Select.Option value="NOT_IN_USE">Không sử dụng</Select.Option>
                             <Select.Option value="IN_USE">Đang sử dụng</Select.Option>
                             <Select.Option value="DAMAGED">Hư hỏng</Select.Option>
+                            <Select.Option value="DISPOSING">Đang thanh lí</Select.Option>
                         </Select>
                     </Form.Item>
                     <Space>

@@ -16,7 +16,7 @@ export const Navbar: React.FC = () => {
             try {
                 const parsedUser = JSON.parse(storedUser);
                 console.log("User:", parsedUser);
-                setUser(parsedUser.email || "");
+                setUser(parsedUser.userName || "");
             } catch (error) {
                 console.error("Lỗi khi parse user:", error);
             }

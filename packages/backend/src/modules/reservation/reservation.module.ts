@@ -6,7 +6,6 @@ import { AuthModule } from '@core/global/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-    imports: [AuthModule],
     controllers: [ReservationController],
     providers: [ReservationService, PrismaService],
 })

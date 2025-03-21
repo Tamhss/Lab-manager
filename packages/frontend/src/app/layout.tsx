@@ -1,5 +1,4 @@
 import '@/styles/globals.css';
-import { Link } from '@nextui-org/link';
 import clsx from 'clsx';
 import { Metadata } from 'next';
 import { ToastContainer } from 'react-toastify';
@@ -21,9 +20,9 @@ export const metadata: Metadata = {
     { media: '(prefers-color-scheme: dark)', color: 'black' },
   ],
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    // icon: '/favicon.ico',
+    // shortcut: '/favicon-16x16.png',
+    // apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
   twitter: siteConfig.twitter,

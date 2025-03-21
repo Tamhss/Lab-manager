@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Checkbox } from "antd";
+import { Checkbox, Spin } from "antd";
 
 const SignIn = () => {
     const [email, setEmail] = useState("");
@@ -103,9 +103,9 @@ const SignIn = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center"
                     >
-                        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                        {loading ? <Spin size="small" /> : "Đăng nhập"}
                     </button>
                 </form>
 

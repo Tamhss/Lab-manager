@@ -90,12 +90,6 @@ const DeviceCategory: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setFile(event.target.files[0]);
-        }
-    };
-
     const handleUpload = async (pauseOnHover: boolean) => {
         if (!file) {
             message.error('Vui lòng chọn file!');

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
@@ -32,6 +32,7 @@ const Device: React.FC = () => {
     const [currentId, setCurrentId] = useState<string | null>(null);
     const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
     const [api, contextHolder] = notification.useNotification();
+    const [file, setFile] = useState<File | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -76,6 +77,49 @@ const Device: React.FC = () => {
     const handleCancel = () => {
         setIsModalOpen(false);
         form.resetFields();
+    };
+
+    const handleUpload = async (pauseOnHover: boolean) => {
+        if (!file) {
+            message.error('Vui lòng chọn file!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post('http://localhost:3009/api/v1/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            api.success({
+                message: 'Upload thành công',
+                description: `File ${file.name} đã được upload`,
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+
+            setFile(null);
+            fetchData();
+        } catch (error) {
+            api.error({
+                message: 'Lỗi khi Upload file',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+        }
+    };
+
+    const props = {
+        accept: '.xlsx, .xls',
+        beforeUpload: (file: File) => {
+            setFile(file);
+            return false;
+        },
+        showUploadList: false,
     };
 
     const handleSave = async (values: DeviceType) => {
@@ -131,7 +175,7 @@ const Device: React.FC = () => {
                 api.success({
                     message: "Xóa thành công",
                     description: `Mục có id ${id} đã được xóa`,
-                    placement: 'topRight',
+                    placement: 'bottomRight',
                     showProgress: true,
                     pauseOnHover,
                 });
@@ -257,10 +301,20 @@ const Device: React.FC = () => {
     return (
         <Spin spinning={loading}>
             {contextHolder}
-            <Button type="primary" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
-                Tạo mới
-            </Button>
-            <Table<DeviceType> columns={columns} dataSource={data} rowKey="id" />
+            <div className="space-x-3 flex justify-normal">
+                <Button className="custom-button" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
+                    Tạo mới
+                </Button>
+                <Upload {...props}>
+                    <Button icon={<UploadOutlined />} className="custom-button">
+                        {file ? file.name : 'Chọn File'}
+                    </Button>
+                </Upload>
+                <Button onClick={() => handleUpload(true)} className="custom-button">
+                    Upload
+                </Button>
+            </div>
+            <Table<DeviceType> columns={columns} dataSource={data} rowKey="id" scroll={{ y: 650 }} />
 
             <Modal title={isEditing ? "Chỉnh sửa thiết bị" : "Tạo mới thiết bị"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleSave}>

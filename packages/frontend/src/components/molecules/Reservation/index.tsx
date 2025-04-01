@@ -4,59 +4,129 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 interface Device {
-    id: string;
+    deviceId: string;
     deviceName: string;
+}
+interface Lecturer {
+    lecturerId: string;
+    userName: string;
+}
+
+interface ApiLecturer {
+    lecturerId: string;
+    userId: string;
+    userName: string;
+    email: string;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 const ReservationForm = () => {
     const [devices, setDevices] = useState<Device[]>([]);
-    const [selectedDevice, setSelectedDevice] = useState<string>("");
+    const [selectedDevice, setSelectedDevice] = useState<string | undefined>(undefined); // Thay vì ""
     const [startTime, setStartTime] = useState<string>("");
     const [endTime, setEndTime] = useState<string>("");
+    const [lecturers, setLecturers] = useState<Lecturer[]>([]);
+    const [selectedLecturer, setSelectedLecturer] = useState<string | undefined>();
+
     useEffect(() => {
-        axios.get("http://localhost:3009/api/v1/devices")
-            .then(response => {
-                console.log("Dữ liệu nhận được từ API:", response.data);
-                if (response.data && Array.isArray(response.data.data)) {
+        axios
+            .get("http://localhost:3009/api/v1/devices")
+            .then((response) => {
+                if (Array.isArray(response.data.data)) {
                     const data = response.data.data.map((device: any) => ({
-                        id: device.id,
-                        deviceName: device.deviceName
+                        deviceId: device.deviceId,
+                        deviceName: device.deviceName,
                     }));
+                    console.log("Dữ liệu sau khi map:", data);
                     setDevices(data);
                 } else {
+                    console.log("Dữ liệu API không hợp lệ");
                     setDevices([]);
                 }
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error("Lỗi khi lấy danh sách thiết bị:", error);
                 setDevices([]);
             });
     }, []);
 
+    useEffect(() => {
+        axios
+            .get("http://localhost:3009/api/v1/lecturers")
+            .then((response) => {
+                if (Array.isArray(response.data.data.data)) {
+                    const data = response.data.data.data.map((user: ApiLecturer) => ({
+                        lecturerId: user.lecturerId,
+                        userName: user.userName,
+                    }));
+                    console.log("Dữ liệu sau khi map:", data);
+                    setLecturers(data);
+                } else {
+                    console.log("Dữ liệu API không hợp lệ");
+                    setLecturers([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Lỗi khi lấy danh sách giảng viên:", error);
+                setLecturers([]);
+            });
+    }, []);
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+        const user = storedUser ? JSON.parse(storedUser) : null; // Parse JSON thành object
+
+        const userId = user ? user.userId : null; // Lấy userId từ object user
+
+        if (!userId) {
+            console.error("Lỗi: userId không tồn tại.");
+            alert("Không tìm thấy userId. Vui lòng đăng nhập lại.");
+            return;
+        }
+
+        // Chuyển đổi thành ISO-8601
+        const formattedStartTime = new Date(startTime).toISOString();
+        const formattedEndTime = new Date(endTime).toISOString();
+
+        const requestData = {
+            userId,
+            deviceId: selectedDevice,
+            lecturerId: selectedLecturer,
+            startTime: formattedStartTime,
+            endTime: formattedEndTime
+        };
+
+        console.log("Dữ liệu gửi đi:", requestData);
+
         try {
-            const token = localStorage.getItem("token"); // Lấy token từ localStorage hoặc context
             await axios.post(
                 "http://localhost:3009/api/v1/reservations",
-                {
-                    deviceId: selectedDevice,
-                    startTime,
-                    endTime
-                },
+                requestData,
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`, // Gửi token trong header
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
                     },
                 }
             );
             alert("Đặt lịch thành công!");
         } catch (error) {
             console.error("Lỗi khi đặt lịch:", error);
+
+            if (axios.isAxiosError(error) && error.response) {
+                console.error("Chi tiết lỗi từ server:", error.response.data);
+            }
         }
     };
+
+
+
 
 
     return (
@@ -69,11 +139,27 @@ const ReservationForm = () => {
                         className="w-full"
                         value={selectedDevice}
                         onChange={(value) => setSelectedDevice(value)}
-                        placeholder="-- Chọn thiết bị --"
                         options={devices.map(device => ({
-                            value: device.id,
+                            value: device.deviceId,
                             label: device.deviceName,
                         }))}
+                        showSearch
+                        allowClear
+                    />
+                </div>
+
+                <div className="text-black">
+                    <label className="block text-gray-600 mb-1">Chọn giảng viên xét duyệt:</label>
+                    <Select
+                        className="w-full"
+                        value={selectedLecturer}
+                        onChange={(value) => setSelectedLecturer(value)}
+                        options={lecturers.map((lecturer) => ({
+                            value: lecturer.lecturerId,
+                            label: lecturer.userName,
+                        }))}
+                        showSearch
+                        allowClear
                     />
                 </div>
 

@@ -4,13 +4,13 @@ import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 interface DeviceType {
-    id: string;
+    deviceId: string;
     deviceName: string;
     description: string;
     category: {
-        id: string;
+        categoryId: string;
         name: string;
     };
     categoryId: string;
@@ -30,7 +30,7 @@ const Device: React.FC = () => {
     const [form] = Form.useForm();
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState<string | null>(null);
-    const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+    const [categories, setCategories] = useState<{ categoryId: string; name: string }[]>([]);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<File | null>(null);
 
@@ -93,6 +93,11 @@ const Device: React.FC = () => {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
+            // Kiểm tra nếu server phản hồi lỗi (success = false)
+            if (response.status !== 200 || response.data?.success === false) {
+                throw new Error(response.data?.message || "Upload thất bại");
+            }
+
             api.success({
                 message: 'Upload thành công',
                 description: `File ${file.name} đã được upload`,
@@ -103,13 +108,40 @@ const Device: React.FC = () => {
 
             setFile(null);
             fetchData();
-        } catch (error) {
+        } catch (error: any) {
             api.error({
                 message: 'Lỗi khi Upload file',
+                description: error.response?.data?.message || "Đã xảy ra lỗi trong quá trình upload",
                 placement: 'bottomRight',
                 showProgress: true,
                 pauseOnHover,
             });
+        }
+
+    };
+
+    const handleExport = async () => {
+        try {
+            const response = await fetch("http://localhost:3009/api/v1/upload/export", {
+                method: "GET",
+            });
+
+            if (!response.ok) {
+                throw new Error("Có lỗi xảy ra khi xuất file Excel");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "devices_export.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Lỗi khi tải file:", error);
         }
     };
 
@@ -163,25 +195,25 @@ const Device: React.FC = () => {
 
     const handleEdit = (record: DeviceType) => {
         form.setFieldsValue(record);
-        setCurrentId(record.id);
+        setCurrentId(record.deviceId);
         setIsEditing(true);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string, pauseOnHover: boolean) => {
+    const handleDelete = async (deviceId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/devices/${id}`);
+            await axios.delete(`http://localhost:3009/api/v1/devices/${deviceId}`);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
-                    description: `Mục có id ${id} đã được xóa`,
+                    description: `Mục có id ${deviceId} đã được xóa`,
                     placement: 'bottomRight',
                     showProgress: true,
                     pauseOnHover,
                 });
             }, 0);
 
-            setData(prevData => prevData.filter(item => item.id !== id));
+            setData(prevData => prevData.filter(item => item.deviceId !== deviceId));
         } catch (error) {
             message.error("Lỗi khi xóa dữ liệu!");
         }
@@ -243,10 +275,10 @@ const Device: React.FC = () => {
     const columns: TableColumnsType<DeviceType> = [
         {
             title: 'Mã thiết bị',
-            dataIndex: 'id',
-            key: 'id',
+            dataIndex: 'deviceId',
+            key: 'deviceId',
             width: '15%',
-            ...getColumnSearchProps('id'),
+            ...getColumnSearchProps('deviceId'),
         },
         {
             title: 'Tên thiết bị',
@@ -292,7 +324,7 @@ const Device: React.FC = () => {
                 <Space size="middle">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id, true)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.deviceId, true)} />
                 </Space>
             ),
         },
@@ -313,6 +345,9 @@ const Device: React.FC = () => {
                 <Button onClick={() => handleUpload(true)} className="custom-button">
                     Upload
                 </Button>
+                <Button onClick={handleExport} className="custom-button">
+                    Export
+                </Button>
             </div>
             <Table<DeviceType> columns={columns} dataSource={data} rowKey="id" scroll={{ y: 650 }} />
 
@@ -320,7 +355,7 @@ const Device: React.FC = () => {
                 <Form form={form} layout="vertical" onFinish={handleSave}>
                     <Form.Item
                         label="Mã thiết bị"
-                        name="id"
+                        name="deviceId"
                     >
                         <Input placeholder="Nhập mã thiết bị" />
                     </Form.Item>
@@ -344,7 +379,7 @@ const Device: React.FC = () => {
                     >
                         <Select placeholder="Chọn loại thiết bị">
                             {categories.map((categoryId) => (
-                                <Select.Option key={categoryId.id} value={categoryId.id}>
+                                <Select.Option key={categoryId.categoryId} value={categoryId.categoryId}>
                                     {categoryId.name}
                                 </Select.Option>
                             ))}

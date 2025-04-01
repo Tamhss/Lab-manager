@@ -8,7 +8,7 @@ import axios from 'axios';
 import bcrypt from 'bcryptjs';
 
 interface UserMType {
-    id: string;
+    userId: string;
     userName: string;
     email: string;
     role: string;
@@ -112,16 +112,16 @@ const UserM: React.FC = () => {
 
     const handleEdit = (record: UserMType) => {
         form.setFieldsValue(record);
-        setCurrentId(record.id);
+        setCurrentId(record.userId);
         setIsEditing(true);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (userId: string) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/user/${id}`);
+            await axios.delete(`http://localhost:3009/api/v1/user/${userId}`);
             message.success("Xóa thành công!");
-            setData(prevData => prevData.filter(item => item.id !== id));
+            setData(prevData => prevData.filter(item => item.userId !== userId));
         } catch (error) {
             message.error("Lỗi khi xóa dữ liệu!");
         }
@@ -211,7 +211,7 @@ const UserM: React.FC = () => {
                 <Space size="middle">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.userId)} />
                 </Space>
             ),
         },

@@ -13,9 +13,9 @@ export class DeviceService {
     }
 
     // Lấy một  Device theo ID
-    async getById(id: string) {
+    async getById(deviceId: string) {
         return this.prisma.device.findUnique({
-            where: { id },
+            where: { deviceId },
             include: { category: true },
         });
     }
@@ -31,7 +31,7 @@ export class DeviceService {
 
             // Cập nhật số lượng trong DeviceCategory
             await prisma.deviceCategory.update({
-                where: { id: newDevice.categoryId }, // Lấy ID từ device vừa tạo
+                where: { categoryId: newDevice.categoryId }, // Lấy ID từ device vừa tạo
                 data: {
                     quantity: { increment: 1 }, // Tăng số lượng lên 1
                 },
@@ -43,31 +43,31 @@ export class DeviceService {
 
 
     // Cập nhật  Device
-    async update(id: string, data: Prisma.DeviceUpdateInput) {
+    async update(deviceId: string, data: Prisma.DeviceUpdateInput) {
         return this.prisma.device.update({
-            where: { id },
+            where: { deviceId },
             data,
             include: { category: true },
         });
     }
 
     // Xóa  Device
-    async delete(id: string) {
+    async delete(deviceId: string) {
         return this.prisma.$transaction(async (prisma) => {
             // Lấy thiết bị cần xóa (để biết nó thuộc category nào)
             const device = await prisma.device.findUnique({
-                where: { id },
+                where: { deviceId },
                 select: { categoryId: true },
             });
 
             if (!device) throw new Error('Device not found');
 
             // Xóa thiết bị
-            await prisma.device.delete({ where: { id } });
+            await prisma.device.delete({ where: { deviceId } });
 
             // Giảm số lượng trong DeviceCategory
             await prisma.deviceCategory.update({
-                where: { id: device.categoryId },
+                where: { categoryId: device.categoryId },
                 data: {
                     quantity: { decrement: 1 }, // Giảm số lượng đi 1
                 },

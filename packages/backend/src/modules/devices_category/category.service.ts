@@ -14,9 +14,9 @@ export class DeviceCategoryService {
     }
 
     // Lấy một Server Device theo ID
-    async getById(id: string) {
+    async getById(categoryId: string) {
         return this.prisma.deviceCategory.findUnique({
-            where: { id },
+            where: { categoryId },
             include: { devices: true },
         });
     }
@@ -29,17 +29,17 @@ export class DeviceCategoryService {
     }
 
     // Cập nhật Server Device
-    async update(id: string, data: Prisma.DeviceCategoryUpdateInput) {
+    async update(categoryId: string, data: Prisma.DeviceCategoryUpdateInput) {
         return this.prisma.deviceCategory.update({
-            where: { id },
+            where: { categoryId },
             data,
         });
     }
 
     // Xóa Server Device
-    async delete(id: string) {
+    async delete(categoryId: string) {
         return this.prisma.deviceCategory.delete({
-            where: { id },
+            where: { categoryId },
         });
     }
 }

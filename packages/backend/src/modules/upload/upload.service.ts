@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { PrismaService } from "@core/global/prisma/prisma.service";
 import { join } from "path";
 import { unlink } from "fs";
+import { Response } from "express";
 
 @Injectable()
 export class UploadService {
@@ -10,7 +11,7 @@ export class UploadService {
 
   async importExcel(file: Express.Multer.File) {
     if (!file) {
-      throw new Error("No file uploaded");
+      throw new Error("Không có file được tải lên");
     }
 
     const filePath = join(process.cwd(), file.path);
@@ -20,51 +21,129 @@ export class UploadService {
 
     const jsonData: any[] = XLSX.utils.sheet_to_json(sheet);
 
-    for (const row of jsonData) {
+    if (jsonData.length === 0) {
+      throw new Error("Dữ liệu trong file Excel không có");
+    }
+
+    const columnNames = Object.keys(jsonData[0]);
+    console.log("Tên các cột trong Excel:", columnNames);
+    console.log("Dữ liệu từ Excel:", jsonData);
+    const categoryNames = [...new Set(jsonData.map(row => row["Loại Thiết Bị"]?.trim()))];
+    const categoriesMap = new Map<string, string>();
+
+    for (const categoryName of categoryNames) {
+      if (!categoryName) {
+        console.error("Tên loại thiết bị bị thiếu trong dữ liệu:", jsonData);
+        continue;
+      }
+
       try {
-        // 1. Kiểm tra và tạo/cập nhật DeviceCategory trước
+        const normalizedCategoryName = categoryName.trim();
         const category = await this.prisma.deviceCategory.upsert({
-          where: { name: row["Tên Loại Thiết Bị"] },
-          update: {}, // Không cập nhật quantity ở đây
+          where: { name: normalizedCategoryName },
+          update: {}, 
           create: {
-            name: row["Tên Loại Thiết Bị"],
-            quantity: 0, // Giá trị mặc định, sẽ cập nhật lại sau
+            name: normalizedCategoryName,
+            quantity: 0,
           },
         });
+        categoriesMap.set(normalizedCategoryName, category.categoryId);
+        console.log(`Đã thêm loại thiết bị: ${normalizedCategoryName} -> ${category.categoryId}`);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(`Lỗi khi nhập loại thiết bị ${categoryName}:`, error.message);
+        } else {
+          console.error(`Lỗi không xác định khi nhập loại thiết bị ${categoryName}:`, error);
+        }
+      }
+    }
 
-        // 2. Tạo mới thiết bị Device
+    for (const row of jsonData) {
+      const categoryName = row["Loại Thiết Bị"]?.trim();
+      if (!categoryName || !categoriesMap.has(categoryName)) {
+        console.error(`Không tìm thấy loại thiết bị "${categoryName}" cho thiết bị ${row["Tên Thiết Bị"]}`);
+        console.error("Dữ liệu hàng:", row);
+        continue;
+      }
+
+      try {
         await this.prisma.device.create({
           data: {
-            id: row["Mã thiết bị"],
+            deviceId: row["Mã Thiết Bị"],
             deviceName: row["Tên Thiết Bị"],
             description: row["Mô Tả"] || null,
             status: row["Trạng Thái"] || "NOT_IN_USE",
             borrowStatus: row["Trạng Thái Mượn"] || "COMPLETED",
-            categoryId: category.id, // Liên kết với bảng DeviceCategory
+            categoryId: categoriesMap.get(categoryName),
           },
         });
-
-        // 3. Đếm lại số thiết bị thuộc category này
-        const deviceCount = await this.prisma.device.count({
-          where: { categoryId: category.id },
-        });
-
-        // 4. Cập nhật lại số lượng trong deviceCategory
-        await this.prisma.deviceCategory.update({
-          where: { id: category.id },
-          data: { quantity: deviceCount },
-        });
-
-      } catch (error) {
-        console.error(`Lỗi khi nhập thiết bị ${row["Tên Thiết Bị"]}:`, error);
+        console.log(`Đã nhập thiết bị: ${row["Tên Thiết Bị"]}`);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(`Lỗi khi nhập thiết bị ${row["Tên Thiết Bị"]}:`, error.message);
+        } else {
+          console.error(`Lỗi không xác định khi nhập thiết bị ${row["Tên Thiết Bị"]}:`, error);
+        }
       }
     }
 
-    // Xóa file sau khi xử lý
+    for (const [categoryName, categoryId] of categoriesMap) {
+      try {
+        const deviceCount = await this.prisma.device.count({
+          where: { categoryId },
+        });
+
+        await this.prisma.deviceCategory.update({
+          where: { categoryId },
+          data: { quantity: deviceCount },
+        });
+        console.log(`Đã cập nhật số lượng cho ${categoryName}: ${deviceCount}`);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(`Lỗi khi cập nhật số lượng cho loại thiết bị ${categoryName}:`, error.message);
+        } else {
+          console.error(`Lỗi không xác định khi cập nhật số lượng cho loại thiết bị ${categoryName}:`, error);
+        }
+      }
+    }
+
     unlink(filePath, (err) => {
       if (err) console.error("Lỗi khi xóa file:", err);
     });
 
-    return { message: "Import thành công", data: jsonData };
+    return { message: "Nhập dữ liệu thành công", data: jsonData };
+  }
+
+
+  async exportExcel(res: Response) {
+    const devices = await this.prisma.device.findMany({
+      include: { category: true },
+    });
+
+    const jsonData = devices.map((device) => ({
+      "Mã Thiết Bị": device.deviceId,
+      "Tên Thiết Bị": device.deviceName,
+      "Mô Tả": device.description || "",
+      "Trạng Thái": device.status,
+      "Trạng Thái Mượn": device.borrowStatus,
+      "Loại Thiết Bị": device.category?.name || "",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(jsonData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Devices");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="devices_export.xlsx"',
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    res.send(Buffer.from(buffer));
   }
 }

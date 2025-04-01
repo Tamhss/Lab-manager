@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Res, Query } from '@nestjs/common';
 import { UserService } from './user.service';
-
+import { Response } from 'express';
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) { }
@@ -34,4 +34,5 @@ export class UserController {
     async delete(@Param('id') id: string) {
         return this.userService.delete(id);
     }
+
 }

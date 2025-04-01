@@ -14,16 +14,16 @@ import Highlighter from 'react-highlight-words';
 import axios from 'axios';
 
 interface DeviceCategoryType {
-    id: string;
+    categoryId: string;
     name: string;
     quantity: number;
 }
 interface DeviceType {
-    id: string;
+    deviceId: string;
     deviceName: string;
     description: string;
     category: {
-        id: string;
+        categoryId: string;
         name: string;
     };
     categoryId: string;
@@ -177,30 +177,30 @@ const DeviceCategory: React.FC = () => {
 
     const handleDetail = (record: DeviceCategoryType) => {
         setSelectedCategory(record.name);
-        fetchDevicesByCategory(record.id);
+        fetchDevicesByCategory(record.categoryId);
     };
 
     const handleEdit = (record: DeviceCategoryType) => {
         form.setFieldsValue(record);
-        setCurrentId(record.id);
+        setCurrentId(record.categoryId);
         setIsEditing(true);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string, pauseOnHover: boolean) => {
+    const handleDelete = async (categoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/devices-category/${id}`);
+            await axios.delete(`http://localhost:3009/api/v1/devices-category/${categoryId}`);
             setTimeout(() => {
                 api.success({
                     message: 'Xoá thành công',
-                    description: `Mục có ID ${id} đã được xoá.`,
+                    description: `Mục có ID ${categoryId} đã được xoá.`,
                     placement: 'bottomRight',
                     showProgress: true,
                     pauseOnHover,
                 });
             }, 0);
 
-            setData((prevData) => prevData.filter((item) => item.id !== id));
+            setData((prevData) => prevData.filter((item) => item.categoryId !== categoryId));
         } catch (error) {
             setTimeout(() => {
                 api.error({
@@ -302,10 +302,10 @@ const DeviceCategory: React.FC = () => {
     const columns: TableColumnsType<DeviceCategoryType> = [
         {
             title: 'Mã loại thiết bị',
-            dataIndex: 'id',
-            key: 'id',
+            dataIndex: 'categoryId',
+            key: 'categoryId',
             width: '20%',
-            ...getColumnSearchProps('id'),
+            ...getColumnSearchProps('categoryId'),
         },
         {
             title: 'Loại thiết bị',
@@ -330,7 +330,7 @@ const DeviceCategory: React.FC = () => {
                 <Space size="middle">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id, true)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.categoryId, true)} />
                 </Space>
             ),
         },
@@ -361,7 +361,7 @@ const DeviceCategory: React.FC = () => {
                 footer={null}
             >
                 <Form form={form} layout="vertical" onFinish={handleSave}>
-                    <Form.Item label="Mã loại thiết bị" name="id">
+                    <Form.Item label="Mã loại thiết bị" name="categoryId">
                         <Input placeholder="Nhập mã loại thiết bị" />
                     </Form.Item>
                     <Form.Item
@@ -389,7 +389,7 @@ const DeviceCategory: React.FC = () => {
                 <Table<DeviceType>
                     columns={deviceColumns}
                     dataSource={deviceList.filter((device) => selectedCategory && device.category.name === selectedCategory)}
-                    rowKey="id"
+                    rowKey="deviceId"
                 />
             </Modal>
         </Spin>

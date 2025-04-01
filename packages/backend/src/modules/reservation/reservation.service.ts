@@ -40,9 +40,9 @@ export class ReservationService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(reservationId: string) {
     const reservation = await this.prisma.reservation.findUnique({
-      where: { id },
+      where: { reservationId },
       include: {
         user: true,
         device: true,
@@ -51,15 +51,15 @@ export class ReservationService {
       },
     });
     if (!reservation) {
-      throw new NotFoundException(`Reservation with ID ${id} not found`);
+      throw new NotFoundException(`Reservation with reservationID ${reservationId} not found`);
     }
     return reservation;
   }
 
-  async update(id: string, updateReservationDto: UpdateReservationDto) {
-    await this.findOne(id); // Kiểm tra tồn tại
+  async update(reservationId: string, updateReservationDto: UpdateReservationDto) {
+    await this.findOne(reservationId); // Kiểm tra tồn tại
     return this.prisma.reservation.update({
-      where: { id },
+      where: { reservationId },
       data: {
         ...updateReservationDto,
         updatedAt: new Date(),
@@ -73,17 +73,17 @@ export class ReservationService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id); // Kiểm tra tồn tại
+  async remove(reservationId: string) {
+    await this.findOne(reservationId); // Kiểm tra tồn tại
     return this.prisma.reservation.delete({
-      where: { id },
+      where: { reservationId },
     });
   }
 
-  async approveByLecturer(id: string, lecturerId: string) {
-    await this.findOne(id); // Kiểm tra tồn tại
+  async approveByLecturer(reservationId: string, lecturerId: string) {
+    await this.findOne(reservationId); // Kiểm tra tồn tại
     return this.prisma.reservation.update({
-      where: { id },
+      where: { reservationId },
       data: {
         lecturerId,
         status: 'APPROVED_BY_LECTURER',
@@ -92,10 +92,10 @@ export class ReservationService {
     });
   }
 
-  async approveByAdmin(id: string) {
-    await this.findOne(id); // Kiểm tra tồn tại
+  async approveByAdmin(reservationId: string) {
+    await this.findOne(reservationId); // Kiểm tra tồn tại
     return this.prisma.reservation.update({
-      where: { id },
+      where: { reservationId },
       data: {
         adminApproved: true,
         status: 'APPROVED',

@@ -2,12 +2,15 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('reservations')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   async create(@Body() createReservationDto: CreateReservationDto) {
     return this.reservationService.create(createReservationDto);
   }
@@ -39,6 +42,7 @@ export class ReservationController {
   }
 
   @Put(':id/approve-lecturer')
+  @UseGuards(AuthGuard('jwt'))
   async approveByLecturer(
     @Param('id') id: string,
     @Body('lecturerId') lecturerId: string,
@@ -47,6 +51,7 @@ export class ReservationController {
   }
 
   @Put(':id/approve-admin')
+  @UseGuards(AuthGuard('jwt'))
   async approveByAdmin(@Param('id') id: string) {
     return this.reservationService.approveByAdmin(id);
   }

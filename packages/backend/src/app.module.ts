@@ -33,6 +33,7 @@ import { DeviceCategoryModule } from '@modules/devices_category/category.module'
 import { ReservationController } from '@modules/reservation/reservation.controller';
 import { ReservationModule } from '@modules/reservation/reservation.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { LecturerModule } from '@modules/lecturer/lecturer.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { UploadModule } from './modules/upload/upload.module';
     ReservationModule,
     AuthModule,
     UploadModule,
+    LecturerModule,
 
     TypeOrmModule.forRoot({
       type: 'postgres',

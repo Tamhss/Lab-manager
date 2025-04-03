@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Request } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Role } from '@prisma/client';
+
 
 @Controller('reservations')
 export class ReservationController {
@@ -11,8 +13,9 @@ export class ReservationController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  async create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationService.create(createReservationDto);
+  async create(@Body() createReservationDto: CreateReservationDto, @Request() req) {
+    const role: Role = req.user.role;  // Lấy 'role' từ đối tượng request (JWT)
+    return this.reservationService.create(createReservationDto, role);
   }
 
   @Get()
@@ -24,35 +27,35 @@ export class ReservationController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(id);
+  async findOne(@Param('id') reservationId: string) {
+    return this.reservationService.findOne(reservationId);
   }
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') reservationId: string,
     @Body() updateReservationDto: UpdateReservationDto,
   ) {
-    return this.reservationService.update(id, updateReservationDto);
+    return this.reservationService.update(reservationId, updateReservationDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.reservationService.remove(id);
+  async remove(@Param('id') reservationId: string) {
+    return this.reservationService.remove(reservationId);
   }
 
   @Put(':id/approve-lecturer')
   @UseGuards(AuthGuard('jwt'))
   async approveByLecturer(
-    @Param('id') id: string,
+    @Param('id') reservationId: string,
     @Body('lecturerId') lecturerId: string,
   ) {
-    return this.reservationService.approveByLecturer(id, lecturerId);
+    return this.reservationService.approveByLecturer(reservationId, lecturerId);
   }
 
   @Put(':id/approve-admin')
   @UseGuards(AuthGuard('jwt'))
-  async approveByAdmin(@Param('id') id: string) {
-    return this.reservationService.approveByAdmin(id);
+  async approveByAdmin(@Param('id') reservationId: string) {
+    return this.reservationService.approveByAdmin(reservationId);
   }
 }

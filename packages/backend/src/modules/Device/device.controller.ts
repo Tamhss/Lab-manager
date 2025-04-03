@@ -12,9 +12,9 @@ export class DeviceController {
     }
 
     // GET a single  device by ID
-    @Get(':id')
-    async getById(@Param('id') id: string) {
-        return this.DeviceService.getById(id);
+    @Get(':deviceId')
+    async getById(@Param('devideId') deviceId: string) {
+        return this.DeviceService.getById(deviceId);
     }
 
     // POST: Create new  device
@@ -24,15 +24,15 @@ export class DeviceController {
     }
 
     // PUT: Update  device by ID
-    @Put(':id')
-    async update(@Param('id') id: string, @Body() data: any) {
-        return this.DeviceService.update(id, data);
+    @Put(':deviceId')
+    async update(@Param('deviceId') deviceId: string, @Body() data: any) {
+        return this.DeviceService.update(deviceId, data);
     }
 
     // DELETE: Remove a  device by ID
-    @Delete(':id')
-    async delete(@Param('id') id: string) {
-        return this.DeviceService.delete(id);
+    @Delete(':deviceId')
+    async delete(@Param('deviceId') deviceId: string) {
+        return this.DeviceService.delete(deviceId);
     }
 
 }

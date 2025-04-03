@@ -50,7 +50,7 @@ export const Navbar: React.FC = () => {
                         <>
                             <Tooltip title="HOME">
                                 <li>
-                                    <Link href="/">
+                                    <Link href="/HomePage">
                                         <HomeOutlined className="text-white text-3xl hover:opacity-80 cursor-pointer" />
                                     </Link>
                                 </li>

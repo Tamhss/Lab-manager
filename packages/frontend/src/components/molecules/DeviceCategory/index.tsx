@@ -40,8 +40,8 @@ const DeviceCategory: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
-    const [isEditing, setIsEditing] = useState(false); // Kiểm tra trạng thái
-    const [currentId, setCurrentId] = useState<string | null>(null); // Lưu ID khi sửa
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentId, setCurrentId] = useState<string | null>(null);
     const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
     const [deviceList, setDeviceList] = useState<DeviceType[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -92,7 +92,13 @@ const DeviceCategory: React.FC = () => {
 
     const handleUpload = async (pauseOnHover: boolean) => {
         if (!file) {
-            message.error('Vui lòng chọn file!');
+            api.error({
+                message: 'Chưa chọn file',
+                description: 'Chọn file để upload',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            })
             return;
         }
 
@@ -273,12 +279,12 @@ const DeviceCategory: React.FC = () => {
     const deviceColumns: TableColumnsType<DeviceType> = [
         {
             title: 'Mã thiết bị',
-            dataIndex: 'id',
-            key: 'id',
+            dataIndex: 'deviceId',
+            key: 'deviceId',
         },
         {
             title: 'Tên thiết bị',
-            dataIndex: 'deviceName', // Phải khớp với thuộc tính trong `DeviceType`
+            dataIndex: 'deviceName',
             key: 'deviceName',
         },
         {
@@ -335,6 +341,15 @@ const DeviceCategory: React.FC = () => {
             ),
         },
     ];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'PENDING_BORROW': return 'gold';
+            case 'BORROWED': return 'orange';
+            case 'COMPLETED': return 'green';
+            default: return 'gray';
+        }
+    };
 
     return (
         <Spin spinning={loading}>

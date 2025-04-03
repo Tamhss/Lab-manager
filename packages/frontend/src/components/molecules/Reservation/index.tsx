@@ -1,7 +1,8 @@
 'use client'
-import { Select } from "antd"; // Import Select từ Ant Design
+import { notification, Select } from "antd"; // Import Select từ Ant Design
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
 
 interface Device {
     deviceId: string;
@@ -29,17 +30,16 @@ const ReservationForm = () => {
     const [endTime, setEndTime] = useState<string>("");
     const [lecturers, setLecturers] = useState<Lecturer[]>([]);
     const [selectedLecturer, setSelectedLecturer] = useState<string | undefined>();
+    const [api, contextHolder] = notification.useNotification();
 
     useEffect(() => {
-        axios
-            .get("http://localhost:3009/api/v1/devices")
+        axios.get("http://localhost:3009/api/v1/devices")
             .then((response) => {
                 if (Array.isArray(response.data.data)) {
                     const data = response.data.data.map((device: any) => ({
                         deviceId: device.deviceId,
                         deviceName: device.deviceName,
                     }));
-                    console.log("Dữ liệu sau khi map:", data);
                     setDevices(data);
                 } else {
                     console.log("Dữ liệu API không hợp lệ");
@@ -47,7 +47,6 @@ const ReservationForm = () => {
                 }
             })
             .catch((error) => {
-                console.error("Lỗi khi lấy danh sách thiết bị:", error);
                 setDevices([]);
             });
     }, []);
@@ -61,28 +60,25 @@ const ReservationForm = () => {
                         lecturerId: user.lecturerId,
                         userName: user.userName,
                     }));
-                    console.log("Dữ liệu sau khi map:", data);
                     setLecturers(data);
                 } else {
-                    console.log("Dữ liệu API không hợp lệ");
                     setLecturers([]);
                 }
             })
             .catch((error) => {
-                console.error("Lỗi khi lấy danh sách giảng viên:", error);
                 setLecturers([]);
             });
     }, []);
 
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, pauseOnHover: boolean) => {
         e.preventDefault();
 
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
-        const user = storedUser ? JSON.parse(storedUser) : null; // Parse JSON thành object
+        const user = storedUser ? JSON.parse(storedUser) : null;
 
-        const userId = user ? user.userId : null; // Lấy userId từ object user
+        const userId = user ? user.userId : null;
 
         if (!userId) {
             console.error("Lỗi: userId không tồn tại.");
@@ -90,7 +86,6 @@ const ReservationForm = () => {
             return;
         }
 
-        // Chuyển đổi thành ISO-8601
         const formattedStartTime = new Date(startTime).toISOString();
         const formattedEndTime = new Date(endTime).toISOString();
 
@@ -101,8 +96,6 @@ const ReservationForm = () => {
             startTime: formattedStartTime,
             endTime: formattedEndTime
         };
-
-        console.log("Dữ liệu gửi đi:", requestData);
 
         try {
             await axios.post(
@@ -115,30 +108,37 @@ const ReservationForm = () => {
                     },
                 }
             );
-            alert("Đặt lịch thành công!");
-        } catch (error) {
-            console.error("Lỗi khi đặt lịch:", error);
+            api.success({
+                message: '',
+                description: `Đặt lịch thành công`,
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
 
-            if (axios.isAxiosError(error) && error.response) {
-                console.error("Chi tiết lỗi từ server:", error.response.data);
-            }
+        } catch (error) {
+            api.error({
+                message: 'Lỗi khi đặt lịch',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
         }
     };
 
-
-
-
-
     return (
         <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
+            {contextHolder}
             <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">Đặt lịch thiết bị</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(e) => handleSubmit(e, true)} className="space-y-4">
                 <div className="text-black">
                     <label className="block text-gray-600 mb-1">Chọn thiết bị:</label>
                     <Select
                         className="w-full"
                         value={selectedDevice}
-                        onChange={(value) => setSelectedDevice(value)}
+                        onChange={(value) => {
+                            setSelectedDevice(value);
+                        }}
                         options={devices.map(device => ({
                             value: device.deviceId,
                             label: device.deviceName,
@@ -171,6 +171,11 @@ const ReservationForm = () => {
                         value={startTime}
                         onChange={(e) => setStartTime(e.target.value)}
                     />
+                    {startTime && (
+                        <p className="text-sm text-gray-500 mt-2">
+                            {`${dayjs(startTime).format("DD/MM/YYYY HH:mm")}`}
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -181,6 +186,11 @@ const ReservationForm = () => {
                         value={endTime}
                         onChange={(e) => setEndTime(e.target.value)}
                     />
+                    {endTime && (
+                        <p className="text-sm text-gray-500 mt-2">
+                            {` ${dayjs(endTime).format("DD/MM/YYYY HH:mm")}`}
+                        </p>
+                    )}
                 </div>
 
                 <button

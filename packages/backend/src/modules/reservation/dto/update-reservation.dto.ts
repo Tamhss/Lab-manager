@@ -1,31 +1,21 @@
-import { IsString, IsOptional, IsDateString, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsDateString } from 'class-validator';
 
 export class UpdateReservationDto {
-  @IsString()
   @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsDateString()
+  actualBorrowTime?: string;
+
+  @IsOptional()
+  @IsDateString()
+  actualReturnTime?: string;
+
+  @IsString()
   deviceId?: string;
 
-  @IsString()
-  @IsOptional()
-  labId?: string;
-
-  @IsDateString()
-  @IsOptional()
-  startTime?: string;
-
-  @IsDateString()
-  @IsOptional()
-  endTime?: string;
-
-  @IsString()
-  @IsOptional()
-  status?: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'REJECTED';
-
-  @IsString()
-  @IsOptional()
-  lecturerId?: string;
-
-  @IsBoolean()
   @IsOptional()
   adminApproved?: boolean;
 }

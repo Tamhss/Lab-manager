@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload, Tag } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 interface DeviceType {
     deviceId: string;
     deviceName: string;
@@ -314,6 +314,11 @@ const Device: React.FC = () => {
             key: 'borrowStatus',
             width: '20%',
             ...getColumnSearchProps('borrowStatus'),
+            render: (borrowStatus) => (
+                <Tag color={getStatusColor(borrowStatus)}>
+                    {borrowStatus}
+                </Tag>
+            )
         },
         {
             title: 'Hành động',
@@ -329,6 +334,15 @@ const Device: React.FC = () => {
             ),
         },
     ];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'PENDING_BORROW': return 'gold';
+            case 'BORROWED': return 'orange';
+            case 'COMPLETED': return 'green';
+            default: return 'gray';
+        }
+    };
 
     return (
         <Spin spinning={loading}>

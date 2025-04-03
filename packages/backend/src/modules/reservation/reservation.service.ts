@@ -1,32 +1,46 @@
+import { Role } from '@prisma/client';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { DeviceService } from '@modules/Device/device.service';
+import { BorrowStatus, ReservationStatus } from '@core/enum/enum';
 
 @Injectable()
 export class ReservationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private deviceService: DeviceService
+  ) { }
 
-  async create(createReservationDto: CreateReservationDto) {
+  async create(createReservationDto: CreateReservationDto, role: Role) {
+    let initialStatus = ReservationStatus.PENDING;
+    if (role === 'LECTURER') {
+      initialStatus = ReservationStatus.APPROVED_BY_LECTURER;
+    } else if (role === 'ADMIN') {
+      initialStatus = ReservationStatus.APPROVED;
+    }
     return this.prisma.reservation.create({
       data: {
         ...createReservationDto,
-        status: 'PENDING',
+        status: initialStatus,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       include: {
         user: true,
-        device: true,
+        device: { select: { deviceId: true } },
         lab: true,
         lecturer: true,
       },
     });
   }
 
-  async findAll(filters: { status?: string; userId?: string }) {
+  async findAll(filters: { status?: string | string[]; userId?: string }) {
     const where: any = {};
-    if (filters.status) where.status = filters.status;
+    if (filters.status) {
+      where.status = Array.isArray(filters.status) ? { in: filters.status } : filters.status;
+    }
     if (filters.userId) where.userId = filters.userId;
 
     return this.prisma.reservation.findMany({
@@ -51,17 +65,43 @@ export class ReservationService {
       },
     });
     if (!reservation) {
-      throw new NotFoundException(`Reservation with reservationID ${reservationId} not found`);
+      throw new NotFoundException(`Reservation with ID ${reservationId} not found`);
     }
     return reservation;
   }
 
   async update(reservationId: string, updateReservationDto: UpdateReservationDto) {
-    await this.findOne(reservationId); // Kiểm tra tồn tại
+    const reservation = await this.findOne(reservationId);
+    let borrowStatus: BorrowStatus | undefined;
+
+    if (updateReservationDto.actualBorrowTime && !updateReservationDto.actualReturnTime) {
+      borrowStatus = BorrowStatus.BORROWED;
+    } else if (updateReservationDto.actualReturnTime) {
+      borrowStatus = BorrowStatus.COMPLETED;
+    }
+
+    console.log('actualBorrowTime:', updateReservationDto.actualBorrowTime);
+    console.log('actualReturnTime:', updateReservationDto.actualReturnTime);
+
+    if (borrowStatus) {
+      await this.deviceService.update(reservation.device.deviceId, {
+        borrowStatus: { set: borrowStatus },
+      });
+    }
+
+    // Kiểm tra và ánh xạ giá trị status từ chuỗi sang enum
+    const statusEnum = ReservationStatus[updateReservationDto.status as keyof typeof ReservationStatus];
+    if (!statusEnum) {
+      throw new Error('Invalid status value');
+    }
+
     return this.prisma.reservation.update({
       where: { reservationId },
       data: {
         ...updateReservationDto,
+        status: statusEnum,  // Gán giá trị enum hợp lệ
+        actualBorrowTime: updateReservationDto.actualBorrowTime ? new Date(updateReservationDto.actualBorrowTime) : undefined,
+        actualReturnTime: updateReservationDto.actualReturnTime ? new Date(updateReservationDto.actualReturnTime) : undefined,
         updatedAt: new Date(),
       },
       include: {
@@ -73,33 +113,40 @@ export class ReservationService {
     });
   }
 
+
   async remove(reservationId: string) {
-    await this.findOne(reservationId); // Kiểm tra tồn tại
-    return this.prisma.reservation.delete({
-      where: { reservationId },
-    });
+    await this.findOne(reservationId);
+    return this.prisma.reservation.delete({ where: { reservationId } });
   }
 
   async approveByLecturer(reservationId: string, lecturerId: string) {
-    await this.findOne(reservationId); // Kiểm tra tồn tại
+    const lecturer = await this.prisma.lecturer.findUnique({ where: { lecturerId } });
+    if (!lecturer) {
+      throw new Error('Giảng viên không tồn tại.');
+    }
     return this.prisma.reservation.update({
       where: { reservationId },
       data: {
         lecturerId,
-        status: 'APPROVED_BY_LECTURER',
+        status: ReservationStatus.APPROVED_BY_LECTURER,
         updatedAt: new Date(),
       },
     });
   }
 
   async approveByAdmin(reservationId: string) {
-    await this.findOne(reservationId); // Kiểm tra tồn tại
     return this.prisma.reservation.update({
       where: { reservationId },
       data: {
         adminApproved: true,
-        status: 'APPROVED',
+        status: ReservationStatus.APPROVED,
         updatedAt: new Date(),
+      },
+      include: {
+        user: true,
+        device: true,
+        lab: true,
+        lecturer: true,
       },
     });
   }

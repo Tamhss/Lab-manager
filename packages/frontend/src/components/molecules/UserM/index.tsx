@@ -222,7 +222,7 @@ const UserM: React.FC = () => {
             <Button type="primary" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
                 Tạo mới
             </Button>
-            <Table<UserMType> columns={columns} dataSource={data} rowKey="id" />
+            <Table<UserMType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.userId }))} />
 
             <Modal title={isEditing ? "Chỉnh sửa người dùng" : "Tạo mới người dùng"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleSave}>

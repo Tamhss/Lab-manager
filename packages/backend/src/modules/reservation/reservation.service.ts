@@ -31,7 +31,11 @@ export class ReservationService {
         user: true,
         device: { select: { deviceId: true } },
         lab: true,
-        lecturer: true,
+        lecturer: {
+          include: {
+            user: true,
+          }
+        }
       },
     });
   }
@@ -49,7 +53,11 @@ export class ReservationService {
         user: true,
         device: true,
         lab: true,
-        lecturer: true,
+        lecturer: {
+          include: {
+            user: true,
+          }
+        }
       },
     });
   }
@@ -61,7 +69,11 @@ export class ReservationService {
         user: true,
         device: true,
         lab: true,
-        lecturer: true,
+        lecturer: {
+          include: {
+            user: true,
+          }
+        }
       },
     });
     if (!reservation) {
@@ -73,33 +85,27 @@ export class ReservationService {
   async update(reservationId: string, updateReservationDto: UpdateReservationDto) {
     const reservation = await this.findOne(reservationId);
     let borrowStatus: BorrowStatus | undefined;
-
-    if (updateReservationDto.actualBorrowTime && !updateReservationDto.actualReturnTime) {
-      borrowStatus = BorrowStatus.BORROWED;
-    } else if (updateReservationDto.actualReturnTime) {
-      borrowStatus = BorrowStatus.COMPLETED;
-    }
-
-    console.log('actualBorrowTime:', updateReservationDto.actualBorrowTime);
-    console.log('actualReturnTime:', updateReservationDto.actualReturnTime);
-
-    if (borrowStatus) {
-      await this.deviceService.update(reservation.device.deviceId, {
-        borrowStatus: { set: borrowStatus },
-      });
-    }
-
-    // Kiểm tra và ánh xạ giá trị status từ chuỗi sang enum
     const statusEnum = ReservationStatus[updateReservationDto.status as keyof typeof ReservationStatus];
-    if (!statusEnum) {
-      throw new Error('Invalid status value');
+
+    if (statusEnum === ReservationStatus.APPROVED) {
+      if (updateReservationDto.actualBorrowTime && !updateReservationDto.actualReturnTime) {
+        borrowStatus = BorrowStatus.BORROWED;
+      } else if (updateReservationDto.actualReturnTime) {
+        borrowStatus = BorrowStatus.COMPLETED;
+      }
+
+      if (borrowStatus) {
+        await this.deviceService.update(reservation.device.deviceId, {
+          borrowStatus: { set: borrowStatus },
+        });
+      }
     }
 
     return this.prisma.reservation.update({
       where: { reservationId },
       data: {
         ...updateReservationDto,
-        status: statusEnum,  // Gán giá trị enum hợp lệ
+        status: statusEnum,
         actualBorrowTime: updateReservationDto.actualBorrowTime ? new Date(updateReservationDto.actualBorrowTime) : undefined,
         actualReturnTime: updateReservationDto.actualReturnTime ? new Date(updateReservationDto.actualReturnTime) : undefined,
         updatedAt: new Date(),
@@ -108,7 +114,11 @@ export class ReservationService {
         user: true,
         device: true,
         lab: true,
-        lecturer: true,
+        lecturer: {
+          include: {
+            user: true,
+          }
+        }
       },
     });
   }
@@ -146,7 +156,11 @@ export class ReservationService {
         user: true,
         device: true,
         lab: true,
-        lecturer: true,
+        lecturer: {
+          include: {
+            user: true,
+          }
+        }
       },
     });
   }

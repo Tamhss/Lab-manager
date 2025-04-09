@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { AppstoreOutlined, SettingOutlined, HomeOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { AppstoreOutlined, SettingOutlined, HomeOutlined, TeamOutlined, UserOutlined, AppstoreAddOutlined, ApartmentOutlined, HistoryOutlined, LaptopOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu, Card } from 'antd';
 import { Pie, Bar, Line } from 'react-chartjs-2';
@@ -17,7 +18,8 @@ import {
 import Device from '../Device';
 import DeviceCategory from '../DeviceCategory';
 import UserM from '../UserM';
-import DeviceReservation from '../DeviceReservation';
+import DeviceReservation from '../DeviceReservationManager';
+import BorrowHistory from '../BorrowHistory';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
@@ -28,8 +30,8 @@ const items: MenuProps['items'] = [
         label: 'Quản lý thiết bị',
         icon: <AppstoreOutlined />,
         children: [
-            { key: '1', label: 'Loại thiết bị' },
-            { key: '2', label: 'Thiết bị' },
+            { key: '1', label: 'Loại thiết bị', icon: <SettingOutlined /> },
+            { key: '2', label: 'Thiết bị', icon: <LaptopOutlined /> },
         ],
     },
     {
@@ -37,8 +39,9 @@ const items: MenuProps['items'] = [
         label: 'Quản lý đăng ký',
         icon: <SettingOutlined />,
         children: [
-            { key: '9', label: 'Đăng ký thiết bị' },
-            { key: '10', label: 'Đăng ký phòng lab' },
+            { key: '3', label: 'Đăng ký thiết bị', icon: <AppstoreAddOutlined /> },
+            { key: '4', label: 'Đăng ký phòng lab', icon: <ApartmentOutlined /> },
+            { key: '5', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
         ],
     },
     {
@@ -46,18 +49,13 @@ const items: MenuProps['items'] = [
         label: 'Quản lý người dùng',
         icon: <TeamOutlined />,  // Icon cho cả nhóm
         children: [
-            { key: '14', label: 'Danh sách người dùng', icon: <UserOutlined /> },
+            { key: '6', label: 'Danh sách người dùng', icon: <UserOutlined /> },
         ],
     },
     {
         type: 'divider',
     },
 ];
-
-const pieData = {
-    labels: ['Đang sử dụng', 'Sẵn sàng', 'Đang bảo trì'],
-    datasets: [{ data: [30, 50, 20], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }],
-};
 
 const barData = {
     labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
@@ -72,6 +70,51 @@ const lineData = {
 const chartOptions = { responsive: true, maintainAspectRatio: false };
 
 const Dashboard: React.FC = () => {
+    const [devices, setDevices] = useState<any[]>([]); // State lưu danh sách thiết bị
+    const [loading, setLoading] = useState(false);
+    const [pieData, setPieData] = useState({
+        labels: ['Không sử dụng', 'Đang sử dụng', 'Hư hỏng', 'Đang thinh lí'],
+        datasets: [{ data: [0, 0, 0], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }],
+    });
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('http://localhost:3009/api/v1/devices');
+            if (Array.isArray(response.data?.data)) {
+                setDevices(response.data.data);
+
+                const inUseCount = response.data.data.filter((device: any) => device.status === 'IN_USE').length;
+                const notInUseCount = response.data.data.filter((device: any) => device.status === 'NOT_IN_USE').length;
+                const damagedCount = response.data.data.filter((device: any) => device.status === 'DAMAGED').length;
+                const disposingCount = response.data.data.filter((device: any) => device.status === 'DAMAGED').length;
+
+                setPieData({
+                    labels: ['Đang sử dụng', 'Không sử dụng', 'Hư hỏng', 'Đang thinh lí'],
+                    datasets: [{
+                        data: [inUseCount, notInUseCount, damagedCount, disposingCount],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#FF1493'],
+                    }],
+                });
+            } else {
+                setDevices([]);
+                setPieData({
+                    labels: ['Đang sử dụng', 'Không sử dụng', 'Hư hỏng', 'Đang thinh lí'],
+                    datasets: [{ data: [0, 0, 0], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }],
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            console.error("Lỗi khi tải dữ liệu từ server!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     const renderDashboard = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card title="Trạng thái thiết bị" className="shadow-lg">
@@ -99,11 +142,14 @@ const Dashboard: React.FC = () => {
             case '2':
                 setContent(<Device />);
                 break;
-            case '14':
-                setContent(<UserM />);
-                break;
-            case '9':
+            case '3':
                 setContent(<DeviceReservation />);
+                break;
+            case '5':
+                setContent(<BorrowHistory />);
+                break;
+            case '6':
+                setContent(<UserM />);
                 break;
             default:
                 setContent(renderDashboard());

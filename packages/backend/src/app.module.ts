@@ -34,6 +34,8 @@ import { ReservationController } from '@modules/reservation/reservation.controll
 import { ReservationModule } from '@modules/reservation/reservation.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { LecturerModule } from '@modules/lecturer/lecturer.module';
+import { BorrowHistoryModule } from '@modules/borrow_history/borrow_history.module';
+import { UserHistoryModule } from '@modules/user_history/user_history.module';
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { LecturerModule } from '@modules/lecturer/lecturer.module';
     AuthModule,
     UploadModule,
     LecturerModule,
+    BorrowHistoryModule,
+    UserHistoryModule,
 
     TypeOrmModule.forRoot({
       type: 'postgres',

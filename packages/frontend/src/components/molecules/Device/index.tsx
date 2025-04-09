@@ -5,6 +5,7 @@ import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notifi
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
+import Item from 'antd/es/list/Item';
 interface DeviceType {
     deviceId: string;
     deviceName: string;
@@ -363,7 +364,7 @@ const Device: React.FC = () => {
                     Export
                 </Button>
             </div>
-            <Table<DeviceType> columns={columns} dataSource={data} rowKey="id" scroll={{ y: 650 }} />
+            <Table<DeviceType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.deviceId }))} scroll={{ y: 650 }} />
 
             <Modal title={isEditing ? "Chỉnh sửa thiết bị" : "Tạo mới thiết bị"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleSave}>

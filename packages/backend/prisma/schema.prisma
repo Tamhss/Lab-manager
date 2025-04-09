@@ -52,12 +52,12 @@ model Admin {
 model DeviceCategory {
   categoryId String   @id @default(uuid())
   name       String   @unique
-  quantity   Int      @default(0) // Số lượng thiết bị theo loại
+  quantity   Int      @default(0)
   devices    Device[]
 }
 
 model Device {
-  deviceId     String         @id @default(uuid())
+  deviceId     String         @id
   deviceName   String
   description  String?
   createdAt    DateTime       @default(now())
@@ -108,8 +108,8 @@ model BorrowHistory {
   reservationId   String    @unique
   userId          String
   deviceId        String
-  borrowTime      DateTime
-  returnTime      DateTime?
+  actualBorrowTime      DateTime
+  actualReturnTime      DateTime?
   deviceCondition String?
   createdAt       DateTime  @default(now())
 
@@ -157,6 +157,7 @@ enum ReservationStatus {
   APPROVED_BY_LECTURER
   APPROVED
   REJECTED
+  COMPLETED
 }
 
 model Login {

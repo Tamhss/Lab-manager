@@ -368,7 +368,7 @@ const DeviceCategory: React.FC = () => {
                 </Button>
             </div>
 
-            <Table<DeviceCategoryType> columns={columns} dataSource={data} rowKey="id" />
+            <Table<DeviceCategoryType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.categoryId }))} />
             <Modal
                 title={isEditing ? 'Chỉnh sửa loại thiết bị' : 'Tạo mới loại thiết bị'}
                 open={isModalOpen}

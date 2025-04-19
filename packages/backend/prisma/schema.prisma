@@ -16,37 +16,40 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  student   Student?  @relation("UserStudent")
-  lecturer  Lecturer? @relation("UserLecturer")
-  admin     Admin?    @relation("UserAdmin")
+  student  Student?  @relation("UserStudent")
+  lecturer Lecturer? @relation("UserLecturer")
+  admin    Admin?    @relation("UserAdmin")
 
-  reservations Reservation[]
-  history      UserHistory[]
-  borrowHistory BorrowHistory[]
+  reservationsDevice  ReservationDevice[]
+  reservationsLab     ReservationLab[]
+  history             UserHistory[]
+  deviceBorrowHistory DeviceBorrowHistory[]
+  labBorrowHistory    LabBorrowHistory[]
 }
 
 model Student {
-  studentId String  @id @default(uuid())
-  userId    String  @unique
-  user      User    @relation("UserStudent", fields: [userId], references: [userId])
+  studentId String @id @default(uuid())
+  userId    String @unique
+  user      User   @relation("UserStudent", fields: [userId], references: [userId])
 
   lecturerId String?
   lecturer   Lecturer? @relation("LecturerStudent", fields: [lecturerId], references: [lecturerId])
 }
 
 model Lecturer {
-  lecturerId String  @id @default(uuid())
-  userId     String  @unique
-  user       User    @relation("UserLecturer", fields: [userId], references: [userId])
+  lecturerId String @id @default(uuid())
+  userId     String @unique
+  user       User   @relation("UserLecturer", fields: [userId], references: [userId])
 
-  students   Student[] @relation("LecturerStudent")
-  approvedReservations Reservation[] @relation("LecturerApprovals")
+  students                   Student[]           @relation("LecturerStudent")
+  approvedDeviceReservations ReservationDevice[] @relation("LecturerApprovals")
+  approvedLabReservations    ReservationLab[]    @relation("LecturerApprovals")
 }
 
 model Admin {
-  adminId String  @id @default(uuid())
-  userId  String  @unique
-  user    User    @relation("UserAdmin", fields: [userId], references: [userId])
+  adminId String @id @default(uuid())
+  userId  String @unique
+  user    User   @relation("UserAdmin", fields: [userId], references: [userId])
 }
 
 model DeviceCategory {
@@ -67,64 +70,103 @@ model Device {
   categoryId   String
   category     DeviceCategory @relation(fields: [categoryId], references: [categoryId])
 
-  reservations  Reservation[]
-  borrowHistory BorrowHistory[]
+  reservations  ReservationDevice[]
+  borrowHistory DeviceBorrowHistory[]
 }
 
 model Lab {
-  labId     String        @id @default(uuid())
-  labName   String        @default("LabRoom")
-  status    LabStatus
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  reservations Reservation[]
+  labId        String       @id @default(uuid())
+  labName      String       @default("LabRoom")
+  status       LabStatus
+  borrowStatus BorrowStatus @default(COMPLETED)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  reservations  ReservationLab[]
+  borrowHistory LabBorrowHistory[]
 }
 
-model Reservation {
-  reservationId String            @id @default(uuid())
-  userId        String
-  deviceId      String?
-  labId         String?
-  startTime     DateTime
-  endTime       DateTime
-  status        ReservationStatus @default(PENDING)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  actualBorrowTime DateTime? // Thêm trường này
+model ReservationDevice {
+  reservationId    String            @id @default(uuid())
+  userId           String
+  deviceId         String?
+  startTime        DateTime
+  endTime          DateTime
+  status           ReservationStatus @default(PENDING)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  actualBorrowTime DateTime?
   actualReturnTime DateTime?
-  lecturerId    String?
-  adminApproved Boolean? @default(false)
+  lecturerId       String?
+  adminApproved    Boolean?          @default(false)
 
   user     User      @relation(fields: [userId], references: [userId])
   device   Device?   @relation(fields: [deviceId], references: [deviceId])
+  lecturer Lecturer? @relation("LecturerApprovals", fields: [lecturerId], references: [lecturerId])
+
+  borrowHistory DeviceBorrowHistory?
+  history       UserHistory[]
+}
+
+model ReservationLab {
+  reservationId    String            @id @default(uuid())
+  userId           String
+  labId            String?
+  startTime        DateTime
+  endTime          DateTime
+  status           ReservationStatus @default(PENDING)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  actualBorrowTime DateTime?
+  actualReturnTime DateTime?
+  lecturerId       String?
+  adminApproved    Boolean?          @default(false)
+
+  user     User      @relation(fields: [userId], references: [userId])
   lab      Lab?      @relation(fields: [labId], references: [labId])
   lecturer Lecturer? @relation("LecturerApprovals", fields: [lecturerId], references: [lecturerId])
 
-  borrowHistory BorrowHistory?
-  history       UserHistory[]
+  borrowHistory LabBorrowHistory?
 }
-model BorrowHistory {
-  borrowHistoryId String    @id @default(uuid())
-  reservationId   String    @unique
-  userId          String
-  deviceId        String
-  actualBorrowTime      DateTime
-  actualReturnTime      DateTime?
-  deviceCondition String?
-  createdAt       DateTime  @default(now())
 
-  reservation Reservation @relation(fields: [reservationId], references: [reservationId])
-  user        User        @relation(fields: [userId], references: [userId])
-  device      Device      @relation(fields: [deviceId], references: [deviceId])
+model DeviceBorrowHistory {
+  borrowHistoryId  String    @id @default(uuid())
+  reservationId    String    @unique
+  userId           String
+  deviceId         String
+  actualBorrowTime DateTime
+  actualReturnTime DateTime?
+  deviceCondition  String?
+  createdAt        DateTime  @default(now())
+
+  reservation ReservationDevice @relation(fields: [reservationId], references: [reservationId])
+  user        User              @relation(fields: [userId], references: [userId])
+  device      Device            @relation(fields: [deviceId], references: [deviceId])
 }
+
+model LabBorrowHistory {
+  borrowHistoryId  String    @id @default(uuid())
+  reservationId    String    @unique
+  userId           String
+  labId            String
+  actualBorrowTime DateTime
+  actualReturnTime DateTime?
+  labCondition  String?
+  createdAt        DateTime  @default(now())
+
+  reservation ReservationLab @relation(fields: [reservationId], references: [reservationId])
+  user        User           @relation(fields: [userId], references: [userId])
+  lab         Lab            @relation(fields: [labId], references: [labId])
+}
+
 model UserHistory {
   userHistoryId String   @id @default(uuid())
   userId        String
   reservationId String
   createdAt     DateTime @default(now())
 
-  user        User        @relation(fields: [userId], references: [userId])
-  reservation Reservation @relation(fields: [reservationId], references: [reservationId])
+  user              User              @relation(fields: [userId], references: [userId])
+  reservationDevice ReservationDevice @relation(fields: [reservationId], references: [reservationId])
 }
 
 enum Role {

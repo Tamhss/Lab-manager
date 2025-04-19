@@ -5,7 +5,7 @@ const MainPageLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto max-w-[100%]   flex-grow">
+      <main className="container mx-auto max-w-[100%] flex-grow">
         {children}
         <ToastContainer />
       </main>

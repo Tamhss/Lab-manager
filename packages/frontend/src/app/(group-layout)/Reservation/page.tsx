@@ -1,4 +1,4 @@
-import BookingCards from "@/components/molecules/Reservation";
+import BookingCards from "@/components/organisms/Reservation";
 
 const Page = () => {
     return <BookingCards />;

@@ -1,0 +1,242 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { SearchOutlined, EyeOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
+import { Button, Input, Space, Table, Spin, message, notification, Upload, Tag } from 'antd';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+import axios from 'axios';
+
+interface BorrowHistoryType {
+    borrowHistoryId: string;
+    reservationId: string;
+    userId: string;
+    deviceId: string;
+    actualBorrowTime: string;
+    actualReturnTime: string;
+    deviceCondition: string;
+}
+
+type DataIndex = keyof BorrowHistoryType;
+
+const DeviceBorrowHistory: React.FC = () => {
+    const [searchText, setSearchText] = useState('');
+    const [searchedColumn, setSearchedColumn] = useState('');
+    const searchInput = useRef<InputRef>(null);
+    const [data, setData] = useState<BorrowHistoryType[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [api, contextHolder] = notification.useNotification();
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [historyRes, deviceRes, userRes] = await Promise.all([
+                axios.get('http://localhost:3009/api/v1/device-borrow-history'),
+                axios.get('http://localhost:3009/api/v1/devices'),
+                axios.get('http://localhost:3009/api/v1/user'),
+            ]);
+    
+            const historyData = historyRes.data?.data || [];
+    
+            const devices = deviceRes.data?.data || [];
+            const users = userRes.data?.data || [];
+    
+            const deviceMap = new Map(devices.map((d: any) => [d.deviceId, d.deviceName]));
+            const userMap = new Map(users.map((u: any) => [u.userId, u.userName]));
+    
+            const mappedData = historyData.map((item: any) => ({
+                ...item,
+                deviceName: deviceMap.get(item.deviceId) || 'Không rõ thiết bị',
+                userName: userMap.get(item.userId) || 'Không rõ người dùng',
+            }));
+    
+            setData(mappedData);
+            console.log("Dữ liệu đã map:", mappedData);
+        } catch (error) {
+            console.error("Lỗi khi lấy dữ liệu:", error);
+            message.error("Lỗi khi tải dữ liệu từ server!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSearch = useCallback(
+        (selectedKeys: string[], confirm: FilterDropdownProps['confirm'], dataIndex: DataIndex) => {
+            confirm();
+            setSearchText(selectedKeys[0]);
+            setSearchedColumn(dataIndex);
+        },
+        []
+    );
+
+    const handleReset = (clearFilters: () => void) => {
+        clearFilters();
+        setSearchText('');
+    };
+
+    const handleDetail = (record: BorrowHistoryType) => {
+        message.info(`Chi tiết: ${record.borrowHistoryId}`);
+    };
+
+    const handleDelete = async (borrowHistoryId: string, pauseOnHover: boolean) => {
+        try {
+            await axios.delete(`http://localhost:3009/api/v1/device-borrow-history/${borrowHistoryId}`);
+            setTimeout(() => {
+                api.success({
+                    message: "Xóa thành công",
+                    description: `Mục có id ${borrowHistoryId} đã được xóa`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+
+            setData(prevData => prevData.filter(item => item.borrowHistoryId !== borrowHistoryId));
+        } catch (error) {
+            message.error("Lỗi khi xóa dữ liệu!");
+        }
+    };
+
+    const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<BorrowHistoryType> => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+            <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+                <Input
+                    ref={searchInput}
+                    placeholder={`Tìm kiếm ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: 'block' }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Tìm kiếm
+                    </Button>
+                    <Button onClick={() => clearFilters && handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                        Đặt lại
+                    </Button>
+                    <Button type="link" size="small" onClick={() => close()}>
+                        Đóng
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
+        onFilter: (value, record) =>
+            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
+        filterDropdownProps: {
+            onOpenChange(open) {
+                if (open) {
+                    setTimeout(() => searchInput.current?.select(), 100);
+                }
+            },
+        },
+        render: (text) =>
+            searchedColumn === dataIndex ? (
+                <Highlighter
+                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                    searchWords={[searchText]}
+                    autoEscape
+                    textToHighlight={text ? text.toString() : ''}
+                />
+            ) : (
+                text
+            ),
+    });
+
+    const columns: TableColumnsType<BorrowHistoryType> = [
+        {
+            title: 'Mã đặt lịch',
+            dataIndex: 'reservationId',
+            key: 'reservationId',
+            width: '15%',
+            ...getColumnSearchProps('reservationId'),
+        },
+        {
+            title: 'Tên người đặt',
+            dataIndex: 'userName',
+            key: 'userName',
+            width: '15%',
+            render: (text) => text || 'Không xác định',
+        },
+        {
+            title: 'Tên thiết bị',
+            dataIndex: 'deviceName',
+            key: 'deviceName',
+            width: '15%',
+            render: (text) => text || 'Không xác định',
+        },
+        {
+            title: 'Thời gian lấy thiết bị',
+            dataIndex: 'actualBorrowTime',
+            key: 'actualBorrowTime',
+            width: '15%',
+            ...getColumnSearchProps('actualBorrowTime'),
+        },
+        {
+            title: 'Thời gian trả thiết bị',
+            dataIndex: 'actualReturnTime',
+            key: 'actualReturnTime',
+            width: '15%',
+            ...getColumnSearchProps('actualReturnTime'),
+        },
+        {
+            title: 'Trạng thái trả',
+            dataIndex: 'deviceCondition',
+            key: 'deviceCondition',
+            width: '15%',
+            ...getColumnSearchProps('deviceCondition'),
+        },
+        // {
+        //     title: 'Trạng thái mượn',
+        //     dataIndex: 'borrowStatus',
+        //     key: 'borrowStatus',
+        //     width: '20%',
+        //     ...getColumnSearchProps('borrowStatus'),
+        //     render: (borrowStatus) => (
+        //         <Tag color={getStatusColor(borrowStatus)}>
+        //             {borrowStatus}
+        //         </Tag>
+        //     )
+        // },
+        {
+            title: 'Hành động',
+            key: 'actions',
+            width: '15%',
+            align: 'center',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.borrowHistoryId, true)} />
+                </Space>
+            ),
+        },
+    ];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'PENDING_BORROW': return 'gold';
+            case 'BORROWED': return 'orange';
+            case 'COMPLETED': return 'green';
+            default: return 'gray';
+        }
+    };
+
+    return (
+        <Spin spinning={loading}>
+            {contextHolder}
+            <Table<BorrowHistoryType> columns={columns} dataSource={data.map(item => ({...item, key: item.borrowHistoryId}))} />
+        </Spin>
+    );
+};
+
+export default DeviceBorrowHistory;

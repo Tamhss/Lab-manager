@@ -1,11 +1,11 @@
 'use client'
-import { notification, Select } from "antd"; // Import Select từ Ant Design
+import { notification, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-interface Device {
-    deviceId: string;
-    deviceName: string;
+interface Lab {
+    labId: string;
+    labName: string;
 }
 interface Lecturer {
     lecturerId: string;
@@ -22,9 +22,9 @@ interface ApiLecturer {
     updatedAt: string;
 }
 
-const DeviceReservationForm = () => {
-    const [devices, setDevices] = useState<Device[]>([]);
-    const [selectedDevice, setSelectedDevice] = useState<string | undefined>(undefined);
+const LabReservationForm = () => {
+    const [labs, setLabs] = useState<Lab[]>([]);
+    const [selectedLab, setSelectedLab] = useState<string | undefined>(undefined);
     const [startTime, setStartTime] = useState<string>("");
     const [endTime, setEndTime] = useState<string>("");
     const [lecturers, setLecturers] = useState<Lecturer[]>([]);
@@ -39,24 +39,24 @@ const DeviceReservationForm = () => {
     }
 
     useEffect(() => {
-        const fetchDevicesAndReservations = async () => {
+        const fetchLabsAndReservations = async () => {
             try {
                 const token = localStorage.getItem("token");
 
-                const devicesResponse = await axios.get("http://localhost:3009/api/v1/devices", {
+                const labsResponse = await axios.get("http://localhost:3009/api/v1/labs", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                const allDevices = devicesResponse.data.data;
+                const allLab = labsResponse.data.data;
 
-                if (!Array.isArray(allDevices)) {
+                if (!Array.isArray(allLab)) {
                     console.log("Dữ liệu devices không hợp lệ");
-                    setDevices([]);
+                    setLabs([]);
                     return;
                 }
 
-                const reservationsResponse = await axios.get("http://localhost:3009/api/v1/reservations-device", {
+                const reservationsResponse = await axios.get("http://localhost:3009/api/v1/reservations-lab", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -68,24 +68,24 @@ const DeviceReservationForm = () => {
                 );
 
                 if (!startTime || !endTime) {
-                    const availableDevices = allDevices
-                        .filter((device: any) => device.status === "IN_USE")
-                        .map((device: any) => ({
-                            deviceId: device.deviceId,
-                            deviceName: device.deviceName,
+                    const availableLabs = allLab
+                        .filter((lab: any) => lab.status === "IN_USE")
+                        .map((lab: any) => ({
+                            labId: lab.labId,
+                            labName: lab.labName,
                         }));
-                    setDevices(availableDevices);
+                    setLabs(availableLabs);
                     return;
                 }
 
                 const selectedStart = new Date(startTime);
                 const selectedEnd = new Date(endTime);
 
-                const availableDevices = allDevices
-                    .filter((device: any) => {
-                        if (device.status !== "IN_USE") return false;
+                const availableLabs = allLab
+                    .filter((lab: any) => {
+                        if (lab.status !== "IN_USE") return false;
                         const hasConflict = activeReservations.some((reservation: any) => {
-                            if (reservation.deviceId !== device.deviceId) return false;
+                            if (reservation.labId !== lab.labId) return false;
 
                             const resStart = new Date(reservation.startTime);
                             const resEnd = new Date(reservation.endTime);
@@ -100,18 +100,18 @@ const DeviceReservationForm = () => {
                         return !hasConflict;
                     })
                     .map((device: any) => ({
-                        deviceId: device.deviceId,
-                        deviceName: device.deviceName,
+                        labId: device.labId,
+                        labName: device.labName,
                     }));
 
-                setDevices(availableDevices);
+                setLabs(availableLabs);
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu:", error);
-                setDevices([]);
+                setLabs([]);
             }
         };
 
-        fetchDevicesAndReservations();
+        fetchLabsAndReservations();
     }, [startTime, endTime]);
 
 
@@ -154,7 +154,7 @@ const DeviceReservationForm = () => {
 
         const requestData = {
             userId,
-            deviceId: selectedDevice,
+            labId: selectedLab,
             lecturerId: selectedLecturer,
             startTime: formattedStartTime,
             endTime: formattedEndTime
@@ -162,7 +162,7 @@ const DeviceReservationForm = () => {
 
         try {
             await axios.post(
-                "http://localhost:3009/api/v1/reservations-device",
+                "http://localhost:3009/api/v1/reservations-lab",
                 requestData,
                 {
                     headers: {
@@ -192,7 +192,7 @@ const DeviceReservationForm = () => {
     return (
         <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
             {contextHolder}
-            <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">Đặt lịch thiết bị</h2>
+            <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">Đặt lịch phòng lab</h2>
             <form onSubmit={(e) => handleSubmit(e, true)} className="space-y-4">
                 <div>
                     <label className="block text-gray-600 mb-1">Thời gian bắt đầu:</label>
@@ -215,16 +215,16 @@ const DeviceReservationForm = () => {
                 </div>
 
                 <div className="text-black">
-                    <label className="block text-gray-600 mb-1">Chọn thiết bị:</label>
+                    <label className="block text-gray-600 mb-1">Chọn phòng lab:</label>
                     <Select
                         className="w-full"
-                        value={selectedDevice}
+                        value={selectedLab}
                         onChange={(value) => {
-                            setSelectedDevice(value);
+                            setSelectedLab(value);
                         }}
-                        options={devices.map(device => ({
-                            value: device.deviceId,
-                            label: device.deviceName,
+                        options={labs.map(lab => ({
+                            value: lab.labId,
+                            label: lab.labName,
                         }))}
                         showSearch
                         allowClear
@@ -257,4 +257,4 @@ const DeviceReservationForm = () => {
     );
 };
 
-export default DeviceReservationForm;
+export default LabReservationForm;

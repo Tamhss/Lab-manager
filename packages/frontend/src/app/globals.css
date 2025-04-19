@@ -175,17 +175,17 @@ a:hover {
 }
 
 .custom-switch .ant-switch-checked {
-  background-color: #35A5BD !important;
+  background-color: #2441e7 !important;
   font-weight: bold;
 }
 
 .ant-tooltip-inner {
-  background-color: #3793A7 !important;
-  color: #ffffff !important;
+  background-color: #2441e7 !important;
+  color: white !important;
 }
 
 .ant-tooltip-arrow::before {
-  background-color: #3793A7 !important;
+  background-color: #2441e7  !important;
 }
 
 .button-shukei:hover {

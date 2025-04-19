@@ -11,11 +11,12 @@ import {
     LogoutOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { useRouter, usePathname } from "next/navigation";
 
 export const Navbar: React.FC = () => {
     const router = useRouter();
+    const pathname = usePathname();
+    const currentPath = pathname || "/";
     const [user, setUser] = useState<string | null>(null);
 
     useEffect(() => {
@@ -48,77 +49,68 @@ export const Navbar: React.FC = () => {
         },
     ];
 
-    const navItemVariants = {
-        initial: { opacity: 0, y: -10 },
-        animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
-        hover: { scale: 1.1, transition: { duration: 0.2 } },
-    };
-
     return (
-        <nav className="bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-3 flex justify-between items-center h-[60px] shadow-lg">
-            {/* Logo */}
-            <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center gap-3"
-            >
-                <span className="text-white font-bold text-xl tracking-tight">
-                    LAB-DNU
+        <nav className="bg-white px-6 py-3 flex justify-between items-center h-[60px] shadow-md">
+            <div className="flex items-center gap-3">
+                <span className="flex space-x-4">
+                    <img src="/images/logo-dnu.png" className="w-12 h-12" alt="Logo" />
+                    <p className="text-gray-600 font-bold text-xl pt-3">LAB-DNU</p>
                 </span>
-            </motion.div>
-
-            {/* Menu chính */}
+            </div>
             <div className="hidden lg:flex">
                 {user && (
-                    <ul className="flex space-x-12 items-center">
-                        <Tooltip title="HOME">
-                            <motion.li
-                                variants={navItemVariants}
-                                initial="initial"
-                                animate="animate"
-                                whileHover="hover"
-                            >
-                                <Link href="/HomePage">
-                                    <HomeOutlined className="text-white text-2xl hover:text-indigo-200 transition-colors duration-200" />
+                    <ul className="flex items-center">
+                        <Tooltip title="TRANG CHỦ">
+                            <li className="relative group">
+                                <Link href="/">
+                                    <div className="px-10 py-3 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                        <HomeOutlined
+                                            className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/" ? "text-indigo-600" : ""
+                                                }`}
+                                        />
+                                    </div>
                                 </Link>
-                            </motion.li>
+                                {currentPath === "/" && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
+                                )}
+                            </li>
                         </Tooltip>
-                        <Tooltip title="DASHBOARD">
-                            <motion.li
-                                variants={navItemVariants}
-                                initial="initial"
-                                animate="animate"
-                                whileHover="hover"
-                            >
+
+                        <Tooltip title="BẢNG ĐIỀU KHIỂN">
+                            <li className="relative group">
                                 <Link href="/DashBoard">
-                                    <DashboardOutlined className="text-white text-2xl hover:text-indigo-200 transition-colors duration-200" />
+                                    <div className="px-10 py-3 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                        <DashboardOutlined
+                                            className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/DashBoard" ? "text-indigo-600" : ""
+                                                }`}
+                                        />
+                                    </div>
                                 </Link>
-                            </motion.li>
+                                {currentPath === "/DashBoard" && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
+                                )}
+                            </li>
                         </Tooltip>
-                        <Tooltip title="ĐĂNG KÝ THIẾT BỊ">
-                            <motion.li
-                                variants={navItemVariants}
-                                initial="initial"
-                                animate="animate"
-                                whileHover="hover"
-                            >
+
+                        <Tooltip title="ĐẶT LỊCH">
+                            <li className="relative group">
                                 <Link href="/Reservation">
-                                    <AppstoreAddOutlined className="text-white text-2xl hover:text-indigo-200 transition-colors duration-200" />
+                                    <div className="px-10 py-3 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                        <AppstoreAddOutlined
+                                            className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/Reservation" ? "text-indigo-600" : ""
+                                                }`}
+                                        />
+                                    </div>
                                 </Link>
-                            </motion.li>
+                                {currentPath === "/Reservation" && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
+                                )}
+                            </li>
                         </Tooltip>
                     </ul>
                 )}
             </div>
-
-            {/* Thông tin người dùng - Giống Facebook */}
-            <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center space-x-4"
-            >
+            <div className="flex items-center space-x-4">
                 {user ? (
                     <>
                         <Tooltip title={user}>
@@ -145,7 +137,9 @@ export const Navbar: React.FC = () => {
                         Login
                     </Button>
                 )}
-            </motion.div>
+            </div>
         </nav>
     );
 };
+
+export default Navbar;

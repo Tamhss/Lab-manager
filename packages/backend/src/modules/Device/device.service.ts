@@ -12,7 +12,6 @@ export class DeviceService {
         });
     }
 
-    // Lấy một  Device theo ID
     async getById(deviceId: string) {
         return this.prisma.device.findUnique({
             where: { deviceId },
@@ -20,28 +19,23 @@ export class DeviceService {
         });
     }
 
-    // Tạo mới  Device
     async create(data: Prisma.DeviceCreateInput) {
         return this.prisma.$transaction(async (prisma) => {
-            // Thêm thiết bị mới
             const newDevice = await prisma.device.create({
                 data,
                 include: { category: true },
             });
 
-            // Cập nhật số lượng trong DeviceCategory
             await prisma.deviceCategory.update({
-                where: { categoryId: newDevice.categoryId }, // Lấy ID từ device vừa tạo
+                where: { categoryId: newDevice.categoryId },
                 data: {
-                    quantity: { increment: 1 }, // Tăng số lượng lên 1
+                    quantity: { increment: 1 },
                 },
             });
 
             return newDevice;
         });
     }
-
-
 
     async update(deviceId: string, data: Prisma.DeviceUpdateInput) {
         const device = await this.prisma.device.findUnique({
@@ -77,6 +71,4 @@ export class DeviceService {
             });
         });
     }
-
-
 }

@@ -19,37 +19,42 @@ import Device from '../Device';
 import DeviceCategory from '../DeviceCategory';
 import UserM from '../UserM';
 import DeviceReservation from '../DeviceReservationManager';
-import BorrowHistory from '../BorrowHistory';
+import Lab from '../Lab';
+import LabReservationManager from '../LabReservationManager';
+import DeviceBorrowHistory from '../LabBorrowHistory';
+import LabBorrowHistory from '../LabBorrowHistory';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
 const items: MenuProps['items'] = [
     { key: 'dashboard', label: 'Dashboard', icon: <HomeOutlined /> },
     {
+        key: 'sub1',
+        label: 'Quản lý phòng lab',
+        icon: <ApartmentOutlined />,
+        children: [
+            { key: '1', label: 'Danh sách phòng lab', icon: <LaptopOutlined /> },
+            { key: '2', label: 'Đặt lịch phòng lab', icon: <ApartmentOutlined /> },
+            { key: '3', label: 'Lịch sử đặt phòng lab', icon: <HistoryOutlined /> },
+        ],
+    },
+    {
         key: 'sub2',
         label: 'Quản lý thiết bị',
         icon: <AppstoreOutlined />,
         children: [
-            { key: '1', label: 'Loại thiết bị', icon: <SettingOutlined /> },
-            { key: '2', label: 'Thiết bị', icon: <LaptopOutlined /> },
-        ],
-    },
-    {
-        key: 'sub4',
-        label: 'Quản lý đăng ký',
-        icon: <SettingOutlined />,
-        children: [
-            { key: '3', label: 'Đăng ký thiết bị', icon: <AppstoreAddOutlined /> },
-            { key: '4', label: 'Đăng ký phòng lab', icon: <ApartmentOutlined /> },
-            { key: '5', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
+            { key: '4', label: 'Loại thiết bị', icon: <SettingOutlined /> },
+            { key: '5', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
+            { key: '6', label: 'Đặt lịch thiết bị', icon: <AppstoreAddOutlined /> },
+            { key: '7', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
         ],
     },
     {
         key: 'grp',
         label: 'Quản lý người dùng',
-        icon: <TeamOutlined />,  // Icon cho cả nhóm
+        icon: <TeamOutlined />,
         children: [
-            { key: '6', label: 'Danh sách người dùng', icon: <UserOutlined /> },
+            { key: '8', label: 'Danh sách người dùng', icon: <UserOutlined /> },
         ],
     },
     {
@@ -70,12 +75,13 @@ const lineData = {
 const chartOptions = { responsive: true, maintainAspectRatio: false };
 
 const Dashboard: React.FC = () => {
-    const [devices, setDevices] = useState<any[]>([]); // State lưu danh sách thiết bị
+    const [devices, setDevices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [pieData, setPieData] = useState({
         labels: ['Không sử dụng', 'Đang sử dụng', 'Hư hỏng', 'Đang thinh lí'],
         datasets: [{ data: [0, 0, 0], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }],
     });
+    const [currentMenu, setCurrentMenu] = useState('dashboard');
 
     const fetchData = async () => {
         setLoading(true);
@@ -129,37 +135,39 @@ const Dashboard: React.FC = () => {
         </div>
     );
 
-    const [content, setContent] = useState<React.ReactNode>(renderDashboard());
-
     const onClick: MenuProps['onClick'] = (e) => {
-        switch (e.key) {
+        setCurrentMenu(e.key);
+    };
+
+    const renderContent = () => {
+        switch (currentMenu) {
             case 'dashboard':
-                setContent(renderDashboard());
-                break;
+                return renderDashboard();
             case '1':
-                setContent(<DeviceCategory />);
-                break;
+                return <Lab />;
             case '2':
-                setContent(<Device />);
-                break;
+                return <LabReservationManager />;
             case '3':
-                setContent(<DeviceReservation />);
-                break;
+                return <LabBorrowHistory />;
+            case '4':
+                return <DeviceCategory />;
             case '5':
-                setContent(<BorrowHistory />);
-                break;
+                return <Device />;
             case '6':
-                setContent(<UserM />);
-                break;
+                return <DeviceReservation />;
+            case '7':
+                return <DeviceBorrowHistory />;
+            case '8':
+                return <UserM />;
             default:
-                setContent(renderDashboard());
+                return renderDashboard();
         }
     };
 
     return (
         <div className="flex h-screen">
             <Menu onClick={onClick} className="w-64 h-full bg-gray-50" defaultSelectedKeys={['dashboard']} mode="inline" items={items} />
-            <div className="flex-1 overflow-auto bg-gray-100 p-4">{content}</div>
+            <div className="flex-1 overflow-auto bg-gray-100 p-4">{renderContent()}</div>
         </div>
     );
 };

@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(private readonly jwtService: JwtService) { } // Đảm bảo có JwtService
+    constructor(private readonly jwtService: JwtService) { }
 
     canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();

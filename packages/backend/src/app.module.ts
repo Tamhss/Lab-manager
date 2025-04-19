@@ -1,3 +1,4 @@
+import { LabBorrowHistory } from './../node_modules/.prisma/client/index.d';
 import {
   MiddlewareConsumer,
   Module,
@@ -30,12 +31,14 @@ import { ApiModule } from '@core/global/api/api.module';
 import { UserModule } from '@modules/user/user.module';
 import { DeviceModule } from '@modules/Device/device.module';
 import { DeviceCategoryModule } from '@modules/devices_category/category.module';
-import { ReservationController } from '@modules/reservation/reservation.controller';
-import { ReservationModule } from '@modules/reservation/reservation.module';
+import { ReservationDeviceModule } from '@modules/reservation_device/reservation_device.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { LecturerModule } from '@modules/lecturer/lecturer.module';
-import { BorrowHistoryModule } from '@modules/borrow_history/borrow_history.module';
+import { DeviceBorrowHistoryModule } from '@modules/device_borrow_history/borrow_history.module';
 import { UserHistoryModule } from '@modules/user_history/user_history.module';
+import { LabModule } from '@modules/Lab/lab.module';
+import { ReservationLabModule } from '@modules/reservation_lab/reservation_lab.module';
+import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_history.module';
 
 @Module({
   imports: [
@@ -57,13 +60,16 @@ import { UserHistoryModule } from '@modules/user_history/user_history.module';
     PostgresExampleModule,
     UserModule,
     DeviceModule,
+    LabModule,
     DeviceCategoryModule,
-    ReservationModule,
+    ReservationDeviceModule,
     AuthModule,
     UploadModule,
     LecturerModule,
-    BorrowHistoryModule,
+    DeviceBorrowHistoryModule,
     UserHistoryModule,
+    ReservationLabModule,
+    LabBorrowHistoryModule,
 
     TypeOrmModule.forRoot({
       type: 'postgres',

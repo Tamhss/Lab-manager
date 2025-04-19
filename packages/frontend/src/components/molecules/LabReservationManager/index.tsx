@@ -8,7 +8,7 @@ import Highlighter from 'react-highlight-words';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-interface DeviceReservationType {
+interface LabReservationType {
     reservationId: string;
     lecturerId: string;
     lecturer: {
@@ -16,31 +16,31 @@ interface DeviceReservationType {
         userName: string,
     };
     userId: string;
-    deviceId: string;
+    labId: string;
     user: {
         userId: string;
         userName: string;
     };
-    device: {
-        deviceId: string;
-        deviceName: string;
+    lab: {
+        labId: string;
+        labName: string;
     };
     startTime: string;
     endTime: string;
     status: string;
 }
 
-type DataIndex = keyof DeviceReservationType;
+type DataIndex = keyof LabReservationType;
 
-const DeviceReservation: React.FC = () => {
-    const [data, setData] = useState<DeviceReservationType[]>([]);
+const LabReservationManager: React.FC = () => {
+    const [data, setData] = useState<LabReservationType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
     const userString = localStorage.getItem('user');
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState<DeviceReservationType | null>(null);
+    const [selectedRecord, setSelectedRecord] = useState<LabReservationType | null>(null);
     const [form] = Form.useForm();
 
 
@@ -103,7 +103,7 @@ const DeviceReservation: React.FC = () => {
                 statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED'];
             }
 
-            const response = await axios.get('http://localhost:3009/api/v1/reservations-device', {
+            const response = await axios.get('http://localhost:3009/api/v1/reservations-lab', {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { status: statusFilter },
                 paramsSerializer: (params) => {
@@ -128,12 +128,12 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const showModal = (record: DeviceReservationType) => {
+    const showModal = (record: LabReservationType) => {
         setSelectedRecord(record);
         setIsModalVisible(true);
     };
 
-    const handleSave = async (deviceId: string) => {
+    const handleSave = async (labId: string) => {
         try {
             const values = await form.validateFields();
             const token = localStorage.getItem("token");
@@ -144,7 +144,7 @@ const DeviceReservation: React.FC = () => {
 
             if (!selectedRecord) return;
 
-            let { actualBorrowTime, actualReturnTime, deviceCondition } = values;
+            let { actualBorrowTime, actualReturnTime, labCondition } = values;
 
             if (actualBorrowTime) {
                 actualBorrowTime = new Date(actualBorrowTime).toISOString();
@@ -163,22 +163,22 @@ const DeviceReservation: React.FC = () => {
 
             await axios.put(
 
-                `http://localhost:3009/api/v1/devices/${deviceId}`,
+                `http://localhost:3009/api/v1/labs/${labId}`,
                 { borrowStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            if (!selectedRecord || !selectedRecord.device) {
+            if (!selectedRecord || !selectedRecord.lab) {
                 message.error("Không tìm thấy thông tin thiết bị!");
                 return;
             }
             const response = await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.reservationId}`,
+                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.reservationId}`,
                 {
                     status: reservationStatus,
                     actualBorrowTime,
                     actualReturnTime: actualReturnTime || null,
-                    deviceId: selectedRecord.device.deviceId,
+                    labId: selectedRecord.lab.labId,
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -187,21 +187,21 @@ const DeviceReservation: React.FC = () => {
                 status: reservationStatus,
                 reservationId: selectedRecord.reservationId,
                 userId: selectedRecord.user.userId,
-                deviceId: selectedRecord.device.deviceId,
+                labId: selectedRecord.lab.labId,
                 actualBorrowTime,
                 actualReturnTime: actualReturnTime || null,
-                deviceCondition
+                labCondition
             });
 
             await axios.post(
-                `http://localhost:3009/api/v1/device-borrow-history`,
+                `http://localhost:3009/api/v1/lab-borrow-history`,
                 {
                     reservationId: selectedRecord.reservationId,
                     userId: selectedRecord.user.userId,
-                    deviceId: selectedRecord.device.deviceId,
+                    labId: selectedRecord.lab.labId,
                     actualBorrowTime,
                     actualReturnTime: actualReturnTime || null,
-                    deviceCondition
+                    labCondition
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -224,7 +224,7 @@ const DeviceReservation: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!selectedRecord) return;
             const response = await axios.get(
-                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.reservationId}`,
+                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.reservationId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -236,7 +236,7 @@ const DeviceReservation: React.FC = () => {
                     actualReturnTime: response.data.data.actualReturnTime
                         ? dayjs(response.data.data.actualReturnTime).format("YYYY-MM-DDTHH:mm")
                         : undefined,
-                    deviceCondition: response.data.data.deviceCondition || undefined,
+                    labCondition: response.data.data.labCondition || undefined,
                 });
 
                 console.log("Dữ liệu gán vào form:", form.getFieldsValue());
@@ -262,7 +262,7 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${reservationId}/approve-lecturer`,
+                `http://localhost:3009/api/v1/reservations-lab/${reservationId}/approve-lecturer`,
                 { lecturerId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -279,7 +279,7 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const approveByAdmin = async (reservationId: string, deviceId: string) => {
+    const approveByAdmin = async (reservationId: string, labId: string) => {
         console.log("reservationId:", reservationId);
         try {
             setLoading(true);
@@ -290,16 +290,8 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${reservationId}/approve-admin`,
+                `http://localhost:3009/api/v1/reservations-lab/${reservationId}/approve-admin`,
                 {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            await axios.put(
-                `http://localhost:3009/api/v1/devices/${deviceId}`,
-                { borrowStatus: "PENDING_BORROW" },
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -324,7 +316,7 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
 
-            await axios.delete(`http://localhost:3009/api/v1/reservations-device/${reservationId}`, {
+            await axios.delete(`http://localhost:3009/api/v1/reservations-lab/${reservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -351,7 +343,7 @@ const DeviceReservation: React.FC = () => {
         setSearchText('');
     };
 
-    const rejectReservation = async (reservationId: string, deviceId: string) => {
+    const rejectReservation = async (reservationId: string, labId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -361,13 +353,13 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${reservationId}`,
-                { status: "REJECTED", deviceId },
+                `http://localhost:3009/api/v1/reservations-lab/${reservationId}`,
+                { status: "REJECTED", labId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            console.log("Request body:", { status: "REJECTED", deviceId });
+            console.log("Request body:", { status: "REJECTED", labId });
 
             message.success("Đã từ chối đặt lịch!");
             fetchData();
@@ -379,7 +371,7 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DeviceReservationType> => ({
+    const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<LabReservationType> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
                 <Input
@@ -432,7 +424,7 @@ const DeviceReservation: React.FC = () => {
             ),
     });
 
-    const columns: TableColumnsType<DeviceReservationType> = [
+    const columns: TableColumnsType<LabReservationType> = [
         {
             title: 'Mã đặt lịch',
             dataIndex: 'reservationId',
@@ -453,10 +445,10 @@ const DeviceReservation: React.FC = () => {
             render: (lecturer) => lecturer?.user.userName || 'Không xác định',
         },
         {
-            title: 'Tên thiết bị',
-            dataIndex: 'device',
-            key: 'device',
-            render: (device) => device?.deviceName || 'Không xác định',
+            title: 'Tên phòng lab',
+            dataIndex: 'lab',
+            key: 'lab',
+            render: (lab) => lab?.labName || 'Không xác định',
         },
         {
             title: 'Thời gian đặt',
@@ -508,7 +500,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByAdmin(record.reservationId, record.device.deviceId)}
+                                onClick={() => approveByAdmin(record.reservationId, record.lab.labId)}
                                 style={{ color: 'green' }}
                             />
                         </Tooltip>
@@ -518,14 +510,14 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}
-                                onClick={() => rejectReservation(record.reservationId, record.deviceId)}
+                                onClick={() => rejectReservation(record.reservationId, record.labId)}
                                 style={{ color: 'red' }}
                             />
                         </Tooltip>
                     )}
                     {record.status === 'APPROVED' && (
                         <>
-                            <Tooltip title="Nhập thời gian mượn thực tế">
+                            <Tooltip title="Nhập thời sử dụng thực tế">
                                 <Button
                                     type="text"
                                     icon={<ClockCircleOutlined />}
@@ -571,15 +563,15 @@ const DeviceReservation: React.FC = () => {
 
     return (
         <Spin spinning={loading}>
-            <Table<DeviceReservationType>
+            <Table<LabReservationType>
                 columns={columns}
                 dataSource={formattedData.map(item => ({ ...item, key: item.reservationId }))}
             />
             <Modal
-                title="Nhập thời gian mượn thực tế"
+                title="Nhập thời mượn thực tế"
                 open={isModalVisible}
                 onCancel={handleCancel}
-                onOk={() => selectedRecord?.device.deviceId && handleSave(selectedRecord.device.deviceId)}
+                onOk={() => selectedRecord?.lab.labId && handleSave(selectedRecord.lab.labId)}
                 okText="Lưu"
                 cancelText="Hủy"
             >
@@ -599,14 +591,10 @@ const DeviceReservation: React.FC = () => {
                         <Input type="datetime-local" />
                     </Form.Item>
                     <Form.Item
-                        name="deviceCondition"
-                        label="Tình trạng thiết bị sau khi trả"
+                        name="labCondition"
+                        label="Tình trạng phòng lab sau khi trả"
                     >
-                        <Select placeholder="Chọn tình trạng">
-                            <Select.Option value="GOOD">Tốt</Select.Option>
-                            <Select.Option value="DAMAGED">Hư hỏng</Select.Option>
-                            <Select.Option value="BROKEN">Bị phá hủy</Select.Option>
-                        </Select>
+                        <Input placeholder="Nhập tình trạng phòng lab" />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -614,4 +602,4 @@ const DeviceReservation: React.FC = () => {
     );
 };
 
-export default DeviceReservation;
+export default LabReservationManager;

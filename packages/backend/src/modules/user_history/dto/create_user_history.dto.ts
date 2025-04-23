@@ -7,5 +7,5 @@ export class CreateUserHistoryDto {
 
   @IsUUID()
   @IsNotEmpty()
-  reservationId: string;
+  deviceReservationId: string;
 }

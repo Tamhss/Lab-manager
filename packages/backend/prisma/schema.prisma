@@ -87,7 +87,7 @@ model Lab {
 }
 
 model ReservationDevice {
-  reservationId    String            @id @default(uuid())
+  deviceReservationId    String            @id @default(uuid())
   userId           String
   deviceId         String?
   startTime        DateTime
@@ -109,7 +109,7 @@ model ReservationDevice {
 }
 
 model ReservationLab {
-  reservationId    String            @id @default(uuid())
+  labReservationId    String            @id @default(uuid())
   userId           String
   labId            String?
   startTime        DateTime
@@ -131,7 +131,7 @@ model ReservationLab {
 
 model DeviceBorrowHistory {
   borrowHistoryId  String    @id @default(uuid())
-  reservationId    String    @unique
+  deviceReservationId    String    @unique
   userId           String
   deviceId         String
   actualBorrowTime DateTime
@@ -139,14 +139,14 @@ model DeviceBorrowHistory {
   deviceCondition  String?
   createdAt        DateTime  @default(now())
 
-  reservation ReservationDevice @relation(fields: [reservationId], references: [reservationId])
+  reservation ReservationDevice @relation(fields: [deviceReservationId], references: [deviceReservationId])
   user        User              @relation(fields: [userId], references: [userId])
   device      Device            @relation(fields: [deviceId], references: [deviceId])
 }
 
 model LabBorrowHistory {
   borrowHistoryId  String    @id @default(uuid())
-  reservationId    String    @unique
+  labReservationId    String    @unique
   userId           String
   labId            String
   actualBorrowTime DateTime
@@ -154,7 +154,7 @@ model LabBorrowHistory {
   labCondition  String?
   createdAt        DateTime  @default(now())
 
-  reservation ReservationLab @relation(fields: [reservationId], references: [reservationId])
+  reservation ReservationLab @relation(fields: [labReservationId], references: [labReservationId])
   user        User           @relation(fields: [userId], references: [userId])
   lab         Lab            @relation(fields: [labId], references: [labId])
 }
@@ -162,11 +162,11 @@ model LabBorrowHistory {
 model UserHistory {
   userHistoryId String   @id @default(uuid())
   userId        String
-  reservationId String
+  deviceReservationId String
   createdAt     DateTime @default(now())
 
   user              User              @relation(fields: [userId], references: [userId])
-  reservationDevice ReservationDevice @relation(fields: [reservationId], references: [reservationId])
+  reservationDevice ReservationDevice @relation(fields: [deviceReservationId], references: [deviceReservationId])
 }
 
 enum Role {
@@ -200,13 +200,4 @@ enum ReservationStatus {
   APPROVED
   REJECTED
   COMPLETED
-}
-
-model Login {
-  id               Int     @id @default(autoincrement()) @map("id")
-  email            String  @map("email") @db.VarChar(40)
-  password         String  @map("password")
-  mail             String? @map("mail") @db.VarChar(250)
-  mail_alert1_flag Boolean @default(false) @map("mail_alert1_flag")
-  mail_alert2_flag Boolean @default(false) @map("mail_alert2_flag")
 }

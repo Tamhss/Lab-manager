@@ -12,12 +12,9 @@ import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { configuration, EConfiguration } from '@core/config';
-import { ConstanceModule } from '@core/global/constance/constance.module';
-import { I18nCustomModule } from '@core/global/i18nCustom/i18nCustom.module';
 import { PrismaModule } from '@core/global/prisma/prisma.module';
 import { DisableGuard } from '@core/guard/disable.guard';
 import { PostInterceptor, ResponseInterceptor } from '@core/interceptor';
-import { HttpExceptionFilter } from '@helper/httpException.filter';
 import { LoggerMiddleware } from '@helper/logger.middleware';
 import { ExampleModule } from '@modules/example/example.module';
 import { AppController } from './app.controller';
@@ -47,8 +44,6 @@ import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_histo
       load: [configuration],
       isGlobal: true,
     }),
-    I18nCustomModule,
-    ConstanceModule,
     ThrottlerModule.forRoot({
       ttl: 60,
       limit: 1000,
@@ -88,10 +83,6 @@ import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_histo
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,

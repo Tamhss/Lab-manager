@@ -60,9 +60,9 @@ export class ReservationLabService {
     });
   }
 
-  async findOne(reservationId: string) {
+  async findOne(labReservationId: string) {
     const reservation = await this.prisma.reservationLab.findUnique({
-      where: { reservationId },
+      where: { labReservationId },
       include: {
         user: true,
         lab: true,
@@ -74,13 +74,13 @@ export class ReservationLabService {
       },
     });
     if (!reservation) {
-      throw new NotFoundException(`Reservation with ID ${reservationId} not found`);
+      throw new NotFoundException(`Reservation with ID ${labReservationId} not found`);
     }
     return reservation;
   }
 
-  async update(reservationId: string, updateReservationDto: UpdateReservationDto) {
-    const reservation = await this.findOne(reservationId);
+  async update(labReservationId: string, updateReservationDto: UpdateReservationDto) {
+    const reservation = await this.findOne(labReservationId);
     let borrowStatus: BorrowStatus | undefined;
     const statusEnum = ReservationStatus[updateReservationDto.status as keyof typeof ReservationStatus];
 
@@ -99,7 +99,7 @@ export class ReservationLabService {
     }
 
     return this.prisma.reservationLab.update({
-      where: { reservationId },
+      where: { labReservationId },
       data: {
         ...updateReservationDto,
         status: statusEnum,
@@ -120,18 +120,18 @@ export class ReservationLabService {
   }
 
 
-  async remove(reservationId: string) {
-    await this.findOne(reservationId);
-    return this.prisma.reservationLab.delete({ where: { reservationId } });
+  async remove(labReservationId: string) {
+    await this.findOne(labReservationId);
+    return this.prisma.reservationLab.delete({ where: { labReservationId } });
   }
 
-  async approveByLecturer(reservationId: string, lecturerId: string) {
+  async approveByLecturer(labReservationId: string, lecturerId: string) {
     const lecturer = await this.prisma.lecturer.findUnique({ where: { lecturerId } });
     if (!lecturer) {
       throw new Error('Giảng viên không tồn tại.');
     }
     return this.prisma.reservationLab.update({
-      where: { reservationId },
+      where: { labReservationId },
       data: {
         lecturerId,
         status: ReservationStatus.APPROVED_BY_LECTURER,
@@ -140,9 +140,9 @@ export class ReservationLabService {
     });
   }
 
-  async approveByAdmin(reservationId: string) {
+  async approveByAdmin(labReservationId: string) {
     return this.prisma.reservationLab.update({
-      where: { reservationId },
+      where: { labReservationId },
       data: {
         adminApproved: true,
         status: ReservationStatus.APPROVED,

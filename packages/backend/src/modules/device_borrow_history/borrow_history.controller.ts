@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { BorrowHistoryService } from './borrow_history.service';
+import { DeviceBorrowHistoryService } from './borrow_history.service';
 import { CreateBorrowHistoryDto } from './dto/create_borrow_history.dto';
 import { UpdateBorrowHistoryDto } from './dto/update_borrow_history.dto';
 
 @Controller('device-borrow-history')
-export class BorrowHistoryController {
-  constructor(private readonly borrowHistoryService: BorrowHistoryService) {}
+export class DeviceBorrowHistoryController {
+  constructor(private readonly borrowHistoryService: DeviceBorrowHistoryService) { }
 
   @Post()
   create(@Body() createBorrowHistoryDto: CreateBorrowHistoryDto) {

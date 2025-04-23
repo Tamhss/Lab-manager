@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { BorrowHistoryService } from './borrow_history.service';
-import { BorrowHistoryController } from './borrow_history.controller';
+import { LabBorrowHistoryService } from './borrow_history.service';
+import { LabBorrowHistoryController } from './borrow_history.controller';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 
 @Module({
-  controllers: [BorrowHistoryController],
-  providers: [BorrowHistoryService, PrismaService],
+  controllers: [LabBorrowHistoryController],
+  providers: [LabBorrowHistoryService, PrismaService],
 })
 export class LabBorrowHistoryModule {}

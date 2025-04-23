@@ -4,12 +4,12 @@ import { CreateBorrowHistoryDto } from './dto/create_borrow_history.dto';
 import { UpdateBorrowHistoryDto } from './dto/update_borrow_history.dto';
 
 @Injectable()
-export class BorrowHistoryService {
+export class LabBorrowHistoryService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: CreateBorrowHistoryDto) {
     return this.prisma.labBorrowHistory.upsert({
-      where: { reservationId: data.reservationId },
+      where: { labReservationId: data.labReservationId },
       update: {
         actualBorrowTime: data.actualBorrowTime,
         actualReturnTime: data.actualReturnTime,

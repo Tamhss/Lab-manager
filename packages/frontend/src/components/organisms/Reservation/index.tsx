@@ -58,7 +58,7 @@ const BookingCards = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-100">
       <div className="flex gap-6 max-w-4xl">
         <motion.div
           variants={cardVariants}

@@ -60,9 +60,9 @@ export class ReservationDeviceService {
     });
   }
 
-  async findOne(reservationId: string) {
+  async findOne(deviceReservationId: string) {
     const reservation = await this.prisma.reservationDevice.findUnique({
-      where: { reservationId },
+      where: { deviceReservationId },
       include: {
         user: true,
         device: true,
@@ -74,13 +74,13 @@ export class ReservationDeviceService {
       },
     });
     if (!reservation) {
-      throw new NotFoundException(`Reservation with ID ${reservationId} not found`);
+      throw new NotFoundException(`Reservation with ID ${deviceReservationId} not found`);
     }
     return reservation;
   }
 
-  async update(reservationId: string, updateReservationDto: UpdateReservationDto) {
-    const reservation = await this.findOne(reservationId);
+  async update(deviceReservationId: string, updateReservationDto: UpdateReservationDto) {
+    const reservation = await this.findOne(deviceReservationId);
     let borrowStatus: BorrowStatus | undefined;
     const statusEnum = ReservationStatus[updateReservationDto.status as keyof typeof ReservationStatus];
 
@@ -99,7 +99,7 @@ export class ReservationDeviceService {
     }
 
     return this.prisma.reservationDevice.update({
-      where: { reservationId },
+      where: { deviceReservationId },
       data: {
         ...updateReservationDto,
         status: statusEnum,
@@ -120,18 +120,18 @@ export class ReservationDeviceService {
   }
 
 
-  async remove(reservationId: string) {
-    await this.findOne(reservationId);
-    return this.prisma.reservationDevice.delete({ where: { reservationId } });
+  async remove(deviceReservationId: string) {
+    await this.findOne(deviceReservationId);
+    return this.prisma.reservationDevice.delete({ where: { deviceReservationId } });
   }
 
-  async approveByLecturer(reservationId: string, lecturerId: string) {
+  async approveByLecturer(deviceReservationId: string, lecturerId: string) {
     const lecturer = await this.prisma.lecturer.findUnique({ where: { lecturerId } });
     if (!lecturer) {
       throw new Error('Giảng viên không tồn tại.');
     }
     return this.prisma.reservationDevice.update({
-      where: { reservationId },
+      where: { deviceReservationId },
       data: {
         lecturerId,
         status: ReservationStatus.APPROVED_BY_LECTURER,
@@ -140,9 +140,9 @@ export class ReservationDeviceService {
     });
   }
 
-  async approveByAdmin(reservationId: string) {
+  async approveByAdmin(deviceReservationId: string) {
     return this.prisma.reservationDevice.update({
-      where: { reservationId },
+      where: { deviceReservationId },
       data: {
         adminApproved: true,
         status: ReservationStatus.APPROVED,

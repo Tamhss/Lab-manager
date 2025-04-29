@@ -16,14 +16,9 @@ import { PrismaModule } from '@core/global/prisma/prisma.module';
 import { DisableGuard } from '@core/guard/disable.guard';
 import { PostInterceptor, ResponseInterceptor } from '@core/interceptor';
 import { LoggerMiddleware } from '@helper/logger.middleware';
-import { ExampleModule } from '@modules/example/example.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostgresExample } from '@modules/postgres_example/entity/postgres_entity';
-import { PostgresExampleModule } from '@modules/postgres_example/postgres_example.module';
 import { AuthModule } from '@core/global/auth/auth.module';
-import { CronjobModule } from '@core/global/schedule/schedule.module';
 import { ApiModule } from '@core/global/api/api.module';
 import { UserModule } from '@modules/user/user.module';
 import { DeviceModule } from '@modules/Device/device.module';
@@ -51,8 +46,6 @@ import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_histo
     AuthModule,
     TerminusModule,
     ApiModule,
-    ExampleModule,
-    PostgresExampleModule,
     UserModule,
     DeviceModule,
     LabModule,
@@ -65,20 +58,6 @@ import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_histo
     UserHistoryModule,
     ReservationLabModule,
     LabBorrowHistoryModule,
-
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'root',
-      password: 'root',
-      database: 'lab',
-      entities: [PostgresExample],
-      synchronize: true,
-      logging: true,
-    }),
-
-    CronjobModule,
   ],
   controllers: [AppController],
   providers: [

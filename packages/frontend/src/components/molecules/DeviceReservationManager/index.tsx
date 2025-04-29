@@ -297,14 +297,6 @@ const DeviceReservation: React.FC = () => {
                 }
             );
 
-            await axios.put(
-                `http://localhost:3009/api/v1/devices/${deviceId}`,
-                { borrowStatus: "PENDING_BORROW" },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
             message.success("Phê duyệt bởi admin thành công!");
             fetchData();
         } catch (error) {

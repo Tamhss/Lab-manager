@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsUUID, IsDateString } from 'class-validator';
 export class CreateBorrowHistoryDto {
   @IsUUID()
   @IsNotEmpty()
-  reservationId: string;
+  deviceReservationId: string;
 
   @IsUUID()
   @IsNotEmpty()

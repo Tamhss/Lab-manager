@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 interface DeviceReservationType {
-    reservationId: string;
+    deviceReservationId: string;
     lecturerId: string;
     lecturer: {
         lecturerId: string,
@@ -60,10 +60,10 @@ const DeviceReservation: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (isModalVisible && selectedRecord?.reservationId) {
+        if (isModalVisible && selectedRecord?.deviceReservationId) {
             fetchReservationData();
         }
-    }, [isModalVisible, selectedRecord?.reservationId]);
+    }, [isModalVisible, selectedRecord?.deviceReservationId]);
 
     const formattedData = useMemo(() => {
         if (data.length > 0) {
@@ -173,7 +173,7 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
             const response = await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.reservationId}`,
+                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.deviceReservationId}`,
                 {
                     status: reservationStatus,
                     actualBorrowTime,
@@ -185,7 +185,7 @@ const DeviceReservation: React.FC = () => {
             console.log('Response from updating reservation:', response.data);
             console.log('Request data:', {
                 status: reservationStatus,
-                reservationId: selectedRecord.reservationId,
+                deviceReservationId: selectedRecord.deviceReservationId,
                 userId: selectedRecord.user.userId,
                 deviceId: selectedRecord.device.deviceId,
                 actualBorrowTime,
@@ -196,7 +196,7 @@ const DeviceReservation: React.FC = () => {
             await axios.post(
                 `http://localhost:3009/api/v1/device-borrow-history`,
                 {
-                    reservationId: selectedRecord.reservationId,
+                    deviceReservationId: selectedRecord.deviceReservationId,
                     userId: selectedRecord.user.userId,
                     deviceId: selectedRecord.device.deviceId,
                     actualBorrowTime,
@@ -224,7 +224,7 @@ const DeviceReservation: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!selectedRecord) return;
             const response = await axios.get(
-                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.reservationId}`,
+                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.deviceReservationId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -252,7 +252,7 @@ const DeviceReservation: React.FC = () => {
         form.resetFields();
     };
 
-    const approveByLecturer = async (reservationId: string, lecturerId: string) => {
+    const approveByLecturer = async (deviceReservationId: string, lecturerId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -262,7 +262,7 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${reservationId}/approve-lecturer`,
+                `http://localhost:3009/api/v1/reservations-device/${deviceReservationId}/approve-lecturer`,
                 { lecturerId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -279,8 +279,8 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const approveByAdmin = async (reservationId: string, deviceId: string) => {
-        console.log("reservationId:", reservationId);
+    const approveByAdmin = async (deviceReservationId: string, deviceId: string) => {
+        console.log("deviceReservationId:", deviceReservationId);
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -290,16 +290,8 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${reservationId}/approve-admin`,
+                `http://localhost:3009/api/v1/reservations-device/${deviceReservationId}/approve-admin`,
                 {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            await axios.put(
-                `http://localhost:3009/api/v1/devices/${deviceId}`,
-                { borrowStatus: "PENDING_BORROW" },
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -315,7 +307,7 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const handleDelete = async (reservationId: string) => {
+    const handleDelete = async (deviceReservationId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -324,7 +316,7 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
 
-            await axios.delete(`http://localhost:3009/api/v1/reservations-device/${reservationId}`, {
+            await axios.delete(`http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -351,7 +343,7 @@ const DeviceReservation: React.FC = () => {
         setSearchText('');
     };
 
-    const rejectReservation = async (reservationId: string, deviceId: string) => {
+    const rejectReservation = async (deviceReservationId: string, deviceId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -361,7 +353,7 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${reservationId}`,
+                `http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`,
                 { status: "REJECTED", deviceId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -435,10 +427,10 @@ const DeviceReservation: React.FC = () => {
     const columns: TableColumnsType<DeviceReservationType> = [
         {
             title: 'Mã đặt lịch',
-            dataIndex: 'reservationId',
-            key: 'reservationId',
+            dataIndex: 'deviceReservationId',
+            key: 'deviceReservationId',
             width: '15%',
-            ...getColumnSearchProps('reservationId'),
+            ...getColumnSearchProps('deviceReservationId'),
         },
         {
             title: 'Tên người dùng',
@@ -498,7 +490,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByLecturer(record.reservationId, record.lecturerId || '')}
+                                onClick={() => approveByLecturer(record.deviceReservationId, record.lecturerId || '')}
                                 style={{ color: 'orange' }}
                             />
                         </Tooltip>
@@ -508,7 +500,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByAdmin(record.reservationId, record.device.deviceId)}
+                                onClick={() => approveByAdmin(record.deviceReservationId, record.device.deviceId)}
                                 style={{ color: 'green' }}
                             />
                         </Tooltip>
@@ -518,7 +510,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}
-                                onClick={() => rejectReservation(record.reservationId, record.deviceId)}
+                                onClick={() => rejectReservation(record.deviceReservationId, record.deviceId)}
                                 style={{ color: 'red' }}
                             />
                         </Tooltip>
@@ -538,7 +530,7 @@ const DeviceReservation: React.FC = () => {
                                     type="text"
                                     danger
                                     icon={<DeleteOutlined />}
-                                    onClick={() => handleDelete(record.reservationId)}
+                                    onClick={() => handleDelete(record.deviceReservationId)}
                                 />
                             </Tooltip>
                         </>
@@ -549,7 +541,7 @@ const DeviceReservation: React.FC = () => {
                                 type="text"
                                 danger
                                 icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(record.reservationId)}
+                                onClick={() => handleDelete(record.deviceReservationId)}
                             />
                         </Tooltip>
                     )}
@@ -573,7 +565,7 @@ const DeviceReservation: React.FC = () => {
         <Spin spinning={loading}>
             <Table<DeviceReservationType>
                 columns={columns}
-                dataSource={formattedData.map(item => ({ ...item, key: item.reservationId }))}
+                dataSource={formattedData.map(item => ({ ...item, key: item.deviceReservationId }))}
             />
             <Modal
                 title="Nhập thời gian mượn thực tế"
@@ -602,11 +594,7 @@ const DeviceReservation: React.FC = () => {
                         name="deviceCondition"
                         label="Tình trạng thiết bị sau khi trả"
                     >
-                        <Select placeholder="Chọn tình trạng">
-                            <Select.Option value="GOOD">Tốt</Select.Option>
-                            <Select.Option value="DAMAGED">Hư hỏng</Select.Option>
-                            <Select.Option value="BROKEN">Bị phá hủy</Select.Option>
-                        </Select>
+                        <Input placeholder="Nhập tình trạng thiết bị" />
                     </Form.Item>
                 </Form>
             </Modal>

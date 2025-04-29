@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 interface LabReservationType {
-    reservationId: string;
+    labReservationId: string;
     lecturerId: string;
     lecturer: {
         lecturerId: string,
@@ -60,10 +60,10 @@ const LabReservationManager: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (isModalVisible && selectedRecord?.reservationId) {
+        if (isModalVisible && selectedRecord?.labReservationId) {
             fetchReservationData();
         }
-    }, [isModalVisible, selectedRecord?.reservationId]);
+    }, [isModalVisible, selectedRecord?.labReservationId]);
 
     const formattedData = useMemo(() => {
         if (data.length > 0) {
@@ -173,7 +173,7 @@ const LabReservationManager: React.FC = () => {
                 return;
             }
             const response = await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.reservationId}`,
+                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.labReservationId}`,
                 {
                     status: reservationStatus,
                     actualBorrowTime,
@@ -185,7 +185,7 @@ const LabReservationManager: React.FC = () => {
             console.log('Response from updating reservation:', response.data);
             console.log('Request data:', {
                 status: reservationStatus,
-                reservationId: selectedRecord.reservationId,
+                labReservationId: selectedRecord.labReservationId,
                 userId: selectedRecord.user.userId,
                 labId: selectedRecord.lab.labId,
                 actualBorrowTime,
@@ -196,7 +196,7 @@ const LabReservationManager: React.FC = () => {
             await axios.post(
                 `http://localhost:3009/api/v1/lab-borrow-history`,
                 {
-                    reservationId: selectedRecord.reservationId,
+                    labReservationId: selectedRecord.labReservationId,
                     userId: selectedRecord.user.userId,
                     labId: selectedRecord.lab.labId,
                     actualBorrowTime,
@@ -224,7 +224,7 @@ const LabReservationManager: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!selectedRecord) return;
             const response = await axios.get(
-                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.reservationId}`,
+                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.labReservationId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -252,7 +252,7 @@ const LabReservationManager: React.FC = () => {
         form.resetFields();
     };
 
-    const approveByLecturer = async (reservationId: string, lecturerId: string) => {
+    const approveByLecturer = async (labReservationId: string, lecturerId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -262,7 +262,7 @@ const LabReservationManager: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${reservationId}/approve-lecturer`,
+                `http://localhost:3009/api/v1/reservations-lab/${labReservationId}/approve-lecturer`,
                 { lecturerId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -279,8 +279,8 @@ const LabReservationManager: React.FC = () => {
         }
     };
 
-    const approveByAdmin = async (reservationId: string, labId: string) => {
-        console.log("reservationId:", reservationId);
+    const approveByAdmin = async (labReservationId: string, labId: string) => {
+        console.log("labReservationId:", labReservationId);
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -290,7 +290,7 @@ const LabReservationManager: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${reservationId}/approve-admin`,
+                `http://localhost:3009/api/v1/reservations-lab/${labReservationId}/approve-admin`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -307,7 +307,7 @@ const LabReservationManager: React.FC = () => {
         }
     };
 
-    const handleDelete = async (reservationId: string) => {
+    const handleDelete = async (labReservationId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -316,7 +316,7 @@ const LabReservationManager: React.FC = () => {
                 return;
             }
 
-            await axios.delete(`http://localhost:3009/api/v1/reservations-lab/${reservationId}`, {
+            await axios.delete(`http://localhost:3009/api/v1/reservations-lab/${labReservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -343,7 +343,7 @@ const LabReservationManager: React.FC = () => {
         setSearchText('');
     };
 
-    const rejectReservation = async (reservationId: string, labId: string) => {
+    const rejectReservation = async (labReservationId: string, labId: string) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -353,7 +353,7 @@ const LabReservationManager: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${reservationId}`,
+                `http://localhost:3009/api/v1/reservations-lab/${labReservationId}`,
                 { status: "REJECTED", labId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -427,10 +427,10 @@ const LabReservationManager: React.FC = () => {
     const columns: TableColumnsType<LabReservationType> = [
         {
             title: 'Mã đặt lịch',
-            dataIndex: 'reservationId',
-            key: 'reservationId',
+            dataIndex: 'labReservationId',
+            key: 'labReservationId',
             width: '15%',
-            ...getColumnSearchProps('reservationId'),
+            ...getColumnSearchProps('labReservationId'),
         },
         {
             title: 'Tên người dùng',
@@ -490,7 +490,7 @@ const LabReservationManager: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByLecturer(record.reservationId, record.lecturerId || '')}
+                                onClick={() => approveByLecturer(record.labReservationId, record.lecturerId || '')}
                                 style={{ color: 'orange' }}
                             />
                         </Tooltip>
@@ -500,7 +500,7 @@ const LabReservationManager: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByAdmin(record.reservationId, record.lab.labId)}
+                                onClick={() => approveByAdmin(record.labReservationId, record.lab.labId)}
                                 style={{ color: 'green' }}
                             />
                         </Tooltip>
@@ -510,7 +510,7 @@ const LabReservationManager: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}
-                                onClick={() => rejectReservation(record.reservationId, record.labId)}
+                                onClick={() => rejectReservation(record.labReservationId, record.labId)}
                                 style={{ color: 'red' }}
                             />
                         </Tooltip>
@@ -530,7 +530,7 @@ const LabReservationManager: React.FC = () => {
                                     type="text"
                                     danger
                                     icon={<DeleteOutlined />}
-                                    onClick={() => handleDelete(record.reservationId)}
+                                    onClick={() => handleDelete(record.labReservationId)}
                                 />
                             </Tooltip>
                         </>
@@ -541,7 +541,7 @@ const LabReservationManager: React.FC = () => {
                                 type="text"
                                 danger
                                 icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(record.reservationId)}
+                                onClick={() => handleDelete(record.labReservationId)}
                             />
                         </Tooltip>
                     )}
@@ -565,7 +565,7 @@ const LabReservationManager: React.FC = () => {
         <Spin spinning={loading}>
             <Table<LabReservationType>
                 columns={columns}
-                dataSource={formattedData.map(item => ({ ...item, key: item.reservationId }))}
+                dataSource={formattedData.map(item => ({ ...item, key: item.labReservationId }))}
             />
             <Modal
                 title="Nhập thời mượn thực tế"

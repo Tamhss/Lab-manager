@@ -8,7 +8,7 @@ import axios from 'axios';
 
 interface BorrowHistoryType {
     borrowHistoryId: string;
-    reservationId: string;
+    deviceReservationId: string;
     userId: string;
     deviceId: string;
     actualBorrowTime: string;
@@ -156,10 +156,10 @@ const DeviceBorrowHistory: React.FC = () => {
     const columns: TableColumnsType<BorrowHistoryType> = [
         {
             title: 'Mã đặt lịch',
-            dataIndex: 'reservationId',
-            key: 'reservationId',
+            dataIndex: 'deviceReservationId',
+            key: 'deviceReservationId',
             width: '15%',
-            ...getColumnSearchProps('reservationId'),
+            ...getColumnSearchProps('deviceReservationId'),
         },
         {
             title: 'Tên người đặt',

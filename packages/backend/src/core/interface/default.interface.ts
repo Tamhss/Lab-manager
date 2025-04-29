@@ -1,5 +1,4 @@
 import { ERole } from '@core/enum';
-import { Login } from '@prisma/client';
 
 export interface IKeyRedisCache {
   RESOURCE: string;
@@ -47,7 +46,6 @@ export interface IResponseAuthUser {
 export interface IResponseAuth {
   accessToken: string;
   refreshToken: string;
-  data: Partial<Login>,
 }
 
 export interface IJwtPayload {

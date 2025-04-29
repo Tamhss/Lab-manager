@@ -8,7 +8,7 @@ import axios from 'axios';
 
 interface LabBorrowHistoryType {
     borrowHistoryId: string;
-    reservationId: string;
+    labReservationId: string;
     userId: string;
     labId: string;
     actualBorrowTime: string;
@@ -49,7 +49,7 @@ const LabBorrowHistory: React.FC = () => {
     
             const mappedData = historyData.map((item: any) => ({
                 ...item,
-                labName: labMap.get(item.labId) || 'Không rõ thiết bị',
+                labName: labMap.get(item.labId) || 'Không rõ phòng lab',
                 userName: userMap.get(item.userId) || 'Không rõ người dùng',
             }));
     
@@ -156,10 +156,10 @@ const LabBorrowHistory: React.FC = () => {
     const columns: TableColumnsType<LabBorrowHistoryType> = [
         {
             title: 'Mã đặt lịch',
-            dataIndex: 'reservationId',
-            key: 'reservationId',
+            dataIndex: 'labReservationId',
+            key: 'labReservationId',
             width: '15%',
-            ...getColumnSearchProps('reservationId'),
+            ...getColumnSearchProps('labReservationId'),
         },
         {
             title: 'Tên người đặt',
@@ -169,21 +169,21 @@ const LabBorrowHistory: React.FC = () => {
             render: (text) => text || 'Không xác định',
         },
         {
-            title: 'Tên thiết bị',
+            title: 'Tên phòng lab',
             dataIndex: 'labName',
             key: 'labName',
             width: '15%',
             render: (text) => text || 'Không xác định',
         },
         {
-            title: 'Thời gian lấy thiết bị',
+            title: 'Thời gian sử dụng',
             dataIndex: 'actualBorrowTime',
             key: 'actualBorrowTime',
             width: '15%',
             ...getColumnSearchProps('actualBorrowTime'),
         },
         {
-            title: 'Thời gian trả thiết bị',
+            title: 'Thời gian trả phòng',
             dataIndex: 'actualReturnTime',
             key: 'actualReturnTime',
             width: '15%',

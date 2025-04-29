@@ -12,7 +12,6 @@ const SignIn = () => {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    // Khi component mount, kiểm tra xem có thông tin đăng nhập đã lưu không
     useEffect(() => {
         const savedEmail = localStorage.getItem("rememberEmail");
         const savedPassword = localStorage.getItem("rememberPassword");
@@ -53,7 +52,6 @@ const SignIn = () => {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(data.data?.user));
 
-        // Nếu người dùng chọn "Nhớ thông tin", lưu email và password vào localStorage
         if (rememberMe) {
             localStorage.setItem("rememberEmail", email);
             localStorage.setItem("rememberPassword", password);

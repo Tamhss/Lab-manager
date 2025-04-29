@@ -1,8 +1,6 @@
 import '@/styles/globals.css';
 import clsx from 'clsx';
 import { Metadata } from 'next';
-import { ToastContainer } from 'react-toastify';
-import { Navbar } from '@/components/molecules/Navbar';
 import { fontSans } from '@/config/fonts';
 import { siteConfig } from '@/config/site';
 import './globals.css';

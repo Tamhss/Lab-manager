@@ -40,7 +40,7 @@ export class ReservationDeviceController {
   }
 
   @Put(':id')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'STUDENT', 'LECTURER')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   async update(
     @Param('id') reservationId: string,

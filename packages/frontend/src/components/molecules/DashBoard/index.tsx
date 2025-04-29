@@ -21,7 +21,7 @@ import UserM from '../UserM';
 import DeviceReservation from '../DeviceReservationManager';
 import Lab from '../Lab';
 import LabReservationManager from '../LabReservationManager';
-import DeviceBorrowHistory from '../LabBorrowHistory';
+import DeviceBorrowHistory from '../DeviceBorrowHistory';
 import LabBorrowHistory from '../LabBorrowHistory';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);

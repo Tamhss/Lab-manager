@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -7,21 +7,33 @@ export class LabService {
     constructor(private prisma: PrismaService) { }
 
     async getAll() {
-        return this.prisma.lab.findMany();
-    }
-
-    async getById(labId: string) {
-        return this.prisma.lab.findUnique({
-            where: { labId },
+        return this.prisma.lab.findMany({
+            include: {
+                deviceCategories: {
+                    include: { devices: true },
+                },
+            },
         });
     }
 
+    async getById(labId: string) {
+        const lab = await this.prisma.lab.findUnique({
+            where: { labId },
+          include: {
+              deviceCategories: {
+                  include: { devices: true },
+              },
+          },
+      });
+        if (!lab) {
+            throw new NotFoundException(`Lab with ID ${labId} not found`);
+        }
+        return lab;
+    }
+
     async create(data: Prisma.LabCreateInput) {
-        return this.prisma.$transaction(async (prisma) => {
-            const newLab = await prisma.lab.create({
-                data,
-            });
-            return newLab;
+        return this.prisma.lab.create({
+            data,
         });
     }
 
@@ -29,11 +41,9 @@ export class LabService {
         const lab = await this.prisma.lab.findUnique({
             where: { labId },
         });
-
         if (!lab) {
-            throw new NotFoundException(`Device with ID ${labId} not found`);
-        }
-
+          throw new NotFoundException(`Lab with ID ${labId} not found`);
+      }
         return this.prisma.lab.update({
             where: { labId },
             data,
@@ -41,14 +51,18 @@ export class LabService {
     }
 
     async delete(labId: string) {
-        return this.prisma.$transaction(async (prisma) => {
-            const lab = await prisma.lab.findUnique({
-                where: { labId },
-            });
-
-            if (!lab) throw new Error('Device not found');
-
-            await prisma.lab.delete({ where: { labId } });
+        const lab = await this.prisma.lab.findUnique({
+            where: { labId },
+          include: { deviceCategories: true },
+      });
+        if (!lab) {
+            throw new NotFoundException(`Lab with ID ${labId} not found`);
+        }
+        if (lab.deviceCategories.length > 0) {
+            throw new ConflictException('Cannot delete lab with associated device categories');
+        }
+        return this.prisma.lab.delete({
+            where: { labId },
         });
     }
 }

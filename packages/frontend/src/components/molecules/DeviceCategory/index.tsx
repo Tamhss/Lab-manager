@@ -8,7 +8,7 @@ import {
     UploadOutlined,
 } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, Upload } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, Upload, Select } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
@@ -30,9 +30,18 @@ interface DeviceType {
     status: string;
 }
 
+interface LabType {
+    labId: string;
+    name: string;
+}
+
+interface DeviceCategoryProps {
+    labId: string;
+}
+
 type DataIndex = keyof DeviceCategoryType;
 
-const DeviceCategory: React.FC = () => {
+const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
@@ -47,15 +56,35 @@ const DeviceCategory: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<File | null>(null);
+    const [isLabModalOpen, setIsLabModalOpen] = useState(false);
+    const [labs, setLabs] = useState<LabType[]>([]);
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchData(labId);
+        fetchLabs();
+    }, [labId]);
 
-    const fetchData = async () => {
+    const fetchLabs = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`http://localhost:3009/api/v1/labs`);
+            if (Array.isArray(response.data?.data)) {
+                setLabs(response.data.data);
+            } else {
+                setLabs([]);
+            }
+            setIsLabModalOpen(true);
+        } catch (error) {
+            message.error('Lỗi khi tải danh sách phòng!');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchData = async (labId: string) => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:3009/api/v1/devices-category');
+            const response = await axios.get(`http://localhost:3009/api/v1/devices-category/lab/${labId}`);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -68,6 +97,7 @@ const DeviceCategory: React.FC = () => {
             setLoading(false);
         }
     };
+
 
     const fetchDevicesByCategory = async (categoryId: string) => {
         try {
@@ -88,6 +118,13 @@ const DeviceCategory: React.FC = () => {
 
     const showModal = () => {
         setIsModalOpen(true);
+        setIsEditing(false);
+        setCurrentId(null);
+        form.resetFields();
+        form.setFieldsValue({
+            labId: labId
+        });
+        setIsModalOpen(true);
     };
 
     const handleUpload = async (pauseOnHover: boolean) => {
@@ -106,7 +143,7 @@ const DeviceCategory: React.FC = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:3009/api/v1/upload', formData, {
+            const response = await axios.post('http://localhost:3009/api/v1/upload/device-categories', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -119,7 +156,7 @@ const DeviceCategory: React.FC = () => {
             });
 
             setFile(null);
-            fetchData();
+            fetchData(labId);
         } catch (error) {
             api.error({
                 message: 'Lỗi khi Upload file',
@@ -147,21 +184,27 @@ const DeviceCategory: React.FC = () => {
     const handleSave = async (values: DeviceCategoryType) => {
         try {
             setLoading(true);
+            const payload = {
+                ...values,
+                labId: labId
+            };
+
             if (isEditing && currentId) {
-                await axios.put(`http://localhost:3009/api/v1/devices-category/${currentId}`, values);
-                message.success('Cập nhật thiết bị thành công!');
+                await axios.put(`http://localhost:3009/api/v1/devices-category/${currentId}`, payload);
+                message.success('Cập nhật loại thiết bị thành công!');
             } else {
-                // Nếu không có ID thì tạo mới (POST)
-                await axios.post('http://localhost:3009/api/v1/devices-category', values);
-                message.success('Tạo mới thiết bị thành công!');
+                await axios.post('http://localhost:3009/api/v1/devices-category', payload);
+                message.success('Tạo mới loại thiết bị thành công!');
             }
-            fetchData();
+
+            fetchData(labId);
             setIsModalOpen(false);
             form.resetFields();
             setIsEditing(false);
             setCurrentId(null);
         } catch (error) {
-            message.error('Lỗi khi lưu thiết bị!');
+            console.error('Lỗi khi lưu:', error);
+            message.error('Có lỗi xảy ra khi lưu loại thiết bị!');
         } finally {
             setLoading(false);
         }
@@ -376,6 +419,9 @@ const DeviceCategory: React.FC = () => {
                 footer={null}
             >
                 <Form form={form} layout="vertical" onFinish={handleSave}>
+                    <Form.Item name="labId" initialValue={labId} hidden>
+                        <Input />
+                    </Form.Item>
                     <Form.Item label="Mã loại thiết bị" name="categoryId">
                         <Input placeholder="Nhập mã loại thiết bị" />
                     </Form.Item>

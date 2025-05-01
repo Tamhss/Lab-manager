@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { DeviceService } from '@modules/Device/device.service';
+import { DeviceService } from '@modules/device/device.service';
 import { BorrowStatus, ReservationStatus } from '@core/enum/enum';
 
 @Injectable()

@@ -5,7 +5,6 @@ import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notifi
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
-import Item from 'antd/es/list/Item';
 interface DeviceType {
     deviceId: string;
     deviceName: string;
@@ -19,9 +18,13 @@ interface DeviceType {
     borrowStatus: string;
 }
 
+interface DeviceProps {
+    labId: string;
+}
+
 type DataIndex = keyof DeviceType;
 
-const Device: React.FC = () => {
+const Device: React.FC<DeviceProps> = ({ labId }) => {
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
@@ -36,14 +39,14 @@ const Device: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
 
     useEffect(() => {
-        fetchData();
-        fetchCategories();
-    }, []);
+        fetchData(labId);
+        fetchCategories(labId);
+    }, [labId]);
 
-    const fetchData = async () => {
+    const fetchData = async (labId: string) => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:3009/api/v1/devices');
+            const response = await axios.get(`http://localhost:3009/api/v1/devices/lab/${labId}`);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -57,9 +60,10 @@ const Device: React.FC = () => {
         }
     };
 
-    const fetchCategories = async () => {
+    const fetchCategories = async (labId: string) => {
         try {
-            const response = await axios.get('http://localhost:3009/api/v1/devices-category');
+            setCategories([]);
+            const response = await axios.get(`http://localhost:3009/api/v1/devices-category/lab/${labId}`);
             if (Array.isArray(response.data?.data)) {
                 setCategories(response.data.data);
             } else {
@@ -90,11 +94,10 @@ const Device: React.FC = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:3009/api/v1/upload', formData, {
+            const response = await axios.post('http://localhost:3009/api/v1/upload/devices', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
-            // Kiểm tra nếu server phản hồi lỗi (success = false)
             if (response.status !== 200 || response.data?.success === false) {
                 throw new Error(response.data?.message || "Upload thất bại");
             }
@@ -108,7 +111,7 @@ const Device: React.FC = () => {
             });
 
             setFile(null);
-            fetchData();
+            fetchData(labId);
         } catch (error: any) {
             api.error({
                 message: 'Lỗi khi Upload file',
@@ -121,11 +124,9 @@ const Device: React.FC = () => {
 
     };
 
-    const handleExport = async () => {
+    const handleExport = async (labId: string) => {
         try {
-            const response = await fetch("http://localhost:3009/api/v1/upload/export", {
-                method: "GET",
-            });
+            const response = await fetch(`http://localhost:3009/api/v1/upload/device/export/${labId}`);
 
             if (!response.ok) {
                 throw new Error("Có lỗi xảy ra khi xuất file Excel");
@@ -135,16 +136,16 @@ const Device: React.FC = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "devices_export.xlsx";
+            a.download = `devices_export_${labId}.xlsx`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error("Lỗi khi tải file:", error);
         }
     };
+
 
     const props = {
         accept: '.xlsx, .xls',
@@ -165,7 +166,7 @@ const Device: React.FC = () => {
                 await axios.post('http://localhost:3009/api/v1/devices', values);
                 message.success("Tạo mới thiết bị thành công!");
             }
-            fetchData();
+            fetchData(labId);
             setIsModalOpen(false);
             form.resetFields();
             setIsEditing(false);
@@ -300,7 +301,7 @@ const Device: React.FC = () => {
             dataIndex: 'category',
             key: 'category',
             width: '15%',
-            render: (category) => category?.name || 'Không xác định', // Kiểm tra và hiển thị
+            render: (category) => category?.name || 'Không xác định',
         },
         {
             title: 'Trạng thái',
@@ -360,7 +361,7 @@ const Device: React.FC = () => {
                 <Button onClick={() => handleUpload(true)} className="custom-button">
                     Upload
                 </Button>
-                <Button onClick={handleExport} className="custom-button">
+                <Button onClick={() => { handleExport(labId) }} className="custom-button">
                     Export
                 </Button>
             </div>
@@ -386,7 +387,7 @@ const Device: React.FC = () => {
                         name="description"
                     >
                         <Input placeholder="Nhập mô tả" />
-                    </Form.Item>
+                    </Form.Item>                   
                     <Form.Item
                         label="Loại thiết bị"
                         name="categoryId"

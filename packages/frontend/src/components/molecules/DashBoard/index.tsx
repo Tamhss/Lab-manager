@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { AppstoreOutlined, SettingOutlined, HomeOutlined, TeamOutlined, UserOutlined, AppstoreAddOutlined, ApartmentOutlined, HistoryOutlined, LaptopOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, SettingOutlined, HomeOutlined, TeamOutlined, UserOutlined, AppstoreAddOutlined, ApartmentOutlined, HistoryOutlined, LaptopOutlined, ClusterOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu, Card } from 'antd';
 import { Pie, Bar, Line } from 'react-chartjs-2';
@@ -43,18 +43,44 @@ const items: MenuProps['items'] = [
         label: 'Quản lý thiết bị',
         icon: <AppstoreOutlined />,
         children: [
-            { key: '4', label: 'Loại thiết bị', icon: <SettingOutlined /> },
-            { key: '5', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
-            { key: '6', label: 'Đặt lịch thiết bị', icon: <AppstoreAddOutlined /> },
-            { key: '7', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
+            {
+                key: 'lab-1',
+                label: 'Phòng Lab 301',
+                icon: <ClusterOutlined />,
+                children: [
+                    { key: '4', label: 'Loại thiết bị', icon: <SettingOutlined /> },
+                    { key: '5', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
+                ],
+            },
+            {
+                key: 'lab-2',
+                label: 'Phòng máy 302',
+                icon: <ClusterOutlined />,
+                children: [
+                    { key: '6', label: 'Loại thiết bị', icon: <SettingOutlined /> },
+                    { key: '7', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
+                ],
+            },
+            {
+                key: 'lab-3',
+                label: 'Phòng máy 306',
+                icon: <ClusterOutlined />,
+                children: [
+                    { key: '8', label: 'Loại thiết bị', icon: <SettingOutlined /> },
+                    { key: '9', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
+                ],
+            },
+            { key: 't1', label: 'Đặt lịch thiết bị', icon: <ApartmentOutlined /> },
+            { key: 't2', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
         ],
     },
+
     {
         key: 'grp',
         label: 'Quản lý người dùng',
         icon: <TeamOutlined />,
         children: [
-            { key: '8', label: 'Danh sách người dùng', icon: <UserOutlined /> },
+            { key: '10', label: 'Danh sách người dùng', icon: <UserOutlined /> },
         ],
     },
     {
@@ -150,14 +176,22 @@ const Dashboard: React.FC = () => {
             case '3':
                 return <LabBorrowHistory />;
             case '4':
-                return <DeviceCategory />;
+                return <DeviceCategory labId='lab-301' />;
             case '5':
-                return <Device />;
+                return <Device labId="lab-301" />;
             case '6':
-                return <DeviceReservation />;
+                return <DeviceCategory labId='P-302' />;
             case '7':
-                return <DeviceBorrowHistory />;
+                return <Device labId="P-302" />;
             case '8':
+                return <DeviceCategory labId='P-306' />;
+            case '9':
+                return <Device labId="P-306" />;
+            case 't1':
+                return <DeviceReservation />;
+            case 't2':
+                return <DeviceBorrowHistory />;
+            case '10':
                 return <UserM />;
             default:
                 return renderDashboard();

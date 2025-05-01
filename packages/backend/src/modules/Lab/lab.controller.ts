@@ -1,33 +1,52 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Patch,
+    Delete,
+    Param,
+    Body,
+    HttpCode,
+    HttpStatus,
+} from '@nestjs/common';
 import { LabService } from './lab.service';
+import { Prisma } from '@prisma/client';
 
 @Controller('labs')
 export class LabController {
-    constructor(private readonly labService: LabService) { }
+      constructor(private readonly labService: LabService) { }
 
+      // GET /labs
     @Get()
-    async getAll() {
+    getAll() {
         return this.labService.getAll();
     }
 
+      // GET /labs/:labId
     @Get(':labId')
-    async getById(@Param('labId') labId: string) {
+    getById(@Param('labId') labId: string) {
         return this.labService.getById(labId);
     }
 
+      // POST /labs
     @Post()
-    async create(@Body() data: any) {
+    create(@Body() data: Prisma.LabCreateInput) {
         return this.labService.create(data);
     }
 
-    @Put(':labId')
-    async update(@Param('labId') labId: string, @Body() data: any) {
-        return this.labService.update(labId, data);
+      // PATCH /labs/:labId
+      @Patch(':labId')
+      update(
+          @Param('labId') labId: string,
+          @Body() data: Prisma.LabUpdateInput,
+      ) {
+          return this.labService.update(labId, data);
     }
 
+      // DELETE /labs/:labId
     @Delete(':labId')
-    async delete(@Param('labId') labId: string) {
+    @HttpCode(HttpStatus.NO_CONTENT)
+    delete(@Param('labId') labId: string) {
         return this.labService.delete(labId);
     }
-
 }

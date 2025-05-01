@@ -1,37 +1,53 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { DeviceCategoryService } from './category.service';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Param,
+    Patch,
+    Delete,
+    HttpCode,
+    HttpStatus,
+    Put,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 @Controller('devices-category')
 export class DeviceCategoryController {
     constructor(private readonly deviceCategoryService: DeviceCategoryService) { }
 
-    // GET all server devices
     @Get()
-    async getAll() {
+    getAll() {
         return this.deviceCategoryService.getAll();
     }
 
-    // GET a single server device by ID
-    @Get(':id')
-    async getById(@Param('id') id: string) {
-        return this.deviceCategoryService.getById(id);
+    @Get('lab/:labId')
+    getByLab(@Param('labId') labId: string) {
+        return this.deviceCategoryService.getByLab(labId);
     }
 
-    // POST: Create new server device
+    @Get(':categoryId')
+    getById(@Param('categoryId') categoryId: string) {
+        return this.deviceCategoryService.getById(categoryId);
+    }
+
     @Post()
-    async create(@Body() data: any) {
+    create(@Body() data: Prisma.DeviceCategoryCreateInput) {
         return this.deviceCategoryService.create(data);
     }
 
-    // PUT: Update server device by ID
-    @Put(':id')
-    async update(@Param('id') id: string, @Body() data: any) {
-        return this.deviceCategoryService.update(id, data);
+    @Put(':categoryId')
+    update(
+        @Param('categoryId') categoryId: string,
+        @Body() data: Prisma.DeviceCategoryUpdateInput,
+    ) {
+        return this.deviceCategoryService.update(categoryId, data);
     }
 
-    // DELETE: Remove a server device by ID
-    @Delete(':id')
-    async delete(@Param('id') id: string) {
-        return this.deviceCategoryService.delete(id);
+    @Delete(':categoryId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    delete(@Param('categoryId') categoryId: string) {
+        return this.deviceCategoryService.delete(categoryId);
     }
 }

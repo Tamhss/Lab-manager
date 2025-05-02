@@ -23,6 +23,7 @@ export class UserService {
                 email: data.email,
                 password: data.password,
                 role: data.role,
+                code: data.code,
             },
         });
     

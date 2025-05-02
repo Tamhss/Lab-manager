@@ -7,15 +7,17 @@ import * as bcrypt from 'bcryptjs';
 export class AuthService {
   constructor(private prisma: PrismaService, private jwtService: JwtService) { }
 
-  async validateUser(email: string, password: string) {
+  async validateUser(code: string, password: string) {
     const user = await this.prisma.user.findUnique(
-      { where: { email },
+      {
+        where: { code },
         select: {
           userId: true,
           email: true,
           password: true,
           userName: true,
           role: true,
+          code: true,
       }, 
     });
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -25,10 +27,10 @@ export class AuthService {
   }
 
   generateToken(user: any) {
-    const payload = { userId: user.userId, email: user.email, role: user.role };
+    const payload = { userId: user.userId, email: user.email, role: user.role, code: user.code };
     return {
       token: this.jwtService.sign(payload),
-      user: { userId: user.userId, email: user.email, userName: user.userName, role: user.role },
+      user: { userId: user.userId, email: user.email, userName: user.userName, role: user.role, code: user.code },
     };
   }
 }

@@ -9,9 +9,9 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     console.log("Login Request:", loginDto);
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+    const user = await this.authService.validateUser(loginDto.code, loginDto.password);
     if (!user) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+      throw new UnauthorizedException('Mã đăng nhập hoặc mật khẩu không đúng');
     }
 
     return this.authService.generateToken(user);

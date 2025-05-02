@@ -11,7 +11,8 @@ async function main() {
             email: "admin@example.com",
             password: hashedPassword,
             userName: "ADMIN",
-            role: "ADMIN"
+            role: "ADMIN",
+            code: "123454"
         },
     });
 

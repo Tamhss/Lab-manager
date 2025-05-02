@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Checkbox, Spin } from "antd";
 
 const SignIn = () => {
-    const [email, setEmail] = useState("");
+    const [code, setCode] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState("");
@@ -13,10 +13,10 @@ const SignIn = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const savedEmail = localStorage.getItem("rememberEmail");
+        const savedCode = localStorage.getItem("rememberCode");
         const savedPassword = localStorage.getItem("rememberPassword");
-        if (savedEmail && savedPassword) {
-            setEmail(savedEmail);
+        if (savedCode && savedPassword) {
+            setCode(savedCode);
             setPassword(savedPassword);
             setRememberMe(true);
         }
@@ -30,7 +30,7 @@ const SignIn = () => {
         const res = await fetch("http://localhost:3009/api/v1/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ code, password }),
         });
 
         const data = await res.json();
@@ -53,10 +53,10 @@ const SignIn = () => {
         localStorage.setItem("user", JSON.stringify(data.data?.user));
 
         if (rememberMe) {
-            localStorage.setItem("rememberEmail", email);
+            localStorage.setItem("rememberCode", code);
             localStorage.setItem("rememberPassword", password);
         } else {
-            localStorage.removeItem("rememberEmail");
+            localStorage.removeItem("rememberCode");
             localStorage.removeItem("rememberPassword");
         }
 
@@ -71,12 +71,12 @@ const SignIn = () => {
 
                 <form onSubmit={handleSubmit} className="mt-6">
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm mb-2">Email</label>
+                        <label className="block text-gray-700 text-sm mb-2">Mã đăng nhập</label>
                         <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email của bạn"
+                            type="code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            placeholder="Mã của bạn"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                         />
                     </div>

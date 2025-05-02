@@ -12,6 +12,7 @@ interface UserMType {
     userName: string;
     email: string;
     role: string;
+    code: string;
 }
 
 type DataIndex = keyof UserMType;
@@ -24,8 +25,8 @@ const UserM: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
-    const [isEditing, setIsEditing] = useState(false); // Kiểm tra trạng thái
-    const [currentId, setCurrentId] = useState<string | null>(null); // Lưu ID khi sửa
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentId, setCurrentId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -63,28 +64,24 @@ const UserM: React.FC = () => {
             let updatedValues = { ...values };
 
             if (values.password) {
-                // Nếu có mật khẩu mới, hash trước khi gửi lên server
                 updatedValues.password = await bcrypt.hash(values.password, 10);
             } else {
-                // Nếu không nhập mật khẩu mới, loại bỏ trường password để không ghi đè
                 delete updatedValues.password;
             }
 
             if (isEditing && currentId) {
-                // Nếu đang sửa thì gọi API cập nhật (PUT)
                 await axios.put(`http://localhost:3009/api/v1/user/${currentId}`, updatedValues);
                 message.success("Cập nhật người dùng thành công!");
             } else {
-                // Nếu không có ID thì tạo mới (POST)
                 await axios.post('http://localhost:3009/api/v1/user', updatedValues);
                 message.success("Tạo mới người dùng thành công!");
             }
 
-            fetchData(); // Load lại danh sách sau khi lưu
+            fetchData();
             setIsModalOpen(false);
             form.resetFields();
-            setIsEditing(false); // Reset trạng thái chỉnh sửa
-            setCurrentId(null); // Xóa ID hiện tại
+            setIsEditing(false);
+            setCurrentId(null);
         } catch (error) {
             message.error("Lỗi khi lưu người dùng!");
         } finally {
@@ -182,6 +179,13 @@ const UserM: React.FC = () => {
 
     const columns: TableColumnsType<UserMType> = [
         {
+            title: 'Mã người dùng',
+            dataIndex: 'code',
+            key: 'code',
+            width: '20%',
+            ...getColumnSearchProps('code'),
+        },
+        {
             title: 'Tên người dùng',
             dataIndex: 'userName',
             key: 'userName',
@@ -226,6 +230,13 @@ const UserM: React.FC = () => {
 
             <Modal title={isEditing ? "Chỉnh sửa người dùng" : "Tạo mới người dùng"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleSave}>
+                    <Form.Item
+                        label="Mã người dùng"
+                        name="code"
+                        rules={[{ required: true, message: 'Vui lòng nhập mã người dùng!' }]}
+                    >
+                        <Input placeholder="Nhập mã người dùng" />
+                    </Form.Item>
                     <Form.Item
                         label="Tên người dùng"
                         name="userName"

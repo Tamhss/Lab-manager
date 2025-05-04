@@ -55,9 +55,9 @@ model Admin {
 
 model DeviceCategory {
   categoryId String   @id @default(uuid())
-  name       String   
+  name       String
   quantity   Int      @default(0)
-  labId     String
+  labId      String
   lab        Lab      @relation(fields: [labId], references: [labId])
   devices    Device[]
 }
@@ -86,25 +86,28 @@ model Lab {
   updatedAt    DateTime     @updatedAt
 
   deviceCategories DeviceCategory[]
-  reservations  ReservationLab[]
-  borrowHistory LabBorrowHistory[]
+  reservations     ReservationLab[]
+  borrowHistory    LabBorrowHistory[]
+  reservationDevices ReservationDevice[]
 }
 
 model ReservationDevice {
-  deviceReservationId    String            @id @default(uuid())
-  userId           String
-  deviceId         String?
-  startTime        DateTime
-  endTime          DateTime
-  status           ReservationStatus @default(PENDING)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  actualBorrowTime DateTime?
-  actualReturnTime DateTime?
-  lecturerId       String?
-  adminApproved    Boolean?          @default(false)
+  deviceReservationId String            @id @default(uuid())
+  userId              String
+  labId               String?
+  deviceId            String?
+  startTime           DateTime
+  endTime             DateTime
+  status              ReservationStatus @default(PENDING)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  actualBorrowTime    DateTime?
+  actualReturnTime    DateTime?
+  lecturerId          String?
+  adminApproved       Boolean?          @default(false)
 
   user     User      @relation(fields: [userId], references: [userId])
+  lab      Lab?      @relation(fields: [labId], references: [labId])
   device   Device?   @relation(fields: [deviceId], references: [deviceId])
   lecturer Lecturer? @relation("LecturerApprovals", fields: [lecturerId], references: [lecturerId])
 
@@ -113,7 +116,7 @@ model ReservationDevice {
 }
 
 model ReservationLab {
-  labReservationId    String            @id @default(uuid())
+  labReservationId String            @id @default(uuid())
   userId           String
   labId            String?
   startTime        DateTime
@@ -134,14 +137,14 @@ model ReservationLab {
 }
 
 model DeviceBorrowHistory {
-  borrowHistoryId  String    @id @default(uuid())
-  deviceReservationId    String    @unique
-  userId           String
-  deviceId         String
-  actualBorrowTime DateTime
-  actualReturnTime DateTime?
-  deviceCondition  String?
-  createdAt        DateTime  @default(now())
+  borrowHistoryId     String    @id @default(uuid())
+  deviceReservationId String    @unique
+  userId              String
+  deviceId            String
+  actualBorrowTime    DateTime
+  actualReturnTime    DateTime?
+  deviceCondition     String?
+  createdAt           DateTime  @default(now())
 
   reservation ReservationDevice @relation(fields: [deviceReservationId], references: [deviceReservationId])
   user        User              @relation(fields: [userId], references: [userId])
@@ -150,12 +153,12 @@ model DeviceBorrowHistory {
 
 model LabBorrowHistory {
   borrowHistoryId  String    @id @default(uuid())
-  labReservationId    String    @unique
+  labReservationId String    @unique
   userId           String
   labId            String
   actualBorrowTime DateTime
   actualReturnTime DateTime?
-  labCondition  String?
+  labCondition     String?
   createdAt        DateTime  @default(now())
 
   reservation ReservationLab @relation(fields: [labReservationId], references: [labReservationId])
@@ -164,10 +167,10 @@ model LabBorrowHistory {
 }
 
 model UserHistory {
-  userHistoryId String   @id @default(uuid())
-  userId        String
+  userHistoryId       String   @id @default(uuid())
+  userId              String
   deviceReservationId String
-  createdAt     DateTime @default(now())
+  createdAt           DateTime @default(now())
 
   user              User              @relation(fields: [userId], references: [userId])
   reservationDevice ReservationDevice @relation(fields: [deviceReservationId], references: [deviceReservationId])

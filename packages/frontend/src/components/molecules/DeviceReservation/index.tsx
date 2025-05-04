@@ -1,5 +1,5 @@
 'use client'
-import { notification, Select } from "antd"; // Import Select từ Ant Design
+import { message, notification, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -12,6 +12,11 @@ interface Lecturer {
     userName: string;
 }
 
+interface Lab {
+    labId: string;
+    labName: string;
+}
+
 interface ApiLecturer {
     lecturerId: string;
     userId: string;
@@ -22,12 +27,15 @@ interface ApiLecturer {
     updatedAt: string;
 }
 
+
 const DeviceReservationForm = () => {
     const [devices, setDevices] = useState<Device[]>([]);
     const [selectedDevice, setSelectedDevice] = useState<string | undefined>(undefined);
     const [startTime, setStartTime] = useState<string>("");
     const [endTime, setEndTime] = useState<string>("");
     const [lecturers, setLecturers] = useState<Lecturer[]>([]);
+    const [labs, setLabs] = useState<Lab[]>([]);
+    const [selectedLab, setSelectedLab] = useState<string | undefined>(undefined);
     const [selectedLecturer, setSelectedLecturer] = useState<string | undefined>();
     const [api, contextHolder] = notification.useNotification();
     const userString = localStorage.getItem('user')
@@ -39,19 +47,45 @@ const DeviceReservationForm = () => {
     }
 
     useEffect(() => {
-        const fetchDevicesAndReservations = async () => {
+        const fetchLabs = async () => {
+            try {
+                setLabs([]);
+                const response = await axios.get(`http://localhost:3009/api/v1/labs`);
+                if (Array.isArray(response.data?.data)) {
+                    setLabs(response.data.data);
+                } else {
+                    setLabs([]);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải danh mục phòng:", error);
+                message.error("Không thể tải danh mục phòng!");
+            }
+        };
+
+        fetchLabs();
+    }, []);
+
+    useEffect(() => {
+        const fetchDevicesByLab = async () => {
+            if (!selectedLab) {
+                setDevices([]);
+                return;
+            }
+
             try {
                 const token = localStorage.getItem("token");
 
-                const devicesResponse = await axios.get("http://localhost:3009/api/v1/devices", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const allDevices = devicesResponse.data.data;
+                const devicesResponse = await axios.get(
+                    `http://localhost:3009/api/v1/devices/lab/${selectedLab}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
 
+                const allDevices = devicesResponse.data.data;
                 if (!Array.isArray(allDevices)) {
-                    console.log("Dữ liệu devices không hợp lệ");
                     setDevices([]);
                     return;
                 }
@@ -84,6 +118,7 @@ const DeviceReservationForm = () => {
                 const availableDevices = allDevices
                     .filter((device: any) => {
                         if (device.status !== "IN_USE") return false;
+
                         const hasConflict = activeReservations.some((reservation: any) => {
                             if (reservation.deviceId !== device.deviceId) return false;
 
@@ -106,14 +141,13 @@ const DeviceReservationForm = () => {
 
                 setDevices(availableDevices);
             } catch (error) {
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                console.error("Lỗi khi lấy thiết bị:", error);
                 setDevices([]);
             }
         };
 
-        fetchDevicesAndReservations();
-    }, [startTime, endTime]);
-
+        fetchDevicesByLab();
+    }, [selectedLab, startTime, endTime]);
 
     useEffect(() => {
         axios
@@ -140,6 +174,10 @@ const DeviceReservationForm = () => {
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
         const user = storedUser ? JSON.parse(storedUser) : null;
+        const selectedStart = new Date(startTime);
+        const selectedEnd = new Date(endTime);
+        const now = new Date();
+
 
         const userId = user ? user.userId : null;
 
@@ -152,10 +190,33 @@ const DeviceReservationForm = () => {
         const formattedStartTime = new Date(startTime).toISOString();
         const formattedEndTime = new Date(endTime).toISOString();
 
+        if (selectedEnd <= selectedStart) {
+            api.error({
+                message: 'Lỗi',
+                description: 'Thời gian mượn phải trước thời gian trả!',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+            return;
+        }
+
+        if (selectedStart <= now || selectedEnd <= now) {
+            api.error({
+                message: 'Lỗi',
+                description: 'Thời gian mượn và trả phải sau thời điểm hiện tại!',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+            return;
+        }
+
         const requestData = {
             userId,
             deviceId: selectedDevice,
             lecturerId: selectedLecturer,
+            labId: selectedLab,
             startTime: formattedStartTime,
             endTime: formattedEndTime
         };
@@ -213,7 +274,22 @@ const DeviceReservationForm = () => {
                         onChange={(e) => setEndTime(e.target.value)}
                     />
                 </div>
-
+                <div className="text-black">
+                    <label className="block text-gray-600 mb-1">Chọn phòng:</label>
+                    <Select
+                        className="w-full"
+                        value={selectedLab}
+                        onChange={(value) => {
+                            setSelectedLab(value);
+                        }}
+                        options={labs.map(lab => ({
+                            value: lab.labId,
+                            label: lab.labName,
+                        }))}
+                        showSearch
+                        allowClear
+                    />
+                </div>
                 <div className="text-black">
                     <label className="block text-gray-600 mb-1">Chọn thiết bị:</label>
                     <Select

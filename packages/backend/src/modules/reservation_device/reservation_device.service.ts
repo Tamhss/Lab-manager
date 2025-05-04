@@ -29,6 +29,7 @@ export class ReservationDeviceService {
       },
       include: {
         user: true,
+        lab: { select: { labId: true } },
         device: { select: { deviceId: true } },
         lecturer: {
           include: {
@@ -51,6 +52,7 @@ export class ReservationDeviceService {
       include: {
         user: true,
         device: true,
+        lab: true,
         lecturer: {
           include: {
             user: true,
@@ -66,6 +68,7 @@ export class ReservationDeviceService {
       include: {
         user: true,
         device: true,
+        lab: true,
         lecturer: {
           include: {
             user: true,
@@ -150,6 +153,7 @@ export class ReservationDeviceService {
       },
       include: {
         user: true,
+        lab: true,
         device: true,
         lecturer: {
           include: {

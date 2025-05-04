@@ -5,6 +5,9 @@ import { Button, Input, Space, Table, Spin, message, notification, Upload, Tag }
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 interface BorrowHistoryType {
     borrowHistoryId: string;
@@ -25,6 +28,8 @@ const DeviceBorrowHistory: React.FC = () => {
     const [data, setData] = useState<BorrowHistoryType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [api, contextHolder] = notification.useNotification();
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
 
     useEffect(() => {
         fetchData();
@@ -180,6 +185,11 @@ const DeviceBorrowHistory: React.FC = () => {
             dataIndex: 'actualBorrowTime',
             key: 'actualBorrowTime',
             width: '15%',
+            render: (value) => {
+                console.log("Thời gian lấy thiết bị:", value);
+                if (!value) return '';
+                return dayjs.utc(value).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm');
+            },
             ...getColumnSearchProps('actualBorrowTime'),
         },
         {

@@ -7,6 +7,10 @@ export class CreateReservationDto {
 
   @IsString()
   @IsOptional()
+  labId?: string;
+
+  @IsString()
+  @IsOptional()
   deviceId?: string;
 
   @IsDateString()

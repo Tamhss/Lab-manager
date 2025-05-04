@@ -11,6 +11,11 @@ import timezone from 'dayjs/plugin/timezone';
 interface DeviceReservationType {
     deviceReservationId: string;
     lecturerId: string;
+    labId: string;
+    lab: {
+        labId: string;
+        labName: string;
+    };
     lecturer: {
         lecturerId: string,
         userName: string,
@@ -188,6 +193,7 @@ const DeviceReservation: React.FC = () => {
                 deviceReservationId: selectedRecord.deviceReservationId,
                 userId: selectedRecord.user.userId,
                 deviceId: selectedRecord.device.deviceId,
+                lab: selectedRecord.lab.labId,
                 actualBorrowTime,
                 actualReturnTime: actualReturnTime || null,
                 deviceCondition
@@ -443,6 +449,12 @@ const DeviceReservation: React.FC = () => {
             dataIndex: 'lecturer',
             key: 'lecturer',
             render: (lecturer) => lecturer?.user.userName || 'Không xác định',
+        },
+        {
+            title: 'Phòng',
+            dataIndex: 'lab',
+            key: 'lab',
+            render: (lab) => lab?.labName || 'Không xác định',
         },
         {
             title: 'Tên thiết bị',

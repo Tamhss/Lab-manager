@@ -46,8 +46,15 @@ const LabBorrowHistory: React.FC = () => {
     
             const labMap = new Map(labs.map((d: any) => [d.labId, d.labName]));
             const userMap = new Map(users.map((u: any) => [u.userId, u.userName]));
-    
-            const mappedData = historyData.map((item: any) => ({
+
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+            let filteredHistory = historyData;
+            if (currentUser.role !== 'ADMIN') {
+                filteredHistory = historyData.filter((item: any) => item.userId === currentUser.userId);
+            }
+
+            const mappedData = filteredHistory.map((item: any) => ({
                 ...item,
                 labName: labMap.get(item.labId) || 'Không rõ phòng lab',
                 userName: userMap.get(item.userId) || 'Không rõ người dùng',

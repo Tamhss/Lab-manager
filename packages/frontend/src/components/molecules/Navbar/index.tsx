@@ -53,8 +53,8 @@ export const Navbar: React.FC = () => {
         <nav className="bg-white px-6 py-3 flex justify-between items-center h-[60px] shadow-md">
             <div className="flex items-center gap-3">
                 <span className="flex space-x-4">
-                    <img src="/images/logo-dnu.png" className="w-12 h-12" alt="Logo" />
-                    <p className="text-gray-600 font-bold text-xl pt-3">LAB-DNU</p>
+                    <img src="https://raw.githubusercontent.com/FIT-DNU/IT-Internship-7-Business-Internship/refs/heads/main/docs/logo/aiotlab_logo.png" className="w-12 h-12" alt="Logo" />
+                    <p className="text-gray-600 font-bold text-xl pt-3">AIoT Lab - DNU</p>
                 </span>
             </div>
             <div className="hidden lg:flex">

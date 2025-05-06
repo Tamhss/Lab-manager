@@ -48,7 +48,6 @@ const DeviceReservation: React.FC = () => {
     const [selectedRecord, setSelectedRecord] = useState<DeviceReservationType | null>(null);
     const [form] = Form.useForm();
 
-
     let role = '';
     let currentUserId = ''
     dayjs.extend(utc);

@@ -45,21 +45,26 @@ const DeviceBorrowHistory: React.FC = () => {
             ]);
     
             const historyData = historyRes.data?.data || [];
-    
             const devices = deviceRes.data?.data || [];
             const users = userRes.data?.data || [];
     
             const deviceMap = new Map(devices.map((d: any) => [d.deviceId, d.deviceName]));
             const userMap = new Map(users.map((u: any) => [u.userId, u.userName]));
     
-            const mappedData = historyData.map((item: any) => ({
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+            let filteredHistory = historyData;
+            if (currentUser.role !== 'ADMIN') {
+                filteredHistory = historyData.filter((item: any) => item.userId === currentUser.userId);
+            }
+
+            const mappedData = filteredHistory.map((item: any) => ({
                 ...item,
                 deviceName: deviceMap.get(item.deviceId) || 'Không rõ thiết bị',
                 userName: userMap.get(item.userId) || 'Không rõ người dùng',
             }));
     
             setData(mappedData);
-            console.log("Dữ liệu đã map:", mappedData);
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
             message.error("Lỗi khi tải dữ liệu từ server!");

@@ -24,9 +24,16 @@ const Lab: React.FC = () => {
     const [form] = Form.useForm();
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState<string | null>(null);
-    const [categories, setCategories] = useState<{ categoryId: string; name: string }[]>([]);
     const [api, contextHolder] = notification.useNotification();
-    const [file, setFile] = useState<File | null>(null);
+    const statusMap = {
+        AVAILABLE: 'Không sử dụng',
+        IN_USE: 'Đang sử dụng',
+        UNDER_MAINTENANCE: 'Đang bảo trì'
+    }
+    const statusBorrowMap = {
+        BORROWED: 'Đang được sử dụng',
+        COMPLETED: 'Trống lịch'
+    }
 
     useEffect(() => {
         fetchData();
@@ -195,25 +202,30 @@ const Lab: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            width: '15%',
+            width: '10%',
             ...getColumnSearchProps('status'),
+            render: (status: 'AVAILABLE' | 'IN_USE' | 'UNDER_MAINTENANCE') => (
+                <Tag color={getStatusColor(status)}>
+                    {statusMap[status] || status}
+                </Tag>
+            ),
         },
         {
             title: 'Trạng thái mượn',
             dataIndex: 'borrowStatus',
             key: 'borrowStatus',
-            width: '20%',
+            width: '10%',
             ...getColumnSearchProps('borrowStatus'),
-            render: (borrowStatus) => (
-                <Tag color={getStatusColor(borrowStatus)}>
-                    {borrowStatus}
+            render: (borrowStatus: 'BORROWED' | 'COMPLETED') => (
+                <Tag color={getStatusBorrowColor(borrowStatus)}>
+                    {statusBorrowMap[borrowStatus] || borrowStatus}
                 </Tag>
             )
         },
         {
             title: 'Hành động',
             key: 'actions',
-            width: '15%',
+            width: '10%',
             align: 'center',
             render: (_, record) => (
                 <Space size="middle">
@@ -226,6 +238,15 @@ const Lab: React.FC = () => {
     ];
 
     const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'AVAILABLE': return 'gold';
+            case 'UNDER_MAINTENANCE': return 'red';
+            case 'IN_USE': return 'green';
+            default: return 'gray';
+        }
+    };
+
+    const getStatusBorrowColor = (status: string) => {
         switch (status) {
             case 'PENDING_BORROW': return 'gold';
             case 'BORROWED': return 'orange';
@@ -242,7 +263,7 @@ const Lab: React.FC = () => {
                     Tạo mới
                 </Button>
             </div>
-            <Table<LabType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.labId }))} scroll={{ y: 650 }} />
+            <Table<LabType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.labId }))} />
 
             <Modal title={isEditing ? "Chỉnh sửa phòng lab" : "Tạo mới phòng lab"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleSave}>

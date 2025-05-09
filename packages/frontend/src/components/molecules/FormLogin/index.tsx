@@ -106,13 +106,6 @@ const SignIn = () => {
                         {loading ? <Spin size="small" /> : "Đăng nhập"}
                     </button>
                 </form>
-
-                <p className="text-sm text-center text-gray-600 mt-4">
-                    Chưa có tài khoản?{" "}
-                    <a href="/signup" className="text-blue-500 hover:underline">
-                        Đăng ký ngay
-                    </a>
-                </p>
             </div>
         </div>
     );

@@ -42,7 +42,13 @@ const LabReservationManager: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<LabReservationType | null>(null);
     const [form] = Form.useForm();
-
+    const statusMap = {
+        PENDING: 'Đang chờ',
+        APPROVED_BY_LECTURER: 'Đã được giảng viên phê duyệt',
+        APPROVED: 'Đã phê duyệt',
+        REJECTED: 'Bị từ chối',
+        COMPLETED: 'Hoàn thành',
+    };
 
     let role = '';
     let currentUserId = ''
@@ -472,16 +478,16 @@ const LabReservationManager: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status) => (
+            render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
-                    {status}
+                    {statusMap[status] || status}
                 </Tag>
             ),
         },
         {
             title: 'Hành động',
             key: 'actions',
-            width: '15%',
+            width: '10%',
             align: 'center',
             render: (_, record) => (
                 <Space size="middle">

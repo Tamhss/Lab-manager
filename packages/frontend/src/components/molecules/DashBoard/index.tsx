@@ -216,6 +216,7 @@ const Dashboard: React.FC = () => {
                 return isLimitedRole ? deny() : <Lab />;
             case '4':
                 return isLimitedRole ? deny() : <DeviceCategory labId="lab-301" />;
+            case '5':
                 return isLimitedRole ? deny() : <Device labId="lab-301" />;
             case '6':
                 return isLimitedRole ? deny() : <DeviceCategory labId="P-302" />;

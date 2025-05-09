@@ -37,6 +37,16 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const [categories, setCategories] = useState<{ categoryId: string; name: string }[]>([]);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<File | null>(null);
+    const statusMap = {
+        NOT_IN_USE: 'Không sử dụng',
+        IN_USE: 'Đang sử dụng',
+        DAMAGED: 'Hư hỏng',
+        DISPOSING: 'Đang thanh lý'
+    }
+    const statusBorrowMap = {
+        BORROWED: 'Đang được sử dụng',
+        COMPLETED: 'Trống lịch'
+    }
 
     useEffect(() => {
         fetchData(labId);
@@ -309,6 +319,11 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
             key: 'status',
             width: '15%',
             ...getColumnSearchProps('status'),
+            render: (status: 'IN_USE' | 'NOT_IN_USE' | 'DAMAGED' | 'DISPOSING') => (
+                <Tag color={getStatusColor(status)}>
+                    {statusMap[status] || status}
+                </Tag>
+            ),
         },
         {
             title: 'Trạng thái mượn',
@@ -316,9 +331,9 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
             key: 'borrowStatus',
             width: '20%',
             ...getColumnSearchProps('borrowStatus'),
-            render: (borrowStatus) => (
-                <Tag color={getStatusColor(borrowStatus)}>
-                    {borrowStatus}
+            render: (borrowStatus: 'BORROWED' | 'COMPLETED') => (
+                <Tag color={getStatusBorrowColor(borrowStatus)}>
+                    {statusBorrowMap[borrowStatus] || borrowStatus}
                 </Tag>
             )
         },
@@ -338,6 +353,16 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     ];
 
     const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'NOT_IN_USE': return 'gold';
+            case 'DAMAGED': return 'red';
+            case 'IN_USE': return 'green';
+            case 'DISPOSING': return 'orange';
+            default: return 'gray';
+        }
+    };
+
+    const getStatusBorrowColor = (status: string) => {
         switch (status) {
             case 'PENDING_BORROW': return 'gold';
             case 'BORROWED': return 'orange';

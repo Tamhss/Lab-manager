@@ -47,6 +47,13 @@ const DeviceReservation: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<DeviceReservationType | null>(null);
     const [form] = Form.useForm();
+    const statusMap = {
+        PENDING: 'Đang chờ',
+        APPROVED_BY_LECTURER: 'Giảng viên đã phê duyệt',
+        APPROVED: 'Đã phê duyệt',
+        REJECTED: 'Bị từ chối',
+        COMPLETED: 'Hoàn thành',
+    };
 
     let role = '';
     let currentUserId = ''
@@ -483,9 +490,9 @@ const DeviceReservation: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status) => (
+            render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
-                    {status}
+                    {statusMap[status] || status}
                 </Tag>
             ),
         },

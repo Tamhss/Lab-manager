@@ -2,6 +2,7 @@
 import { message, notification, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Popup from "@/components/Context/PopupSuccess";
 
 interface Device {
     deviceId: string;
@@ -38,6 +39,7 @@ const DeviceReservationForm = () => {
     const [selectedLab, setSelectedLab] = useState<string | undefined>(undefined);
     const [selectedLecturer, setSelectedLecturer] = useState<string | undefined>();
     const [api, contextHolder] = notification.useNotification();
+    const [popupVisible, setPopupVisible] = useState(false);
     const userString = localStorage.getItem('user')
 
     let role = '';
@@ -171,6 +173,17 @@ const DeviceReservationForm = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, pauseOnHover: boolean) => {
         e.preventDefault();
 
+        if (!startTime || !endTime) {
+            api.error({
+                message: 'Lỗi',
+                description: 'Vui lòng chọn đầy đủ thời gian mượn và trả!',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+            return;
+        }
+
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
         const user = storedUser ? JSON.parse(storedUser) : null;
@@ -232,13 +245,7 @@ const DeviceReservationForm = () => {
                     },
                 }
             );
-            api.success({
-                message: '',
-                description: `Đặt lịch thành công`,
-                placement: 'bottomRight',
-                showProgress: true,
-                pauseOnHover,
-            });
+            setPopupVisible(true);
 
         } catch (error) {
             api.error({
@@ -329,6 +336,12 @@ const DeviceReservationForm = () => {
                     Đặt lịch
                 </button>
             </form>
+            <Popup
+                visible={popupVisible}
+                title="Đặt lịch phòng thành công!"
+                content="Yêu cầu của bạn đã được gửi. Vui lòng chờ xác nhận."
+                onClose={() => setPopupVisible(false)}
+            />
         </div>
     );
 };

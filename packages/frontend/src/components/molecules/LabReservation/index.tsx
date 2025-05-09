@@ -2,6 +2,7 @@
 import { notification, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Popup from "@/components/Context/PopupSuccess";
 
 interface Lab {
     labId: string;
@@ -30,6 +31,7 @@ const LabReservationForm = () => {
     const [lecturers, setLecturers] = useState<Lecturer[]>([]);
     const [selectedLecturer, setSelectedLecturer] = useState<string | undefined>();
     const [api, contextHolder] = notification.useNotification();
+    const [popupVisible, setPopupVisible] = useState(false);
     const userString = localStorage.getItem('user')
 
     let role = '';
@@ -171,13 +173,7 @@ const LabReservationForm = () => {
                     },
                 }
             );
-            api.success({
-                message: '',
-                description: `Đặt lịch thành công`,
-                placement: 'bottomRight',
-                showProgress: true,
-                pauseOnHover,
-            });
+            setPopupVisible(true);
 
         } catch (error) {
             api.error({
@@ -253,6 +249,12 @@ const LabReservationForm = () => {
                     Đặt lịch
                 </button>
             </form>
+            <Popup
+                visible={popupVisible}
+                title="Đặt lịch thiết bị thành công!"
+                content="Yêu cầu của bạn đã được gửi. Vui lòng chờ xác nhận."
+                onClose={() => setPopupVisible(false)}
+            />
         </div>
     );
 };

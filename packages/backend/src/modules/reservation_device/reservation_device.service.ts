@@ -5,12 +5,14 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { DeviceService } from '@modules/device/device.service';
 import { BorrowStatus, ReservationStatus } from '@core/enum/enum';
+import { MailService } from '@modules/send_mail/mail.service';
 
 @Injectable()
 export class ReservationDeviceService {
   constructor(
     private prisma: PrismaService,
-    private deviceService: DeviceService
+    private deviceService: DeviceService,
+    private mailService: MailService
   ) { }
 
   async create(createReservationDto: CreateReservationDto, role: Role) {
@@ -100,6 +102,13 @@ export class ReservationDeviceService {
         });
       }
     }
+    if (statusEnum === ReservationStatus.REJECTED) {
+      await this.mailService.sendMail(
+        reservation.user.email,
+        'Yêu cầu đặt thiết bị bị từ chối',
+        `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt thiết bị "${reservation.device.deviceName}" của bạn đã bị từ chối.`,
+      );
+    }
 
     return this.prisma.reservationDevice.update({
       where: { deviceReservationId },
@@ -133,18 +142,31 @@ export class ReservationDeviceService {
     if (!lecturer) {
       throw new Error('Giảng viên không tồn tại.');
     }
-    return this.prisma.reservationDevice.update({
+
+    const reservation = await this.prisma.reservationDevice.update({
       where: { deviceReservationId },
       data: {
         lecturerId,
         status: ReservationStatus.APPROVED_BY_LECTURER,
         updatedAt: new Date(),
       },
+      include: {
+        user: true,
+        device: true,
+      },
     });
+    const subject = 'Lịch đặt thiết bị đã được phê duyệt bởi giảng viên';
+    const text = `Xin chào ${reservation.user.userName}, lịch đặt thiết bị "${reservation.device.deviceName}" vào ${reservation.createdAt} đã được giảng viên phê duyệt.`;
+    const html = `<p>Xin chào <strong>${reservation.user.userName}</strong>,</p>
+      <p>Lịch đặt thiết bị <strong>${reservation.device.deviceName}</strong> vào <strong>${reservation.createdAt}</strong> đã được giảng viên phê duyệt.</p>`;
+
+    await this.mailService.sendMail(reservation.user.email, subject, text, html);
+
+    return reservation;
   }
 
   async approveByAdmin(deviceReservationId: string) {
-    return this.prisma.reservationDevice.update({
+    const reservation = await this.prisma.reservationDevice.update({
       where: { deviceReservationId },
       data: {
         adminApproved: true,
@@ -158,9 +180,18 @@ export class ReservationDeviceService {
         lecturer: {
           include: {
             user: true,
-          }
-        }
+          },
+        },
       },
     });
+
+    const subject = 'Lịch đặt thiết bị đã được phê duyệt bởi admin';
+    const text = `Xin chào ${reservation.user.userName}, lịch đặt thiết bị "${reservation.device.deviceName}" vào ${reservation.createdAt} đã được admin phê duyệt.`;
+    const html = `<p>Xin chào <strong>${reservation.user.userName}</strong>,</p>
+      <p>Lịch đặt thiết bị <strong>${reservation.device.deviceName}</strong> vào <strong>${reservation.createdAt}</strong> đã được <span style="color:green">admin phê duyệt</span>.</p>`;
+
+    await this.mailService.sendMail(reservation.user.email, subject, text, html);
+
+    return reservation;
   }
 }

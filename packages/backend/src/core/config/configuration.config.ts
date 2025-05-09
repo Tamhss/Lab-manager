@@ -56,6 +56,18 @@ export const configuration = () => ({
   },
   api: {
     regi: process.env.URL_API_REGI
+  },
+  mail: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 2525,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    from: process.env.SMTP_FROM,
+  },
+  mailboxlayer: {
+    apiKey: process.env.MAILBOXLAYER_API_KEY,
   }
 });
 
@@ -95,5 +107,15 @@ export enum EConfiguration {
   FORGOT_PASSWORD_EXPIRED_TIME = 'time.forgotPasswordExpiredTime',
   REGISTER_EXPIRED_TIME = 'time.registerExpiredTime',
 
-  URL_API_REGI = 'api.regi'
+  URL_API_REGI = 'api.regi',
+
+  SMTP_HOST = 'mail.host',
+  SMTP_PORT = 'mail.port',
+  SMTP_USER = 'mail.auth.user',
+  SMTP_PASS = 'mail.auth.pass',
+  SMTP_FROM = 'mail.from',
+
+  MAILBOXLAYER_API_KEY = 'mailboxlayer.apiKey',
+
+
 }

@@ -3,9 +3,10 @@ import { ReservationLabService } from './reservation_lab.service';
 import { ReservationLabController } from './reservation_lab.controller';
 import { PrismaService } from '@core/global/prisma/prisma.service';
 import { LabModule } from '@modules/Lab/lab.module';
+import { MailModule } from '@modules/send_mail/mail.module';
 
 @Module({
-    imports: [forwardRef(() => LabModule)],
+    imports: [forwardRef(() => LabModule), MailModule],
     controllers: [ReservationLabController],
     providers: [ReservationLabService, PrismaService],
 })

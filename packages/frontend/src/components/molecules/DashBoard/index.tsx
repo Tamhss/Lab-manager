@@ -23,6 +23,7 @@ import Lab from '../Lab';
 import LabReservationManager from '../LabReservationManager';
 import DeviceBorrowHistory from '../DeviceBorrowHistory';
 import LabBorrowHistory from '../LabBorrowHistory';
+import ServerDashboard from '../ServerDashboard';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
@@ -88,16 +89,20 @@ const Dashboard: React.FC = () => {
     }, []);
 
     const renderDashboard = () => (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card title="Trạng thái thiết bị" className="shadow-lg">
                 <div className="h-[300px]"><Pie data={pieData} options={chartOptions} /></div>
             </Card>
             <Card title="Thống kê đăng ký" className="shadow-lg">
                 <div className="h-[300px]"><Bar data={barData} options={chartOptions} /></div>
             </Card>
-            <Card title="Hoạt động hàng tuần" className="md:col-span-2 shadow-lg">
+            {/* <Card title="Hoạt động hàng tuần" className="md:col-span-2 shadow-lg">
                 <div className="h-[300px]"><Line data={lineData} options={chartOptions} /></div>
-            </Card>
+            </Card> */}
+            <div className='md:col-span-2'>
+                <ServerDashboard />
+            </div>
+
         </div>
     );
 
@@ -211,7 +216,6 @@ const Dashboard: React.FC = () => {
                 return isLimitedRole ? deny() : <Lab />;
             case '4':
                 return isLimitedRole ? deny() : <DeviceCategory labId="lab-301" />;
-            case '5':
                 return isLimitedRole ? deny() : <Device labId="lab-301" />;
             case '6':
                 return isLimitedRole ? deny() : <DeviceCategory labId="P-302" />;

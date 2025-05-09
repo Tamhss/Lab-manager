@@ -57,7 +57,7 @@ export const Navbar: React.FC = () => {
                     <p className="text-gray-600 font-bold text-xl pt-3">AIoT Lab - DNU</p>
                 </span>
             </div>
-            <div className="hidden lg:flex">
+            <div className="hidden lg:flex pr-14">
                 {user && (
                     <ul className="flex items-center">
                         <Tooltip title="TRANG CHỦ">

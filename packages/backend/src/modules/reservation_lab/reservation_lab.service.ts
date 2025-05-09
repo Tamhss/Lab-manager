@@ -5,12 +5,14 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { BorrowStatus, ReservationStatus } from '@core/enum/enum';
 import { LabService } from '@modules/Lab/lab.service';
+import { MailService } from '@modules/send_mail/mail.service';
 
 @Injectable()
 export class ReservationLabService {
   constructor(
     private prisma: PrismaService,
-    private labService: LabService
+    private labService: LabService,
+    private mailService: MailService
   ) { }
 
   async create(createReservationDto: CreateReservationDto, role: Role) {
@@ -97,6 +99,13 @@ export class ReservationLabService {
         });
       }
     }
+    if (statusEnum === ReservationStatus.REJECTED) {
+      await this.mailService.sendMail(
+        reservation.user.email,
+        'Yêu cầu đặt phòng bị từ chối',
+        `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
+      );
+    }
 
     return this.prisma.reservationLab.update({
       where: { labReservationId },
@@ -130,18 +139,30 @@ export class ReservationLabService {
     if (!lecturer) {
       throw new Error('Giảng viên không tồn tại.');
     }
-    return this.prisma.reservationLab.update({
+    const reservation = await this.prisma.reservationLab.update({
       where: { labReservationId },
       data: {
         lecturerId,
         status: ReservationStatus.APPROVED_BY_LECTURER,
         updatedAt: new Date(),
       },
+      include: {
+        user: true,
+        lab: true,
+      }
     });
+    const subject = 'Lịch đặt phòng đã được phê duyệt bởi giảng viên';
+    const text = `Xin chào ${reservation.user.userName}, lịch đặt thiết bị "${reservation.lab.labName}" vào ${reservation.createdAt} đã được giảng viên phê duyệt.`;
+    const html = `<p>Xin chào <strong>${reservation.user.userName}</strong>,</p>
+      <p>Lịch đặt thiết bị <strong>${reservation.lab.labName}</strong> vào <strong>${reservation.createdAt}</strong> đã được giảng viên phê duyệt.</p>`;
+
+    await this.mailService.sendMail(reservation.user.email, subject, text, html);
+
+    return reservation;
   }
 
   async approveByAdmin(labReservationId: string) {
-    return this.prisma.reservationLab.update({
+    const reservation = await this.prisma.reservationLab.update({
       where: { labReservationId },
       data: {
         adminApproved: true,
@@ -158,5 +179,13 @@ export class ReservationLabService {
         }
       },
     });
+    const subject = 'Lịch đặt thiết bị đã được phê duyệt bởi admin';
+    const text = `Xin chào ${reservation.user.userName}, lịch đặt thiết bị "${reservation.lab.labName}" vào ${reservation.createdAt} đã được admin phê duyệt.`;
+    const html = `<p>Xin chào <strong>${reservation.user.userName}</strong>,</p>
+      <p>Lịch đặt thiết bị <strong>${reservation.lab.labName}</strong> vào <strong>${reservation.createdAt}</strong> đã được admin phê duyệt.</p>`;
+
+    await this.mailService.sendMail(reservation.user.email, subject, text, html);
+
+    return reservation;
   }
 }

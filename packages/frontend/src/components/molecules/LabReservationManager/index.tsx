@@ -46,6 +46,7 @@ const LabReservationManager: React.FC = () => {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Đã được giảng viên phê duyệt',
         APPROVED: 'Đã phê duyệt',
+        BORROWED: 'Đang mượn',
         REJECTED: 'Bị từ chối',
         COMPLETED: 'Hoàn thành',
     };
@@ -106,7 +107,7 @@ const LabReservationManager: React.FC = () => {
             if (role === 'LECTURER') {
                 statusFilter = 'PENDING';
             } else if (role === 'ADMIN') {
-                statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED'];
+                statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
 
             const response = await axios.get('http://localhost:3009/api/v1/reservations-lab', {
@@ -478,7 +479,7 @@ const LabReservationManager: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'REJECTED' | 'COMPLETED') => (
+            render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'BORROWED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
                     {statusMap[status] || status}
                 </Tag>
@@ -521,7 +522,7 @@ const LabReservationManager: React.FC = () => {
                             />
                         </Tooltip>
                     )}
-                    {record.status === 'APPROVED' && (
+                    {(record.status === 'APPROVED' || record.status === 'BORROWED') && (
                         <>
                             <Tooltip title="Nhập thời sử dụng thực tế">
                                 <Button
@@ -531,26 +532,16 @@ const LabReservationManager: React.FC = () => {
                                     style={{ color: 'purple' }}
                                 />
                             </Tooltip>
-                            <Tooltip title="Xóa">
-                                <Button
-                                    type="text"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handleDelete(record.labReservationId)}
-                                />
-                            </Tooltip>
                         </>
                     )}
-                    {record.status !== 'APPROVED' && (
-                        <Tooltip title="Xóa">
-                            <Button
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(record.labReservationId)}
-                            />
-                        </Tooltip>
-                    )}
+                    <Tooltip title="Xóa">
+                        <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleDelete(record.labReservationId)}
+                        />
+                    </Tooltip>
                 </Space>
             ),
         },
@@ -561,6 +552,7 @@ const LabReservationManager: React.FC = () => {
             case 'PENDING': return 'gold';
             case 'APPROVED_BY_LECTURER': return 'orange';
             case 'APPROVED': return 'green';
+            case 'BORROWED': return 'blue'
             case 'REJECTED': return 'red';
             case 'COMPLETED': return 'blue';
             default: return 'gray';

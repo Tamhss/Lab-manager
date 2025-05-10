@@ -139,11 +139,24 @@ const LabReservationForm = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, pauseOnHover: boolean) => {
         e.preventDefault();
 
+        if (!startTime || !endTime) {
+            api.error({
+                message: 'Lỗi',
+                description: 'Vui lòng chọn đầy đủ thời gian mượn và trả!',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+            return;
+        }
+
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
         const user = storedUser ? JSON.parse(storedUser) : null;
-
+        const selectedStart = new Date(startTime);
+        const selectedEnd = new Date(endTime);
         const userId = user ? user.userId : null;
+        const now = new Date();
 
         if (!userId) {
             console.error("Lỗi: userId không tồn tại.");
@@ -153,6 +166,28 @@ const LabReservationForm = () => {
 
         const formattedStartTime = new Date(startTime).toISOString();
         const formattedEndTime = new Date(endTime).toISOString();
+
+        if (selectedEnd <= selectedStart) {
+            api.error({
+                message: 'Lỗi',
+                description: 'Thời gian mượn phải trước thời gian trả!',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+            return;
+        }
+
+        if (selectedStart <= now || selectedEnd <= now) {
+            api.error({
+                message: 'Lỗi',
+                description: 'Thời gian mượn và trả phải sau thời điểm hiện tại!',
+                placement: 'bottomRight',
+                showProgress: true,
+                pauseOnHover,
+            });
+            return;
+        }
 
         const requestData = {
             userId,

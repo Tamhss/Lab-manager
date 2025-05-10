@@ -15,6 +15,24 @@ export class ReservationDeviceService {
     private mailService: MailService
   ) { }
 
+  private async generateCustomId(userId: string, deviceId: string): Promise<string> {
+    const prefix = 'DLTB';
+    const shortUserId = userId.slice(0, 4);
+    const shortDeviceId = deviceId ? deviceId.slice(0, 4) : 'NODEVICE';
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const candidateId = `${prefix}-${shortUserId}-${shortDeviceId}-${random}`;
+
+    const existing = await this.prisma.reservationDevice.findUnique({
+      where: { deviceReservationId: candidateId },
+    });
+
+    if (existing) {
+      return this.generateCustomId(userId, deviceId);
+    }
+
+    return candidateId;
+  }
+
   async create(createReservationDto: CreateReservationDto, role: Role) {
     let initialStatus = ReservationStatus.PENDING;
     if (role === 'LECTURER') {
@@ -22,8 +40,15 @@ export class ReservationDeviceService {
     } else if (role === 'ADMIN') {
       initialStatus = ReservationStatus.APPROVED;
     }
+
+    const deviceReservationId = await this.generateCustomId(
+      createReservationDto.userId,
+      createReservationDto.deviceId || 'NODEVICE'
+    );
+
     return this.prisma.reservationDevice.create({
       data: {
+        deviceReservationId,
         ...createReservationDto,
         status: initialStatus,
         createdAt: new Date(),

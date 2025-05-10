@@ -525,7 +525,7 @@ const DeviceReservation: React.FC = () => {
                         </Tooltip>
                     )}
                     {(role === 'LECTURER' || role === 'ADMIN' || role === 'STUDENT') && (record.status === 'PENDING' || record.status === 'APPROVED_BY_LECTURER' || record.status === 'PENDING') && (
-                        <Tooltip title="Từ chối">
+                        <Tooltip title="Hủy đặt lịch">
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}
@@ -535,26 +535,26 @@ const DeviceReservation: React.FC = () => {
                         </Tooltip>
                     )}
                     {(record.status === 'APPROVED' || record.status === 'BORROWED') && (
-                        <>
-                            <Tooltip title="Nhập thời gian mượn thực tế">
-                                <Button
-                                    type="text"
-                                    icon={<ClockCircleOutlined />}
-                                    onClick={() => showModal(record)}
-                                    style={{ color: 'purple' }}
-                                />
-                            </Tooltip>
-                        </>
+                        <Tooltip title="Nhập thời gian mượn thực tế">
+                            <Button
+                                type="text"
+                                icon={<ClockCircleOutlined />}
+                                onClick={() => showModal(record)}
+                                style={{ color: 'purple' }}
+                            />
+                        </Tooltip>
+                    )}
+                    {role !== 'STUDENT' && (
+                        <Tooltip title="Xóa">
+                            <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleDelete(record.deviceReservationId)}
+                            />
+                        </Tooltip>
                     )}
 
-                    <Tooltip title="Xóa">
-                        <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => handleDelete(record.deviceReservationId)}
-                        />
-                    </Tooltip>
 
                 </Space>
             ),

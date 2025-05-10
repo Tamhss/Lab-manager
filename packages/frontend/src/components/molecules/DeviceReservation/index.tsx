@@ -28,7 +28,6 @@ interface ApiLecturer {
     updatedAt: string;
 }
 
-
 const DeviceReservationForm = () => {
     const [devices, setDevices] = useState<Device[]>([]);
     const [selectedDevice, setSelectedDevice] = useState<string | undefined>(undefined);
@@ -190,8 +189,6 @@ const DeviceReservationForm = () => {
         const selectedStart = new Date(startTime);
         const selectedEnd = new Date(endTime);
         const now = new Date();
-
-
         const userId = user ? user.userId : null;
 
         if (!userId) {

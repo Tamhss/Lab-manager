@@ -15,6 +15,24 @@ export class ReservationLabService {
     private mailService: MailService
   ) { }
 
+  private async generateCustomId(userId: string, labId: string): Promise<string> {
+    const prefix = 'DLP';
+    const shortUserId = userId.slice(0, 4);
+    const shortLabId = labId ? labId.slice(0, 7) : 'NOLAB';
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const candidateId = `${prefix}-${shortUserId}-${shortLabId}-${random}`;
+
+    const existing = await this.prisma.reservationLab.findUnique({
+      where: { labReservationId: candidateId },
+    });
+
+    if (existing) {
+      return this.generateCustomId(userId, labId);
+    }
+
+    return candidateId;
+  }
+
   async create(createReservationDto: CreateReservationDto, role: Role) {
     let initialStatus = ReservationStatus.PENDING;
     if (role === 'LECTURER') {
@@ -22,8 +40,15 @@ export class ReservationLabService {
     } else if (role === 'ADMIN') {
       initialStatus = ReservationStatus.APPROVED;
     }
+
+    const labReservationId = await this.generateCustomId(
+      createReservationDto.userId,
+      createReservationDto.labId || 'NOLAB' // Xử lý trường hợp deviceId là undefined
+    );
+
     return this.prisma.reservationLab.create({
       data: {
+        labReservationId,
         ...createReservationDto,
         status: initialStatus,
         createdAt: new Date(),

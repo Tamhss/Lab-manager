@@ -92,7 +92,7 @@ model Lab {
 }
 
 model ReservationDevice {
-  deviceReservationId String            @id @default(uuid())
+  deviceReservationId String            @id
   userId              String
   labId               String?
   deviceId            String?

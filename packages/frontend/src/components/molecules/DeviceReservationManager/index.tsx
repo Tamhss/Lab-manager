@@ -51,6 +51,7 @@ const DeviceReservation: React.FC = () => {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Giảng viên đã phê duyệt',
         APPROVED: 'Đã phê duyệt',
+        BORROWED: 'Đang mượn',
         REJECTED: 'Bị từ chối',
         COMPLETED: 'Hoàn thành',
     };
@@ -111,7 +112,7 @@ const DeviceReservation: React.FC = () => {
             if (role === 'LECTURER') {
                 statusFilter = 'PENDING';
             } else if (role === 'ADMIN') {
-                statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED'];
+                statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
 
             const response = await axios.get('http://localhost:3009/api/v1/reservations-device', {
@@ -170,14 +171,14 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
             const borrowStatus = actualReturnTime ? "COMPLETED" : "BORROWED";
-            const reservationStatus = actualReturnTime ? "COMPLETED" : "BORROWED";
+            const status = actualReturnTime ? "COMPLETED" : "BORROWED";
 
-            await axios.put(
-
+            const test = await axios.put(
                 `http://localhost:3009/api/v1/devices/${deviceId}`,
                 { borrowStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            console.log('test:', test.data);
 
             if (!selectedRecord || !selectedRecord.device) {
                 message.error("Không tìm thấy thông tin thiết bị!");
@@ -186,7 +187,7 @@ const DeviceReservation: React.FC = () => {
             const response = await axios.put(
                 `http://localhost:3009/api/v1/reservations-device/${selectedRecord.deviceReservationId}`,
                 {
-                    status: reservationStatus,
+                    status,
                     actualBorrowTime,
                     actualReturnTime: actualReturnTime || null,
                     deviceId: selectedRecord.device.deviceId,
@@ -195,7 +196,7 @@ const DeviceReservation: React.FC = () => {
             );
             console.log('Response from updating reservation:', response.data);
             console.log('Request data:', {
-                status: reservationStatus,
+                status,
                 deviceReservationId: selectedRecord.deviceReservationId,
                 userId: selectedRecord.user.userId,
                 deviceId: selectedRecord.device.deviceId,
@@ -490,7 +491,7 @@ const DeviceReservation: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'REJECTED' | 'COMPLETED') => (
+            render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'BORROWED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
                     {statusMap[status] || status}
                 </Tag>
@@ -533,7 +534,7 @@ const DeviceReservation: React.FC = () => {
                             />
                         </Tooltip>
                     )}
-                    {record.status === 'APPROVED' && (
+                    {(record.status === 'APPROVED' || record.status === 'BORROWED') && (
                         <>
                             <Tooltip title="Nhập thời gian mượn thực tế">
                                 <Button
@@ -543,26 +544,18 @@ const DeviceReservation: React.FC = () => {
                                     style={{ color: 'purple' }}
                                 />
                             </Tooltip>
-                            <Tooltip title="Xóa">
-                                <Button
-                                    type="text"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handleDelete(record.deviceReservationId)}
-                                />
-                            </Tooltip>
                         </>
                     )}
-                    {record.status !== 'APPROVED' && (
-                        <Tooltip title="Xóa">
-                            <Button
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(record.deviceReservationId)}
-                            />
-                        </Tooltip>
-                    )}
+
+                    <Tooltip title="Xóa">
+                        <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleDelete(record.deviceReservationId)}
+                        />
+                    </Tooltip>
+
                 </Space>
             ),
         },
@@ -573,8 +566,9 @@ const DeviceReservation: React.FC = () => {
             case 'PENDING': return 'gold';
             case 'APPROVED_BY_LECTURER': return 'orange';
             case 'APPROVED': return 'green';
+            case 'BORROWED': return 'blue'
             case 'REJECTED': return 'red';
-            case 'COMPLETED': return 'blue';
+            case 'COMPLETED': return 'gray';
             default: return 'gray';
         }
     };

@@ -109,6 +109,7 @@ export class ReservationDeviceService {
         `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt thiết bị "${reservation.device.deviceName}" của bạn đã bị từ chối.`,
       );
     }
+    console.log('test', Object.values(ReservationStatus));
 
     return this.prisma.reservationDevice.update({
       where: { deviceReservationId },

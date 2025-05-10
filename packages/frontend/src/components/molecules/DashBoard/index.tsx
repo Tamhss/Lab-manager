@@ -112,7 +112,7 @@ const Dashboard: React.FC = () => {
 
     const getMenuItems = (): MenuProps['items'] => {
 
-        const labLabel = isLimitedRole ? 'Sử dụng phòng lab' : 'Quản lý phòng lab';
+        const labLabel = isLimitedRole ? 'Sử dụng phòng' : 'Quản lý phòng';
         const deviceLabel = isLimitedRole ? 'Sử dụng thiết bị' : 'Quản lý thiết bị';
 
         if (isLimitedRole) {
@@ -123,8 +123,8 @@ const Dashboard: React.FC = () => {
                     label: labLabel,
                     icon: <ApartmentOutlined />,
                     children: [
-                        { key: '2', label: 'Đặt lịch phòng lab', icon: <ApartmentOutlined /> },
-                        { key: '3', label: 'Lịch sử đặt phòng lab', icon: <HistoryOutlined /> },
+                        { key: '2', label: 'Đặt lịch phòng', icon: <ApartmentOutlined /> },
+                        { key: '3', label: 'Lịch sử đặt phòng', icon: <HistoryOutlined /> },
                     ],
                 },
                 {
@@ -146,9 +146,9 @@ const Dashboard: React.FC = () => {
                 label: labLabel,
                 icon: <ApartmentOutlined />,
                 children: [
-                    { key: '1', label: 'Danh sách phòng lab', icon: <LaptopOutlined /> },
-                    { key: '2', label: 'Đặt lịch phòng lab', icon: <ApartmentOutlined /> },
-                    { key: '3', label: 'Lịch sử đặt phòng lab', icon: <HistoryOutlined /> },
+                    { key: '1', label: 'Danh sách phòng', icon: <LaptopOutlined /> },
+                    { key: '2', label: 'Đặt lịch phòng', icon: <ApartmentOutlined /> },
+                    { key: '3', label: 'Lịch sử đặt phòng', icon: <HistoryOutlined /> },
                 ],
             },
             {

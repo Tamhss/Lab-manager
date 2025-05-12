@@ -34,6 +34,23 @@ const Lab: React.FC = () => {
         BORROWED: 'Đang được sử dụng',
         COMPLETED: 'Trống lịch'
     }
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'AVAILABLE': return 'gold';
+            case 'UNDER_MAINTENANCE': return 'red';
+            case 'IN_USE': return 'green';
+            default: return 'gray';
+        }
+    };
+
+    const getStatusBorrowColor = (status: string) => {
+        switch (status) {
+            case 'PENDING_BORROW': return 'gold';
+            case 'BORROWED': return 'orange';
+            case 'COMPLETED': return 'green';
+            default: return 'gray';
+        }
+    };
 
     useEffect(() => {
         fetchData();
@@ -236,24 +253,6 @@ const Lab: React.FC = () => {
             ),
         },
     ];
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'AVAILABLE': return 'gold';
-            case 'UNDER_MAINTENANCE': return 'red';
-            case 'IN_USE': return 'green';
-            default: return 'gray';
-        }
-    };
-
-    const getStatusBorrowColor = (status: string) => {
-        switch (status) {
-            case 'PENDING_BORROW': return 'gold';
-            case 'BORROWED': return 'orange';
-            case 'COMPLETED': return 'green';
-            default: return 'gray';
-        }
-    };
 
     return (
         <Spin spinning={loading}>

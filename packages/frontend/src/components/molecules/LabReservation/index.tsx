@@ -51,9 +51,10 @@ const LabReservationForm = () => {
                     },
                 });
                 const allLab = labsResponse.data.data;
+                console.log('tất cả các lab được lấy ra', allLab)
 
                 if (!Array.isArray(allLab)) {
-                    console.log("Dữ liệu devices không hợp lệ");
+                    console.log("Dữ liệu labs không hợp lệ");
                     setLabs([]);
                     return;
                 }
@@ -66,7 +67,7 @@ const LabReservationForm = () => {
                 const reservations = reservationsResponse.data.data;
 
                 const activeReservations = reservations.filter(
-                    (reservation: any) => reservation.status !== "COMPLETED"
+                    (reservation: any) => reservation.status === "APPROVED"
                 );
 
                 if (!startTime || !endTime) {
@@ -286,7 +287,7 @@ const LabReservationForm = () => {
             </form>
             <Popup
                 visible={popupVisible}
-                title="Đặt lịch thiết bị thành công!"
+                title="Đặt lịch phòng thành công!"
                 content="Yêu cầu của bạn đã được gửi. Vui lòng chờ xác nhận."
                 onClose={() => setPopupVisible(false)}
             />

@@ -493,7 +493,7 @@ const LabReservationManager: React.FC = () => {
             render: (_, record) => (
                 <Space size="middle">
                     {role === 'LECTURER' && record.status === 'PENDING' && (
-                        <Tooltip title="Phê duyệt bởi giảng viên">
+                        <Tooltip title="Phê duyệt">
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
@@ -503,7 +503,7 @@ const LabReservationManager: React.FC = () => {
                         </Tooltip>
                     )}
                     {role === 'ADMIN' && record.status === 'APPROVED_BY_LECTURER' && (
-                        <Tooltip title="Phê duyệt bởi admin">
+                        <Tooltip title="Phê duyệt">
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
@@ -534,14 +534,16 @@ const LabReservationManager: React.FC = () => {
                             </Tooltip>
                         </>
                     )}
-                    <Tooltip title="Xóa">
-                        <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => handleDelete(record.labReservationId)}
-                        />
-                    </Tooltip>
+                    {role !== 'STUDENT' && (
+                        <Tooltip title="Xóa">
+                            <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleDelete(record.labReservationId)}
+                            />
+                        </Tooltip>
+                    )}
                 </Space>
             ),
         },

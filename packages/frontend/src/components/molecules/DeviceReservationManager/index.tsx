@@ -505,7 +505,7 @@ const DeviceReservation: React.FC = () => {
             render: (_, record) => (
                 <Space size="middle">
                     {role === 'LECTURER' && record.status === 'PENDING' && (
-                        <Tooltip title="Phê duyệt bởi giảng viên">
+                        <Tooltip title="Phê duyệt">
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
@@ -515,7 +515,7 @@ const DeviceReservation: React.FC = () => {
                         </Tooltip>
                     )}
                     {role === 'ADMIN' && record.status === 'APPROVED_BY_LECTURER' && (
-                        <Tooltip title="Phê duyệt bởi admin">
+                        <Tooltip title="Phê duyệt">
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}

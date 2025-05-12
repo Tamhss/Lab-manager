@@ -58,30 +58,30 @@ export const configuration = () => ({
     regi: process.env.URL_API_REGI
   },
 
-  mail: {
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT ?? '587', 10),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    from: process.env.SMTP_FROM,
-  },
-
-  //test send mail
   // mail: {
   //   host: process.env.SMTP_HOST,
-  //   port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 2525,
+  //   port: parseInt(process.env.SMTP_PORT ?? '587', 10),
+  //   secure: false,
   //   auth: {
   //     user: process.env.SMTP_USER,
   //     pass: process.env.SMTP_PASS,
   //   },
   //   from: process.env.SMTP_FROM,
   // },
-  // mailboxlayer: {
-  //   apiKey: process.env.MAILBOXLAYER_API_KEY,
-  // }
+
+  //test send mail
+  mail: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 2525,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    from: process.env.SMTP_FROM,
+  },
+  mailboxlayer: {
+    apiKey: process.env.MAILBOXLAYER_API_KEY,
+  }
 });
 
 export enum EConfiguration {

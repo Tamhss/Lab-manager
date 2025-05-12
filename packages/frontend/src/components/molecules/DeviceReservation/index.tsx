@@ -99,7 +99,7 @@ const DeviceReservationForm = () => {
                 const reservations = reservationsResponse.data.data;
 
                 const activeReservations = reservations.filter(
-                    (reservation: any) => reservation.status !== "COMPLETED"
+                    (reservation: any) => reservation.status === "APPROVED"
                 );
 
                 if (!startTime || !endTime) {

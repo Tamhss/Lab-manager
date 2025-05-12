@@ -27,11 +27,11 @@ import { ReservationDeviceModule } from '@modules/reservation_device/reservation
 import { UploadModule } from './modules/upload_device/upload.module';
 import { LecturerModule } from '@modules/lecturer/lecturer.module';
 import { DeviceBorrowHistoryModule } from '@modules/device_borrow_history/borrow_history.module';
-import { UserHistoryModule } from '@modules/user_history/user_history.module';
 import { LabModule } from '@modules/Lab/lab.module';
 import { ReservationLabModule } from '@modules/reservation_lab/reservation_lab.module';
 import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_history.module';
 import { MailModule } from '@modules/send_mail/mail.module';
+import { LabUsageModule } from '@modules/lab_usage/lab_usage.module';
 
 @Module({
   imports: [
@@ -56,10 +56,10 @@ import { MailModule } from '@modules/send_mail/mail.module';
     UploadModule,
     LecturerModule,
     DeviceBorrowHistoryModule,
-    UserHistoryModule,
     ReservationLabModule,
     LabBorrowHistoryModule,
     MailModule,
+    LabUsageModule,
   ],
   controllers: [AppController],
   providers: [

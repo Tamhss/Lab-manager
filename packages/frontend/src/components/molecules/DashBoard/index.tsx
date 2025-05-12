@@ -24,8 +24,20 @@ import LabReservationManager from '../LabReservationManager';
 import DeviceBorrowHistory from '../DeviceBorrowHistory';
 import LabBorrowHistory from '../LabBorrowHistory';
 import ServerDashboard from '../ServerDashboard';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+dayjs.extend(isoWeek);
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
+
+interface BarChartData {
+    labels: string[];
+    datasets: {
+        label: string;
+        data: number[];
+        backgroundColor: string;
+    }[];
+}
 
 const Dashboard: React.FC = () => {
     const [devices, setDevices] = useState<any[]>([]);
@@ -38,10 +50,14 @@ const Dashboard: React.FC = () => {
         datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#FF1493'] }],
     });
 
-    const barData = {
-        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
-        datasets: [{ label: 'Số lượng đăng ký', data: [12, 19, 3, 5, 2], backgroundColor: 'rgba(75, 192, 192, 0.6)' }],
-    };
+    const [barData, setBarData] = useState<BarChartData>({
+        labels: [],
+        datasets: [{
+            label: 'Số lượng đăng ký',
+            data: [],
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        }],
+    });
 
     const lineData = {
         labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
@@ -78,9 +94,61 @@ const Dashboard: React.FC = () => {
         }
     };
 
+    const fetchDataReservation = async () => {
+        console.log('Fetching reservation data...');
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const [deviceRes, labRes] = await Promise.all([
+                axios.get('http://localhost:3009/api/v1/reservations-device', config),
+
+                axios.get('http://localhost:3009/api/v1/reservations-lab', config),
+            ]);
+            console.log('Device reservations:', deviceRes.data);
+            console.log('Lab reservations:', labRes.data);
+
+            const allReservations = [...deviceRes.data.data, ...labRes.data.data]
+
+            const monthlyCounts: Record<string, number> = {};
+            allReservations.forEach((res: any) => {
+                const month = dayjs(res.createdAt).month() + 1;
+                const year = dayjs(res.createdAt).year();
+                const key = `Tháng ${month} (${year})`;
+                monthlyCounts[key] = (monthlyCounts[key] || 0) + 1;
+            });
+
+            const sortedMonths = Object.keys(monthlyCounts).sort((a, b) => {
+                const getMonthNum = (str: string) => parseInt(str.match(/Tháng (\d+)/)?.[1] || '0');
+                return getMonthNum(a) - getMonthNum(b);
+            });
+
+            const newBarData: BarChartData = {
+                labels: sortedMonths,
+                datasets: [{
+                    label: 'Số lượng đăng ký',
+                    data: sortedMonths.map(month => monthlyCounts[month]),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                }],
+            };
+
+            setBarData(newBarData);
+            console.log('Bar Data:', newBarData);
+        } catch (error) {
+            console.error('Lỗi khi tải đơn đăng ký:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     useEffect(() => {
         fetchData();
-
+        fetchDataReservation();
         const userData = localStorage.getItem('user');
         if (userData) {
             const user = JSON.parse(userData);

@@ -39,12 +39,11 @@ export const Navbar: React.FC = () => {
     };
 
     const menuItems = [
-        { key: "profile", icon: <UserOutlined />, label: "Profile" },
-        { key: "settings", icon: <SettingOutlined />, label: "Settings" },
+        { key: "profile", icon: <UserOutlined />, label: "Hồ sơ" },
         {
             key: "logout",
             icon: <LogoutOutlined />,
-            label: "Logout",
+            label: "Đăng xuất",
             onClick: handleLogout,
         },
     ];
@@ -134,7 +133,7 @@ export const Navbar: React.FC = () => {
                         className="bg-white text-indigo-700 font-semibold hover:bg-indigo-100 transition-colors duration-200"
                         style={{ borderRadius: "20px", padding: "0 16px", height: "36px" }}
                     >
-                        Login
+                            Đăng nhập
                     </Button>
                 )}
             </div>

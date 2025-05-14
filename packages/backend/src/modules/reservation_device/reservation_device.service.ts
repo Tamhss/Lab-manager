@@ -109,7 +109,7 @@ export class ReservationDeviceService {
     return reservation;
   }
 
-  async update(deviceReservationId: string, updateReservationDto: UpdateReservationDto) {
+  async update(deviceReservationId: string, updateReservationDto: UpdateReservationDto, actorRole: Role) {
     const reservation = await this.findOne(deviceReservationId);
     let borrowStatus: BorrowStatus | undefined;
     const statusEnum = ReservationStatus[updateReservationDto.status as keyof typeof ReservationStatus];
@@ -127,14 +127,31 @@ export class ReservationDeviceService {
         });
       }
     }
+
+    const user = await this.prisma.user.findUnique({
+      where: { userId: reservation.userId },
+      select: { role: true },
+    });
+    const userRole = user?.role;
+
     if (statusEnum === ReservationStatus.REJECTED) {
-      await this.mailService.sendMail(
-        reservation.user.email,
-        'Yêu cầu đặt thiết bị bị từ chối',
-        `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt thiết bị "${reservation.device.deviceName}" của bạn đã bị từ chối.`,
-      );
+      if (userRole === Role.STUDENT && actorRole !== Role.STUDENT) {
+      // Gửi email nếu STUDENT bị LECTURER hoặc ADMIN từ chối
+        await this.mailService.sendMail(
+          reservation.user.email,
+          'Yêu cầu đặt phòng bị từ chối',
+          `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
+        );
+      } else if (userRole !== Role.STUDENT) {
+        // Gửi email nếu người dùng không phải STUDENT (LECTURER, ADMIN, v.v.)
+        await this.mailService.sendMail(
+          reservation.user.email,
+          'Yêu cầu đặt phòng bị từ chối',
+          `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
+        );
+      }
+      // Không gửi email nếu STUDENT tự hủy (userRole === Role.STUDENT && actorRole === Role.STUDENT)
     }
-    console.log('test', Object.values(ReservationStatus));
 
     return this.prisma.reservationDevice.update({
       where: { deviceReservationId },

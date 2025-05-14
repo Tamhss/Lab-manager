@@ -23,6 +23,7 @@
     "codegen:remote": "openapi-generator-cli generate -i ../repicle-server/swagger.json -g typescript-nestjs -o ./codegen-output/ --remove-operation-id-prefix --additional-properties=useSingleRequestParameter=true --skip-validate-spec && chmod +x ./openapiclean.sh && sh ./openapiclean.sh"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",

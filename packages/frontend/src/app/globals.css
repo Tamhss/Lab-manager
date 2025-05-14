@@ -253,12 +253,12 @@ a:hover {
 
 .custom-button {
   background-color: white !important;
-  color: #2441e7 !important;
-  border-color: #2441e7 !important;
+  color: #3651ec !important;
+  border-color: #4861eb !important;
   transition: all 0.3s ease;
 }
 
 .custom-button:hover {
-  background-color: #2441e7 !important;
+  background-color: #4861eb !important;
   color: white !important;
 }

@@ -1,5 +1,5 @@
 import { RolesGuard } from '../../core/global/auth/roles.guard';
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Request, Req } from '@nestjs/common';
 import { ReservationLabService } from './reservation_lab.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -8,11 +8,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '@core/global/auth/roles.decorator';
 import { Role } from '@prisma/client';
 
-
-
 @Controller('reservations-lab')
 export class ReservationLabController {
-  constructor(private readonly reservationService: ReservationLabService) {}
+  constructor(private readonly reservationService: ReservationLabService) { }
 
   @Post()
   @Roles('ADMIN', 'STUDENT', 'LECTURER')
@@ -40,13 +38,15 @@ export class ReservationLabController {
   }
 
   @Put(':id')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'LECTURER', 'STUDENT')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   async update(
     @Param('id') reservationId: string,
     @Body() updateReservationDto: UpdateReservationDto,
+    @Req() request: any,
   ) {
-    return this.reservationService.update(reservationId, updateReservationDto);
+    const actorRole: Role = request.user.role;
+    return this.reservationService.update(reservationId, updateReservationDto, actorRole);
   }
 
   @Delete(':id')

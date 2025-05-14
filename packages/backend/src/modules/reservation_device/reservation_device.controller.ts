@@ -1,5 +1,5 @@
 import { RolesGuard } from '../../core/global/auth/roles.guard';
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Request, Req } from '@nestjs/common';
 import { ReservationDeviceService } from './reservation_device.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -45,8 +45,10 @@ export class ReservationDeviceController {
   async update(
     @Param('id') reservationId: string,
     @Body() updateReservationDto: UpdateReservationDto,
+    @Req() request: any,
   ) {
-    return this.reservationService.update(reservationId, updateReservationDto);
+    const actorRole: Role = request.user.role;
+    return this.reservationService.update(reservationId, updateReservationDto, actorRole);
   }
 
   @Delete(':id')

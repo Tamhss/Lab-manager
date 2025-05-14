@@ -513,7 +513,7 @@ const LabReservationManager: React.FC = () => {
                         </Tooltip>
                     )}
                     {(role === 'LECTURER' || role === 'ADMIN' || role === 'STUDENT') && (record.status === 'PENDING' || record.status === 'APPROVED_BY_LECTURER' || record.status === 'PENDING') && (
-                        <Tooltip title="Từ chối">
+                        <Tooltip title="Hủy đặt lịch">
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}

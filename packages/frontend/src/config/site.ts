@@ -2,7 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 // TODO update information
 export const siteConfig = {
-  name: 'Lab',
+  name: 'AIoT Lab - DNU',
   description: 'Developer love Repicle',
   ogImage: 'https://repicle.com/twitter-cards/repicle.jpeg',
   author: 'Junior Garcia',

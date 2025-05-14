@@ -3,7 +3,7 @@ import { Button, message, notification, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Popup from "@/components/Context/PopupSuccess";
-import { ArrowLeftOutlined, ArrowRightOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, LeftCircleOutlined, LeftOutlined, RightCircleOutlined, RightOutlined } from "@ant-design/icons";
 
 interface Device {
     deviceId: string;
@@ -29,7 +29,11 @@ interface ApiLecturer {
     updatedAt: string;
 }
 
-const DeviceReservationForm = () => {
+interface DeviceReservationFormProps {
+    onBack: () => void;
+}
+
+const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack }) => {
     const [devices, setDevices] = useState<Device[]>([]);
     const [selectedDevice, setSelectedDevice] = useState<string | undefined>(undefined);
     const [startTime, setStartTime] = useState<string>("");
@@ -411,8 +415,8 @@ const DeviceReservationForm = () => {
                 {contextHolder}
                 <form onSubmit={(e) => handleSubmit(e, true)} className="space-y-4">
                     {/* Step 1: Start Date Selection */}
-                    <div className={`${currentStep === 1 ? 'block' : 'hidden'} transition duration-300 pb-6`}>
-                        <label className="block text-gray-600 pl-4 font-bold bg-gradient-to-r from-indigo-200 to-purple-200 py-2 rounded-t-xl">Chọn ngày mượn</label>
+                    <div className={`${currentStep === 1 ? 'block' : 'hidden'} transition duration-300`}>
+                        <label className="block text-gray-600 pl-4 font-bold bg-gradient-to-r from-indigo-200 to-purple-200 py-2 rounded-t-xl">Chọn thời gian mượn</label>
                         <div className="px-8">
                             <div className="flex justify-between items-center mb-2 mt-2">
                                 <button
@@ -420,7 +424,7 @@ const DeviceReservationForm = () => {
                                     onClick={() => handlePrevMonth(setStartDisplayMonth, setStartDisplayYear)}
                                     className="text-blue-500 hover:text-blue-700 transition-colors"
                                 >
-                                    {<LeftOutlined />}
+                                    {<LeftCircleOutlined />}
                                 </button>
                                 <div className="text-lg font-semibold text-gray-800">
                                     Tháng {startDisplayMonth + 1} Năm {startDisplayYear}
@@ -430,7 +434,7 @@ const DeviceReservationForm = () => {
                                     onClick={() => handleNextMonth(setStartDisplayMonth, setStartDisplayYear)}
                                     className="text-blue-500 hover:text-blue-700 transition-colors"
                                 >
-                                    {<RightOutlined />}
+                                    {<RightCircleOutlined />}
                                 </button>
                             </div>
                             <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 p-4 rounded-lg shadow-sm">
@@ -440,11 +444,14 @@ const DeviceReservationForm = () => {
                                 {generateCalendar(startDisplayMonth, startDisplayYear, startDate, setStartDate)}
                             </div>
                         </div>
+                        <Button className="custom-button mt-4 ml-4 mb-4" icon={<ArrowLeftOutlined />} onClick={onBack}>
+                            Quay lại trang đặt lịch
+                        </Button>
                     </div>
 
                     {/* Step 2: End Date Selection */}
                     <div className={`${currentStep === 2 ? 'block' : 'hidden'} transition duration-300`}>
-                        <label className="block text-gray-600 pl-4 font-bold bg-gradient-to-r from-indigo-200 to-purple-200 py-2 rounded-t-xl">Chọn ngày trả</label>
+                        <label className="block text-gray-600 pl-4 font-bold bg-gradient-to-r from-indigo-200 to-purple-200 py-2 rounded-t-xl">Chọn thời gian trả</label>
                         <div className="px-8">
                             <div className="flex justify-between items-center mb-2 mt-2">
                                 <button
@@ -452,7 +459,7 @@ const DeviceReservationForm = () => {
                                     onClick={() => handlePrevMonth(setEndDisplayMonth, setEndDisplayYear)}
                                     className="text-blue-500 hover:text-blue-700 transition-colors"
                                 >
-                                    {<LeftOutlined />}
+                                    {<LeftCircleOutlined />}
                                 </button>
                                 <div className="text-lg font-semibold text-gray-800">
                                     Tháng {endDisplayMonth + 1} Năm {endDisplayYear}
@@ -462,7 +469,7 @@ const DeviceReservationForm = () => {
                                     onClick={() => handleNextMonth(setEndDisplayMonth, setEndDisplayYear)}
                                     className="text-blue-500 hover:text-blue-700 transition-colors"
                                 >
-                                    {<RightOutlined />}
+                                    {<RightCircleOutlined />}
                                 </button>
                             </div>
                             <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 p-4 rounded-lg shadow-sm">
@@ -472,7 +479,7 @@ const DeviceReservationForm = () => {
                                 {generateCalendar(endDisplayMonth, endDisplayYear, endDate, setEndDate)}
                             </div>
                         </div>
-                        <Button className="custom-button mt-4 ml-4" icon={<ArrowLeftOutlined />} onClick={handleBack} style={{ marginBottom: 16 }}>
+                        <Button className="custom-button mb-4 mt-4 ml-4" icon={<ArrowLeftOutlined />} onClick={handleBack}>
                             Quay lại
                         </Button>
                     </div>
@@ -522,11 +529,11 @@ const DeviceReservationForm = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="flex space-x-2 px-4 justify-between">
-                                <Button className="custom-button " icon={<ArrowLeftOutlined />} onClick={handleBack} style={{ marginBottom: 16 }}>
+                            <div className="flex space-x-2 px-4 pl-8">
+                                <Button className="custom-button mb-4 " icon={<ArrowLeftOutlined />} onClick={handleBack}>
                                     Quay lại
                                 </Button>
-                                <Button className="custom-button" onClick={handleTimeSelection} style={{ marginBottom: 16 }}>
+                                <Button className="custom-button mb-4" onClick={handleTimeSelection}>
                                     Tiếp tục
                                     <ArrowRightOutlined />
                                 </Button>
@@ -583,11 +590,11 @@ const DeviceReservationForm = () => {
                                     />
                                 </div>
                             )}
-                            <div className="flex space-x-2 px-4 justify-between">
-                                <Button className="custom-button" icon={<ArrowLeftOutlined />} onClick={handleBack} style={{ marginBottom: 16 }}>
+                            <div className="flex space-x-2 px-4 pl-8">
+                                <Button className="custom-button mb-4" icon={<ArrowLeftOutlined />} onClick={handleBack}>
                                     Quay lại
                                 </Button>
-                                <Button htmlType="submit" className="custom-button" style={{ marginBottom: 16 }}>
+                                <Button htmlType="submit" icon={<CheckCircleOutlined />} className="custom-button">
                                     Đặt lịch
                                 </Button>
                             </div>

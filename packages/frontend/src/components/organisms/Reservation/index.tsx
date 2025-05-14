@@ -8,7 +8,9 @@ import LabReservationForm from '@/components/molecules/LabReservation';
 
 const BookingCards = () => {
   const [selected, setSelected] = useState<'device' | 'lab' | null>(null);
-
+  const handleBack = () => {
+    setSelected(null);
+  };
   const cardVariants = {
     initial: {
       scale: 1,
@@ -40,7 +42,7 @@ const BookingCards = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <DeviceReservationForm />
+        <DeviceReservationForm onBack={handleBack} />
       </motion.div>
     );
   }
@@ -52,7 +54,7 @@ const BookingCards = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <LabReservationForm />
+        <LabReservationForm onBack={handleBack} />
       </motion.div>
     );
   }

@@ -202,14 +202,14 @@ const Lab: React.FC = () => {
 
     const columns: TableColumnsType<LabType> = [
         {
-            title: 'Mã phòng lab',
+            title: 'Mã phòng',
             dataIndex: 'labId',
             key: 'labId',
             width: '15%',
             ...getColumnSearchProps('labId'),
         },
         {
-            title: 'Tên phòng lab',
+            title: 'Tên phòng',
             dataIndex: 'labName',
             key: 'labName',
             width: '15%',

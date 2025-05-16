@@ -50,7 +50,9 @@ const UserM: React.FC = () => {
     };
 
     const showModal = () => {
+        setIsEditing(false);
         setIsModalOpen(true);
+        form.resetFields(); 
     };
 
     const handleCancel = () => {
@@ -251,13 +253,15 @@ const UserM: React.FC = () => {
                     >
                         <Input placeholder="Nhập email" />
                     </Form.Item>
-                    <Form.Item
-                        label="Password"
-                        name="password"
-                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-                    >
-                        <Input placeholder="Nhập password" />
-                    </Form.Item>
+                    {!isEditing && (
+                        <Form.Item
+                            label="Password"
+                            name="password"
+                            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                        >
+                            <Input placeholder="Nhập password" />
+                        </Form.Item>
+                    )}
                     <Form.Item
                         label="Quyền"
                         name="role"

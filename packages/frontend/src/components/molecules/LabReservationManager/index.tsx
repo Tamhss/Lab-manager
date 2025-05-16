@@ -452,7 +452,7 @@ const LabReservationManager: React.FC = () => {
             render: (lecturer) => lecturer?.user.userName || 'Không xác định',
         },
         {
-            title: 'Tên phòng lab',
+            title: 'Tên phòng',
             dataIndex: 'lab',
             key: 'lab',
             render: (lab) => lab?.labName || 'Không xác định',

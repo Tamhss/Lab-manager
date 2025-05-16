@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Checkbox, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const SignIn = () => {
     const [code, setCode] = useState("");
@@ -26,6 +27,8 @@ const SignIn = () => {
         e.preventDefault();
         setError("");
         setLoading(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
         const res = await fetch("http://localhost:3009/api/v1/auth/login", {
             method: "POST",
@@ -101,9 +104,10 @@ const SignIn = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center"
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2"
                     >
-                        {loading ? <Spin size="small" /> : "Đăng nhập"}
+                        <span>Đăng nhập</span>
+                        {loading && <Spin indicator={<LoadingOutlined spin />} className="!text-white" />}
                     </button>
                 </form>
             </div>

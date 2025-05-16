@@ -8,7 +8,7 @@ import {
     UploadOutlined,
 } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, Upload, Select } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, Upload, Select, Tag } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
@@ -58,6 +58,12 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const [file, setFile] = useState<File | null>(null);
     const [isLabModalOpen, setIsLabModalOpen] = useState(false);
     const [labs, setLabs] = useState<LabType[]>([]);
+    const statusMap = {
+        NOT_IN_USE: 'Không sử dụng',
+        IN_USE: 'Đang sử dụng',
+        DAMAGED: 'Hư hỏng',
+        DISPOSING: 'Đang thanh lý'
+    }
 
     useEffect(() => {
         fetchData(labId);
@@ -345,6 +351,11 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
+            render: (status: 'IN_USE' | 'NOT_IN_USE' | 'DAMAGED' | 'DISPOSING') => (
+                <Tag color={getStatusColorDevice(status)}>
+                    {statusMap[status] || status}
+                </Tag>
+            ),
         },
     ];
 
@@ -390,6 +401,16 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             case 'PENDING_BORROW': return 'gold';
             case 'BORROWED': return 'orange';
             case 'COMPLETED': return 'green';
+            default: return 'gray';
+        }
+    };
+
+    const getStatusColorDevice = (status: string) => {
+        switch (status) {
+            case 'NOT_IN_USE': return 'gray';
+            case 'DAMAGED': return 'red';
+            case 'IN_USE': return 'green';
+            case 'DISPOSING': return 'orange';
             default: return 'gray';
         }
     };

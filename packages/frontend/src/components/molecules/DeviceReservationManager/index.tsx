@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { SearchOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Tag, Tooltip, Form, Modal, Select } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Tag, Tooltip, Form, Modal, Select, notification } from 'antd';
 import axios from 'axios';
 import { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
@@ -47,6 +47,7 @@ const DeviceReservation: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<DeviceReservationType | null>(null);
     const [form] = Form.useForm();
+    const [api, contextHolder] = notification.useNotification();
     const statusMap = {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Giảng viên đã phê duyệt',
@@ -320,7 +321,7 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const handleDelete = async (deviceReservationId: string) => {
+    const handleDelete = async (deviceReservationId: string, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -332,6 +333,16 @@ const DeviceReservation: React.FC = () => {
             await axios.delete(`http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xóa thành công",
+                    description: `Mục có id ${deviceReservationId} đã được xóa`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
 
             fetchData();
         } catch (error) {
@@ -550,7 +561,7 @@ const DeviceReservation: React.FC = () => {
                                 type="text"
                                 danger
                                 icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(record.deviceReservationId)}
+                                onClick={() => handleDelete(record.deviceReservationId, true)}
                             />
                         </Tooltip>
                     )}
@@ -575,6 +586,7 @@ const DeviceReservation: React.FC = () => {
 
     return (
         <Spin spinning={loading}>
+            {contextHolder}
             <Table<DeviceReservationType>
                 columns={columns}
                 dataSource={formattedData.map(item => ({ ...item, key: item.deviceReservationId }))}

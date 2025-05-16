@@ -62,7 +62,7 @@ export const Navbar: React.FC = () => {
                         <Tooltip title="TRANG CHỦ">
                             <li className="relative group">
                                 <Link href="/">
-                                    <div className="px-10 py-3 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                    <div className="px-10 py-4 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
                                         <HomeOutlined
                                             className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/" ? "text-indigo-600" : ""
                                                 }`}
@@ -78,7 +78,7 @@ export const Navbar: React.FC = () => {
                         <Tooltip title="BẢNG ĐIỀU KHIỂN">
                             <li className="relative group">
                                 <Link href="/DashBoard">
-                                    <div className="px-10 py-3 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                    <div className="px-10 py-4 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
                                         <DashboardOutlined
                                             className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/DashBoard" ? "text-indigo-600" : ""
                                                 }`}
@@ -94,7 +94,7 @@ export const Navbar: React.FC = () => {
                         <Tooltip title="ĐẶT LỊCH">
                             <li className="relative group">
                                 <Link href="/Reservation">
-                                    <div className="px-10 py-3 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                    <div className="px-10 py-4 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
                                         <AppstoreAddOutlined
                                             className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/Reservation" ? "text-indigo-600" : ""
                                                 }`}

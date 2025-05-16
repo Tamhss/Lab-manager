@@ -176,7 +176,7 @@ const LabBorrowHistory: React.FC = () => {
             render: (text) => text || 'Không xác định',
         },
         {
-            title: 'Tên phòng lab',
+            title: 'Tên phòng',
             dataIndex: 'labName',
             key: 'labName',
             width: '15%',

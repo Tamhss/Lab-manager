@@ -354,7 +354,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'NOT_IN_USE': return 'gold';
+            case 'NOT_IN_USE': return 'gray';
             case 'DAMAGED': return 'red';
             case 'IN_USE': return 'green';
             case 'DISPOSING': return 'orange';

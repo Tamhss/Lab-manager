@@ -211,18 +211,6 @@ const DeviceBorrowHistory: React.FC = () => {
             width: '15%',
             ...getColumnSearchProps('deviceCondition'),
         },
-        // {
-        //     title: 'Trạng thái mượn',
-        //     dataIndex: 'borrowStatus',
-        //     key: 'borrowStatus',
-        //     width: '20%',
-        //     ...getColumnSearchProps('borrowStatus'),
-        //     render: (borrowStatus) => (
-        //         <Tag color={getStatusColor(borrowStatus)}>
-        //             {borrowStatus}
-        //         </Tag>
-        //     )
-        // },
         {
             title: 'Hành động',
             key: 'actions',
@@ -236,15 +224,6 @@ const DeviceBorrowHistory: React.FC = () => {
             ),
         },
     ];
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PENDING_BORROW': return 'gold';
-            case 'BORROWED': return 'orange';
-            case 'COMPLETED': return 'green';
-            default: return 'gray';
-        }
-    };
 
     return (
         <Spin spinning={loading}>

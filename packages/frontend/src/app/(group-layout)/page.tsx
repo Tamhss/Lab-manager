@@ -43,7 +43,7 @@ const Page = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.3 },
+      transition: { staggerChildren: 0.2, delayChildren: 0.1 },
     },
   };
 
@@ -77,7 +77,7 @@ const Page = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8">
                 <motion.div
                   variants={itemFadeIn}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.1 } }}
                 >
                   <Card
                     title="Đăng ký thiết bị"
@@ -93,7 +93,7 @@ const Page = () => {
                 </motion.div>
                 <motion.div
                   variants={itemFadeIn}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.1 } }}
                 >
                   <Card
                     title="Quản lý lịch sử"
@@ -109,7 +109,7 @@ const Page = () => {
                 </motion.div>
                 <motion.div
                   variants={itemFadeIn}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.1 } }}
                 >
                   <Card
                     title="Hỗ trợ nhanh"
@@ -130,7 +130,7 @@ const Page = () => {
                 <motion.div
                   className="md:w-1/2 mb-4 md:mb-0 md:pr-6"
                   whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.1 }}
                 >
                   <img
                     src="/images/bg-home.jpg"
@@ -174,7 +174,7 @@ const Page = () => {
                 <motion.div
                   className="flex items-start"
                   variants={itemFadeIn}
-                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 >
                   <BankOutlined className="text-4xl text-orange-600 mr-4" />
                   <div>
@@ -187,7 +187,7 @@ const Page = () => {
                 <motion.div
                   className="flex items-start"
                   variants={itemFadeIn}
-                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 >
                   <CodeOutlined className="text-4xl text-orange-600 mr-4" />
                   <div>
@@ -200,7 +200,7 @@ const Page = () => {
                 <motion.div
                   className="flex items-start"
                   variants={itemFadeIn}
-                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 >
                   <BookOutlined className="text-4xl text-orange-600 mr-4" />
                   <div>
@@ -213,7 +213,7 @@ const Page = () => {
                 <motion.div
                   className="flex items-start"
                   variants={itemFadeIn}
-                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 >
                   <MedicineBoxOutlined className="text-4xl text-orange-600 mr-4" />
                   <div>
@@ -226,7 +226,7 @@ const Page = () => {
                 <motion.div
                   className="flex items-start"
                   variants={itemFadeIn}
-                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 >
                   <GlobalOutlined className="text-4xl text-orange-600 mr-4" />
                   <div>

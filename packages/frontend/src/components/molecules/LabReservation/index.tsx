@@ -2,7 +2,7 @@
 import { Button, Modal, notification, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Popup from "@/components/Context/PopupSuccess";
+import Popup from "@/components/atom/PopupSuccess";
 import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, LeftCircleOutlined, LeftOutlined, RightCircleOutlined, RightOutlined } from "@ant-design/icons";
 
 interface Lab {

@@ -572,6 +572,11 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
                                     }))}
                                     showSearch
                                     allowClear
+                                    filterOption={(input, option) => {
+                                        if (!option) return false;
+                                        return option.label.toLowerCase().includes(input.toLowerCase());
+                                    }}
+
                                 />
                             </div>
                             {role === 'STUDENT' && (

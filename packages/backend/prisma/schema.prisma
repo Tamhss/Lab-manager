@@ -44,7 +44,6 @@ model Lecturer {
   students                   Student[]           @relation("LecturerStudent")
   approvedDeviceReservations ReservationDevice[] @relation("LecturerApprovals")
   approvedLabReservations    ReservationLab[]    @relation("LecturerApprovals")
-  roomManagement RoomManagement[]
 }
 
 model Admin {
@@ -89,9 +88,6 @@ model Lab {
   reservations     ReservationLab[]
   borrowHistory    LabBorrowHistory[]
   reservationDevices ReservationDevice[]
-  labUsage LabUsage[]
-  roomManagement RoomManagement[]
-
 }
 
 model ReservationDevice {
@@ -168,39 +164,11 @@ model LabBorrowHistory {
   lab         Lab            @relation(fields: [labId], references: [labId])
 }
 
-model LabUsage {
-  labUsageId String   @id @default(uuid())
-  labId      String
-  session    Session
-  usageDate  DateTime
-  status     String
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  lab Lab @relation(fields: [labId], references: [labId])
-}
-
-model RoomManagement {
-  roomId      String   @id @default(uuid())
-  labId       String
-  imageUrl    String?
-  status      String
-  lecturerId  String?
-  schedule    String?
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  lab      Lab      @relation(fields: [labId], references: [labId])
-  lecturer Lecturer? @relation(fields: [lecturerId], references: [lecturerId])
-}
-
-enum Session {
-  MORNING
-  AFTERNOON
-  EVENING
-}
+// enum Session {
+//   MORNING
+//   AFTERNOON
+//   EVENING
+// }
 
 enum Role {
   STUDENT

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, Select } from 'antd';
-import type { FilterDropdownProps } from 'antd/es/table/interface';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification } from 'antd';
+import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
@@ -27,6 +27,8 @@ const UserM: React.FC = () => {
     const [form] = Form.useForm();
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState<string | null>(null);
+    const [api, contextHolder] = notification.useNotification();
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     useEffect(() => {
         fetchData();
@@ -52,7 +54,7 @@ const UserM: React.FC = () => {
     const showModal = () => {
         setIsEditing(false);
         setIsModalOpen(true);
-        form.resetFields(); 
+        form.resetFields();
     };
 
     const handleCancel = () => {
@@ -60,7 +62,7 @@ const UserM: React.FC = () => {
         form.resetFields();
     };
 
-    const handleSave = async (values: { userName: string; email: string; password?: string; role: string }) => {
+    const handleSave = async (values: { userName: string; email: string; password?: string; role: string }, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             let updatedValues = { ...values };
@@ -85,12 +87,27 @@ const UserM: React.FC = () => {
             setIsEditing(false);
             setCurrentId(null);
         } catch (error) {
-            message.error("Lỗi khi lưu người dùng!");
+            if (axios.isAxiosError(error) && error.response) {
+                const serverMessage = error.response.data?.message;
+
+                if (serverMessage === "Email đã tồn tại.") {
+                    api.error({
+                        message: 'Lỗi',
+                        description: 'Email đã tồn tại',
+                        placement: 'bottomRight',
+                        showProgress: true,
+                        pauseOnHover,
+                    });
+                } else {
+                    message.error(serverMessage || "Lỗi khi lưu người dùng!");
+                }
+            } else {
+                message.error("Lỗi không xác định!");
+            }
         } finally {
             setLoading(false);
         }
     };
-
 
     const handleSearch = useCallback(
         (selectedKeys: string[], confirm: FilterDropdownProps['confirm'], dataIndex: DataIndex) => {
@@ -116,13 +133,68 @@ const UserM: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (userId: string) => {
+    const handleDelete = async (userId: string, pauseOnHover: boolean) => {
         try {
             await axios.delete(`http://localhost:3009/api/v1/user/${userId}`);
-            message.success("Xóa thành công!");
+            setTimeout(() => {
+                api.success({
+                    message: "Xóa thành công",
+                    description: `Người dùng có id ${userId} đã được xóa`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+
             setData(prevData => prevData.filter(item => item.userId !== userId));
         } catch (error) {
-            message.error("Lỗi khi xóa dữ liệu!");
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: `Không thể xoá người dùng có id ${userId}. Vui lòng thử lại!`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
+        }
+    };
+
+    const handleDeleteSelected = async (pauseOnHover: boolean) => {
+        if (selectedRowKeys.length === 0) return;
+
+        try {
+            await Promise.all(
+                selectedRowKeys.map((userId) =>
+                    axios.delete(`http://localhost:3009/api/v1/user/${userId}`)
+                )
+            );
+
+            setData(prevData =>
+                prevData.filter(item => !selectedRowKeys.includes(item.userId))
+            );
+
+            setSelectedRowKeys([]); // clear selection
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+        } catch (error) {
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá mục đã chọn. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
         }
     };
 
@@ -179,6 +251,15 @@ const UserM: React.FC = () => {
             ),
     });
 
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<UserMType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
     const columns: TableColumnsType<UserMType> = [
         {
             title: 'Mã người dùng',
@@ -198,7 +279,7 @@ const UserM: React.FC = () => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
-            width: '20%',
+            width: '25%',
             ...getColumnSearchProps('email'),
         },
         {
@@ -217,7 +298,7 @@ const UserM: React.FC = () => {
                 <Space size="middle">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.userId)} />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.userId, true)} />
                 </Space>
             ),
         },
@@ -225,13 +306,23 @@ const UserM: React.FC = () => {
 
     return (
         <Spin spinning={loading}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
-                Tạo mới
-            </Button>
-            <Table<UserMType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.userId }))} />
+            {contextHolder}
+            <div className="space-x-3 flex justify-normal">
+                <Button type="primary" icon={<PlusOutlined />} onClick={showModal} style={{ marginBottom: 16 }}>
+                    Tạo mới
+                </Button>
+                <Button
+                    danger
+                    disabled={selectedRowKeys.length === 0}
+                    onClick={() => handleDeleteSelected(true)}
+                >
+                    Xoá các mục đã chọn
+                </Button>
+            </div>
+            <Table<UserMType> rowSelection={rowSelection} columns={columns} dataSource={data.map(item => ({ ...item, key: item.userId }))} />
 
             <Modal title={isEditing ? "Chỉnh sửa người dùng" : "Tạo mới người dùng"} open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <Form form={form} layout="vertical" onFinish={handleSave}>
+                <Form form={form} layout="vertical" onFinish={(values) => handleSave(values, true)}>
                     <Form.Item
                         label="Mã người dùng"
                         name="code"

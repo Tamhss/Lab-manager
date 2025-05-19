@@ -31,7 +31,6 @@ import { LabModule } from '@modules/Lab/lab.module';
 import { ReservationLabModule } from '@modules/reservation_lab/reservation_lab.module';
 import { LabBorrowHistoryModule } from '@modules/lab_borrow_history/borrow_history.module';
 import { MailModule } from '@modules/send_mail/mail.module';
-import { LabUsageModule } from '@modules/lab_usage/lab_usage.module';
 
 @Module({
   imports: [
@@ -59,7 +58,6 @@ import { LabUsageModule } from '@modules/lab_usage/lab_usage.module';
     ReservationLabModule,
     LabBorrowHistoryModule,
     MailModule,
-    LabUsageModule,
   ],
   controllers: [AppController],
   providers: [

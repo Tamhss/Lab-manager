@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, Upload, Select, Tag } from 'antd';
-import type { FilterDropdownProps } from 'antd/es/table/interface';
+import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
 
@@ -58,6 +58,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const [file, setFile] = useState<File | null>(null);
     const [isLabModalOpen, setIsLabModalOpen] = useState(false);
     const [labs, setLabs] = useState<LabType[]>([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const statusMap = {
         NOT_IN_USE: 'Không sử dụng',
         IN_USE: 'Đang sử dụng',
@@ -269,6 +270,44 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
         }
     };
 
+    const handleDeleteSelected = async (pauseOnHover: boolean) => {
+        if (selectedRowKeys.length === 0) return;
+
+        try {
+            await Promise.all(
+                selectedRowKeys.map((categoryId) =>
+                    axios.delete(`http://localhost:3009/api/v1/devices-category/${categoryId}`)
+                )
+            );
+
+            setData(prevData =>
+                prevData.filter(item => !selectedRowKeys.includes(item.categoryId))
+            );
+
+            setSelectedRowKeys([]); // clear selection
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+        } catch (error) {
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá mục đã chọn. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
+        }
+    };
+
     const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DeviceCategoryType> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -325,6 +364,15 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             ),
     });
 
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<DeviceCategoryType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
     const deviceColumns: TableColumnsType<DeviceType> = [
         {
             title: 'Mã thiết bị',
@@ -364,21 +412,21 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             title: 'Mã loại thiết bị',
             dataIndex: 'categoryId',
             key: 'categoryId',
-            width: '20%',
+            width: '30%',
             ...getColumnSearchProps('categoryId'),
         },
         {
             title: 'Loại thiết bị',
             dataIndex: 'name',
             key: 'name',
-            width: '20%',
+            width: '30%',
             ...getColumnSearchProps('name'),
         },
         {
             title: 'Số lượng',
             dataIndex: 'quantity',
             key: 'quantity',
-            width: '20%',
+            width: '25%',
             ...getColumnSearchProps('quantity'),
         },
         {
@@ -395,15 +443,6 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             ),
         },
     ];
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PENDING_BORROW': return 'gold';
-            case 'BORROWED': return 'orange';
-            case 'COMPLETED': return 'green';
-            default: return 'gray';
-        }
-    };
 
     const getStatusColorDevice = (status: string) => {
         switch (status) {
@@ -430,9 +469,16 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
                 <Button onClick={() => handleUpload(true)} className="custom-button">
                     Upload
                 </Button>
+                <Button
+                    danger
+                    disabled={selectedRowKeys.length === 0}
+                    onClick={() => handleDeleteSelected(true)}
+                >
+                    Xoá các mục đã chọn
+                </Button>
             </div>
 
-            <Table<DeviceCategoryType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.categoryId }))} />
+            <Table<DeviceCategoryType> rowSelection={rowSelection} columns={columns} dataSource={data.map(item => ({ ...item, key: item.categoryId }))} />
             <Modal
                 title={isEditing ? 'Chỉnh sửa loại thiết bị' : 'Tạo mới loại thiết bị'}
                 open={isModalOpen}

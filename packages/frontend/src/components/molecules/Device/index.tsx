@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload, Tag } from 'antd';
-import type { FilterDropdownProps } from 'antd/es/table/interface';
+import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
 interface DeviceType {
@@ -16,6 +16,7 @@ interface DeviceType {
     categoryId: string;
     status: string;
     borrowStatus: string;
+    updatedAt: string
 }
 
 interface DeviceProps {
@@ -37,6 +38,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const [categories, setCategories] = useState<{ categoryId: string; name: string }[]>([]);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<File | null>(null);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const statusMap = {
         NOT_IN_USE: 'Không sử dụng',
         IN_USE: 'Đang sử dụng',
@@ -227,9 +229,56 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
 
             setData(prevData => prevData.filter(item => item.deviceId !== deviceId));
         } catch (error) {
-            message.error("Lỗi khi xóa dữ liệu!");
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá dữ liệu. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
         }
     };
+
+    const handleDeleteSelected = async (pauseOnHover: boolean) => {
+        if (selectedRowKeys.length === 0) return;
+
+        try {
+            await Promise.all(
+                selectedRowKeys.map((id) =>
+                    axios.delete(`http://localhost:3009/api/v1/devices/${id}`)
+                )
+            );
+
+            setData(prevData =>
+                prevData.filter(item => !selectedRowKeys.includes(item.deviceId))
+            );
+
+            setSelectedRowKeys([]); // clear selection
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+        } catch (error) {
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá dữ liệu. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
+        }
+    };
+
 
     const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DeviceType> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -283,6 +332,15 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
                 text
             ),
     });
+
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<DeviceType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
 
     const columns: TableColumnsType<DeviceType> = [
         {
@@ -389,8 +447,19 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
                 <Button onClick={() => { handleExport(labId) }} className="custom-button">
                     Export
                 </Button>
+                <Button
+                    danger
+                    disabled={selectedRowKeys.length === 0}
+                    onClick={() => handleDeleteSelected(true)}
+                >
+                    Xoá các mục đã chọn
+                </Button>
             </div>
-            <Table<DeviceType> columns={columns} dataSource={data.map(item => ({ ...item, key: item.deviceId }))} scroll={{ y: 650 }} />
+            <Table<DeviceType> rowSelection={rowSelection} columns={columns} dataSource={
+                [...data]
+                    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                    .map(item => ({ ...item, key: item.deviceId }))
+            } scroll={{ y: 650 }} />
 
             <Modal title={isEditing ? "Chỉnh sửa thiết bị" : "Tạo mới thiết bị"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleSave}>

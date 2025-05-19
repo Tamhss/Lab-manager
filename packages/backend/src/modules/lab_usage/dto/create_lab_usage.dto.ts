@@ -1,22 +1,22 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+// import { IsDateString, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
-export enum Session {
-  MORNING = 'MORNING',
-  AFTERNOON = 'AFTERNOON',
-  EVENING = 'EVENING',
-}
+// export enum Session {
+//   MORNING = 'MORNING',
+//   AFTERNOON = 'AFTERNOON',
+//   EVENING = 'EVENING',
+// }
 
-export class CreateLabUsageDto {
-  @IsString()
-  @IsNotEmpty()
-  labId: string;
+// export class CreateLabUsageDto {
+//   @IsString()
+//   @IsNotEmpty()
+//   labId: string;
 
-  @IsEnum(Session)
-  session: Session;
+//   @IsEnum(Session)
+//   session: Session;
 
-  @IsDateString()
-  usageDate: string;
+//   @IsDateString()
+//   usageDate: string;
 
-  @IsString()
-  status: string;
-}
+//   @IsString()
+//   status: string;
+// }

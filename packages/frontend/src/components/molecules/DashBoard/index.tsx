@@ -14,7 +14,8 @@ import {
     CategoryScale, LinearScale, BarElement,
     PointElement, LineElement,
 } from 'chart.js';
-
+import NProgress from 'nprogress'; // Import NProgress
+import 'nprogress/nprogress.css'
 import Device from '../Device';
 import DeviceCategory from '../DeviceCategory';
 import UserM from '../UserM';
@@ -42,8 +43,9 @@ interface BarChartData {
 const Dashboard: React.FC = () => {
     const [devices, setDevices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [currentMenu, setCurrentMenu] = useState('dashboard');
+    const [currentMenu, setCurrentMenu] = useState<string>('dashboard');
     const [userRole, setUserRole] = useState<string>('');
+    const [isMenuLoading, setIsMenuLoading] = useState(true);
 
     const [pieData, setPieData] = useState({
         labels: ['Không sử dụng', 'Đang sử dụng', 'Hư hỏng', 'Đang thinh lí'],
@@ -68,6 +70,7 @@ const Dashboard: React.FC = () => {
 
     const fetchData = async () => {
         setLoading(true);
+        NProgress.start();
         try {
             const response = await axios.get('http://localhost:3009/api/v1/devices');
             if (Array.isArray(response.data?.data)) {
@@ -91,12 +94,13 @@ const Dashboard: React.FC = () => {
             console.error('Lỗi khi tải thiết bị:', error);
         } finally {
             setLoading(false);
+            NProgress.done();
         }
     };
 
     const fetchDataReservation = async () => {
-        console.log('Fetching reservation data...');
         setLoading(true);
+        NProgress.start();
         try {
             const token = localStorage.getItem('token');
             const config = {
@@ -142,11 +146,13 @@ const Dashboard: React.FC = () => {
             console.error('Lỗi khi tải đơn đăng ký:', error);
         } finally {
             setLoading(false);
+            NProgress.done();
         }
     };
 
 
     useEffect(() => {
+        NProgress.start();
         fetchData();
         fetchDataReservation();
         const userData = localStorage.getItem('user');
@@ -154,7 +160,24 @@ const Dashboard: React.FC = () => {
             const user = JSON.parse(userData);
             setUserRole(user.role);
         }
+        NProgress.done();
     }, []);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const savedMenu = localStorage.getItem('currentMenu');
+            if (savedMenu) {
+                setCurrentMenu(savedMenu);
+            }
+            setIsMenuLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('currentMenu', currentMenu);
+        }
+    }, [currentMenu]);
 
     const renderDashboard = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -174,7 +197,11 @@ const Dashboard: React.FC = () => {
         </div>
     );
 
-    const onClick: MenuProps['onClick'] = (e) => setCurrentMenu(e.key);
+    const onClick: MenuProps['onClick'] = (e) => {
+        NProgress.start();
+        setCurrentMenu(e.key);
+        NProgress.done();
+    }
 
     const isLimitedRole = ['LECTURER', 'STUDENT'].includes(userRole);
 
@@ -268,6 +295,9 @@ const Dashboard: React.FC = () => {
     };
 
     const renderContent = () => {
+        if (isMenuLoading) {
+            return <div>Loading...</div>; // Hiển thị loading trong khi chờ
+        }
         switch (currentMenu) {
             case 'dashboard':
                 return renderDashboard();
@@ -308,7 +338,7 @@ const Dashboard: React.FC = () => {
             <Menu
                 onClick={onClick}
                 className="w-64 h-full bg-gray-50"
-                defaultSelectedKeys={['dashboard']}
+                defaultSelectedKeys={[currentMenu]}
                 mode="inline"
                 items={getMenuItems()}
             />

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import DeviceReservationForm from '../../molecules/DeviceReservation';
 import { motion } from 'framer-motion';
 import LabReservationForm from '@/components/molecules/LabReservation';
-import LabRegulation from '@/components/Context/Regulations';
+import LabRegulation from '@/components/atom/Regulations';
 import { Button } from 'antd';
 
 const BookingCards = () => {

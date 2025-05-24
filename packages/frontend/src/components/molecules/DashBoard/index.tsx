@@ -27,6 +27,7 @@ import LabBorrowHistory from '../LabBorrowHistory';
 import ServerDashboard from '../ServerDashboard';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import { user } from '@nextui-org/react';
 dayjs.extend(isoWeek);
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
@@ -180,20 +181,51 @@ const Dashboard: React.FC = () => {
     }, [currentMenu]);
 
     const renderDashboard = () => (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card title="Trạng thái thiết bị" className="shadow-lg">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {userRole !== 'ADMIN' && (
+                <>
+                    <Card title="Thông báo" className="shadow-lg flex items-center justify-between p-4 hover:brightness-105 hover:shadow-xl hover:scale-105 transition duration-300">
+                        <div className="w-16 h-16 bg-blue-600 rounded flex items-center justify-center">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                        </div>
+                    </Card>
+                    <Card title="Hồ sơ cá nhân" className="shadow-lg flex items-center justify-between p-4 hover:brightness-105 hover:shadow-xl hover:scale-105 transition duration-300">
+                        <div className="w-16 h-16 bg-red-500 rounded flex items-center justify-center">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" transform="translate(0 4)"></path>
+                            </svg>
+                        </div>
+                    </Card>
+                    <Card title="Cài đặt" className="shadow-lg flex items-center justify-between p-4 hover:brightness-105 hover:shadow-xl hover:scale-105 transition duration-300">
+                        <div className="w-16 h-16 bg-teal-500 rounded flex items-center justify-center">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H14M10 12H14M10 18H14M6 6H18M6 12H18M6 18H18"></path>
+                            </svg>
+                        </div>
+                    </Card>
+                    <Card title="Đánh giá" className="shadow-lg flex items-center justify-between p-4 hover:brightness-105 hover:shadow-xl hover:scale-105 transition duration-300">
+                        <div className="w-16 h-16 bg-yellow-400 rounded flex items-center justify-center">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.287-3.97a1 1 0 00-.364-1.118L2.314 9.397c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.97z"></path>
+                            </svg>
+                        </div>
+                    </Card>
+                </>
+            )}
+            <Card title="Trạng thái thiết bị" className="shadow-lg md:col-span-2">
                 <div className="h-[300px]"><Pie data={pieData} options={chartOptions} /></div>
             </Card>
-            <Card title="Thống kê đăng ký" className="shadow-lg">
+            <Card title="Thống kê đăng ký" className="shadow-lg md:col-span-2">
                 <div className="h-[300px]"><Bar data={barData} options={chartOptions} /></div>
             </Card>
-            {/* <Card title="Hoạt động hàng tuần" className="md:col-span-2 shadow-lg">
-                <div className="h-[300px]"><Line data={lineData} options={chartOptions} /></div>
-            </Card> */}
-            <div className='md:col-span-2'>
+            {userRole === 'ADMIN' && (
+                <div className='md:col-span-4'>
                 <ServerDashboard />
             </div>
-
+            )}
         </div>
     );
 
@@ -296,7 +328,7 @@ const Dashboard: React.FC = () => {
 
     const renderContent = () => {
         if (isMenuLoading) {
-            return <div>Loading...</div>; // Hiển thị loading trong khi chờ
+            return <div>Loading...</div>;
         }
         switch (currentMenu) {
             case 'dashboard':

@@ -17,7 +17,7 @@ export const Navbar: React.FC = () => {
     const router = useRouter();
     const pathname = usePathname();
     const currentPath = pathname || "/";
-    const [user, setUser] = useState<string | null>(null);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -25,7 +25,7 @@ export const Navbar: React.FC = () => {
             try {
                 const parsedUser = JSON.parse(storedUser);
                 console.log("User:", parsedUser);
-                setUser(parsedUser.userName || "");
+                setUser(parsedUser);
             } catch (error) {
                 console.error("Lỗi khi parse user:", error);
             }
@@ -59,21 +59,23 @@ export const Navbar: React.FC = () => {
             <div className="hidden lg:flex pr-14">
                 {user && (
                     <ul className="flex items-center">
-                        <Tooltip title="TRANG CHỦ">
-                            <li className="relative group">
-                                <Link href="/">
-                                    <div className="px-10 py-4 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
-                                        <HomeOutlined
-                                            className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/" ? "text-indigo-600" : ""
-                                                }`}
-                                        />
-                                    </div>
-                                </Link>
-                                {currentPath === "/" && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
-                                )}
-                            </li>
-                        </Tooltip>
+                        {user?.role !== "ADMIN" && (
+                            <Tooltip title="TRANG CHỦ">
+                                <li className="relative group">
+                                    <Link href="/">
+                                        <div className="px-10 py-4 rounded-lg transition-all duration-200 group-hover:bg-gray-200">
+                                            <HomeOutlined
+                                                className={`text-black text-2xl transition-colors duration-200 ${currentPath === "/" ? "text-indigo-600" : ""
+                                                    }`}
+                                            />
+                                        </div>
+                                    </Link>
+                                    {currentPath === "/" && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
+                                    )}
+                                </li>
+                            </Tooltip>
+                        )}
 
                         <Tooltip title="BẢNG ĐIỀU KHIỂN">
                             <li className="relative group">

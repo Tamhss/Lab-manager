@@ -28,9 +28,9 @@ To get a local copy up and running follow these steps.
 - Node
 
 ```sh
-  Node version >= 18.14.2
+  Node version 18.9.0
 
-  Yarn version 1.22.19
+  Yarn version 1.22.22
 ```
 
 ### Create .env file like .env.example for both backend and frontend folder
@@ -49,7 +49,6 @@ $ yarn db:migrate
 $ yarn dev
 
 ```
-
 
 ### Running frontend
 

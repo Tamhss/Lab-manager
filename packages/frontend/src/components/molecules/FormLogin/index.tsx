@@ -28,8 +28,6 @@ const SignIn = () => {
         setError("");
         setLoading(true);
 
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
         const res = await fetch("http://localhost:3009/api/v1/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

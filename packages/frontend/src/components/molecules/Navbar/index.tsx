@@ -114,7 +114,7 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center space-x-4">
                 {user ? (
                     <>
-                        <Tooltip title={user}>
+                        <Tooltip title={user.userName}>
                             <Button
                                 shape="circle"
                                 className="bg-indigo-700 text-white hover:bg-purple-600 border-none"

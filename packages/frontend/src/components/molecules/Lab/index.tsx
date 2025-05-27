@@ -246,7 +246,6 @@ const Lab: React.FC = () => {
             align: 'center',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type="text" icon={<EyeOutlined />} onClick={() => handleDetail(record)} />
                     <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
                     <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.labId, true)} />
                 </Space>

@@ -136,21 +136,24 @@ export class ReservationDeviceService {
 
     if (statusEnum === ReservationStatus.REJECTED) {
       if (userRole === Role.STUDENT && actorRole !== Role.STUDENT) {
-      // Gửi email nếu STUDENT bị LECTURER hoặc ADMIN từ chối
         await this.mailService.sendMail(
           reservation.user.email,
-          'Yêu cầu đặt phòng bị từ chối',
-          `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
+          'Yêu cầu đặt thiết bị bị từ chối',
+          `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt thiết bị "${reservation.device.deviceName}" của bạn đã bị từ chối.`,
+        );
+      } else if (userRole === Role.STUDENT && actorRole === Role.STUDENT) {
+        await this.mailService.sendMail(
+          reservation.user.email,
+          'Hủy yêu cầu đặt thiết bị thành công',
+          `Xin chào ${reservation.user.userName}, bạn đã hủy thành công yêu cầu đặt thiết bị "${reservation.device.deviceName}".`,
         );
       } else if (userRole !== Role.STUDENT) {
-        // Gửi email nếu người dùng không phải STUDENT (LECTURER, ADMIN, v.v.)
         await this.mailService.sendMail(
           reservation.user.email,
-          'Yêu cầu đặt phòng bị từ chối',
-          `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
+          'Yêu cầu đặt thiết bị bị từ chối',
+          `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt thiết bị "${reservation.device.deviceName}" của bạn đã bị từ chối.`,
         );
       }
-      // Không gửi email nếu STUDENT tự hủy (userRole === Role.STUDENT && actorRole === Role.STUDENT)
     }
 
     return this.prisma.reservationDevice.update({

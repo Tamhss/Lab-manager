@@ -3,7 +3,7 @@ import { SearchOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, CheckCirc
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table, Spin, message, Tag, Tooltip, Form, Modal, Select, notification } from 'antd';
 import axios from 'axios';
-import { FilterDropdownProps } from 'antd/es/table/interface';
+import { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -48,6 +48,7 @@ const DeviceReservation: React.FC = () => {
     const [selectedRecord, setSelectedRecord] = useState<DeviceReservationType | null>(null);
     const [form] = Form.useForm();
     const [api, contextHolder] = notification.useNotification();
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const statusMap = {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Giảng viên đã phê duyệt',
@@ -353,6 +354,44 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
+    const handleDeleteSelected = async (pauseOnHover: boolean) => {
+        if (selectedRowKeys.length === 0) return;
+
+        try {
+            await Promise.all(
+                selectedRowKeys.map((deviceReservationId) =>
+                    axios.delete(`http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`)
+                )
+            );
+
+            setData(prevData =>
+                prevData.filter(item => !selectedRowKeys.includes(item.deviceReservationId))
+            );
+
+            setSelectedRowKeys([]);
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+        } catch (error) {
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá mục đã chọn. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
+        }
+    };
+
     const handleSearch = useCallback(
         (selectedKeys: string[], confirm: FilterDropdownProps['confirm'], dataIndex: DataIndex) => {
             confirm();
@@ -447,6 +486,16 @@ const DeviceReservation: React.FC = () => {
                 text
             ),
     });
+
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<DeviceReservationType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
 
     const columns: TableColumnsType<DeviceReservationType> = [
         {
@@ -587,7 +636,16 @@ const DeviceReservation: React.FC = () => {
     return (
         <Spin spinning={loading}>
             {contextHolder}
+            <Button
+                danger
+                disabled={selectedRowKeys.length === 0}
+                onClick={() => handleDeleteSelected(true)}
+                className='mb-4'
+            >
+                Xoá các mục đã chọn
+            </Button>
             <Table<DeviceReservationType>
+                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={formattedData.map(item => ({ ...item, key: item.deviceReservationId }))}
             />

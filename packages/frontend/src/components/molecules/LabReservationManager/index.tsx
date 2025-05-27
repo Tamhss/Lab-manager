@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { SearchOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Tag, Tooltip, Form, Modal, Select } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Tag, Tooltip, Form, Modal, Select, notification } from 'antd';
 import axios from 'axios';
-import { FilterDropdownProps } from 'antd/es/table/interface';
+import { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -42,6 +42,8 @@ const LabReservationManager: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<LabReservationType | null>(null);
     const [form] = Form.useForm();
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [api, contextHolder] = notification.useNotification();
     const statusMap = {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Đã được giảng viên phê duyệt',
@@ -336,6 +338,51 @@ const LabReservationManager: React.FC = () => {
         }
     };
 
+    const handleDeleteSelected = async (pauseOnHover: boolean) => {
+        if (selectedRowKeys.length === 0) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                message.error("Không tìm thấy token, vui lòng đăng nhập lại!");
+                return;
+            }
+            await Promise.all(
+                selectedRowKeys.map((labReservationId) =>
+                    axios.delete(`http://localhost:3009/api/v1/reservations-lab/${labReservationId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    })
+                )
+            );
+
+            setData(prevData =>
+                prevData.filter(item => !selectedRowKeys.includes(item.labReservationId))
+            );
+
+            setSelectedRowKeys([]); // clear selection
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+        } catch (error) {
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá dữ liệu. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
+        }
+    };
+
     const handleSearch = useCallback(
         (selectedKeys: string[], confirm: FilterDropdownProps['confirm'], dataIndex: DataIndex) => {
             confirm();
@@ -430,6 +477,15 @@ const LabReservationManager: React.FC = () => {
                 text
             ),
     });
+
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<LabReservationType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
 
     const columns: TableColumnsType<LabReservationType> = [
         {
@@ -563,7 +619,17 @@ const LabReservationManager: React.FC = () => {
 
     return (
         <Spin spinning={loading}>
+            {contextHolder}
+            <Button
+                danger
+                disabled={selectedRowKeys.length === 0}
+                onClick={() => handleDeleteSelected(true)}
+                className='mb-4'
+            >
+                Xoá các mục đã chọn
+            </Button>
             <Table<LabReservationType>
+                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={formattedData.map(item => ({ ...item, key: item.labReservationId }))}
             />

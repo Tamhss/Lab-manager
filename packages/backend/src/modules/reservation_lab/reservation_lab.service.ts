@@ -133,21 +133,24 @@ export class ReservationLabService {
 
     if (statusEnum === ReservationStatus.REJECTED) {
       if (userRole === Role.STUDENT && actorRole !== Role.STUDENT) {
-        // Gửi email nếu STUDENT bị LECTURER hoặc ADMIN từ chối
         await this.mailService.sendMail(
           reservation.user.email,
           'Yêu cầu đặt phòng bị từ chối',
           `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
         );
+      } else if (userRole === Role.STUDENT && actorRole === Role.STUDENT) {
+        await this.mailService.sendMail(
+          reservation.user.email,
+          'Hủy yêu cầu đặt phòng thành công',
+          `Xin chào ${reservation.user.userName}, bạn đã hủy thành công yêu cầu đặt lịch "${reservation.lab.labName}".`,
+        );
       } else if (userRole !== Role.STUDENT) {
-      // Gửi email nếu người dùng không phải STUDENT (LECTURER, ADMIN, v.v.)
         await this.mailService.sendMail(
           reservation.user.email,
           'Yêu cầu đặt phòng bị từ chối',
           `Xin chào ${reservation.user.userName}, rất tiếc yêu cầu đặt phòng "${reservation.lab.labName}" của bạn đã bị từ chối.`,
         );
       }
-      // Không gửi email nếu STUDENT tự hủy (userRole === Role.STUDENT && actorRole === Role.STUDENT)
     }
 
     return this.prisma.reservationLab.update({
@@ -195,9 +198,9 @@ export class ReservationLabService {
       }
     });
     const subject = 'Lịch đặt phòng đã được phê duyệt bởi giảng viên';
-    const text = `Xin chào ${reservation.user.userName}, lịch đặt thiết bị "${reservation.lab.labName}" vào ${reservation.createdAt} đã được giảng viên phê duyệt.`;
+    const text = `Xin chào ${reservation.user.userName}, lịch đặt phòng "${reservation.lab.labName}" vào ${reservation.createdAt} đã được giảng viên phê duyệt.`;
     const html = `<p>Xin chào <strong>${reservation.user.userName}</strong>,</p>
-      <p>Lịch đặt thiết bị <strong>${reservation.lab.labName}</strong> vào <strong>${reservation.createdAt}</strong> đã được giảng viên phê duyệt.</p>`;
+      <p>Lịch đặt <strong>${reservation.lab.labName}</strong> vào <strong>${reservation.createdAt}</strong> đã được giảng viên phê duyệt.</p>`;
 
     await this.mailService.sendMail(reservation.user.email, subject, text, html);
 
@@ -222,10 +225,10 @@ export class ReservationLabService {
         }
       },
     });
-    const subject = 'Lịch đặt thiết bị đã được phê duyệt bởi admin';
-    const text = `Xin chào ${reservation.user.userName}, lịch đặt thiết bị "${reservation.lab.labName}" vào ${reservation.createdAt} đã được admin phê duyệt.`;
+    const subject = 'Lịch đặt phòng đã được phê duyệt bởi admin';
+    const text = `Xin chào ${reservation.user.userName}, lịch đặt "${reservation.lab.labName}" vào ${reservation.createdAt} đã được admin phê duyệt.`;
     const html = `<p>Xin chào <strong>${reservation.user.userName}</strong>,</p>
-      <p>Lịch đặt thiết bị <strong>${reservation.lab.labName}</strong> vào <strong>${reservation.createdAt}</strong> đã được admin phê duyệt.</p>`;
+      <p>Lịch đặt <strong>${reservation.lab.labName}</strong> vào <strong>${reservation.createdAt}</strong> đã được admin phê duyệt.</p>`;
 
     await this.mailService.sendMail(reservation.user.email, subject, text, html);
 

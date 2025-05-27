@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchOutlined, EyeOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table, Spin, message, notification, Upload, Tag } from 'antd';
-import type { FilterDropdownProps } from 'antd/es/table/interface';
+import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
 import dayjs from 'dayjs'
@@ -28,6 +28,7 @@ const DeviceBorrowHistory: React.FC = () => {
     const [data, setData] = useState<BorrowHistoryType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [api, contextHolder] = notification.useNotification();
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     dayjs.extend(utc);
     dayjs.extend(timezone);
 
@@ -110,6 +111,44 @@ const DeviceBorrowHistory: React.FC = () => {
         }
     };
 
+    const handleDeleteSelected = async (pauseOnHover: boolean) => {
+        if (selectedRowKeys.length === 0) return;
+
+        try {
+            await Promise.all(
+                selectedRowKeys.map((borrowHistoryId) =>
+                    axios.delete(`http://localhost:3009/api/v1/device-borrow-history/${borrowHistoryId}`)
+                )
+            );
+
+            setData(prevData =>
+                prevData.filter(item => !selectedRowKeys.includes(item.borrowHistoryId))
+            );
+
+            setSelectedRowKeys([]);
+
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
+        } catch (error) {
+            setTimeout(() => {
+                api.error({
+                    message: 'Lỗi khi xoá',
+                    description: 'Không thể xoá mục đã chọn. Vui lòng thử lại!',
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
+        }
+    };
+
     const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<BorrowHistoryType> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -162,6 +201,15 @@ const DeviceBorrowHistory: React.FC = () => {
                 text
             ),
     });
+
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<BorrowHistoryType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
 
     const columns: TableColumnsType<BorrowHistoryType> = [
         {
@@ -228,7 +276,15 @@ const DeviceBorrowHistory: React.FC = () => {
     return (
         <Spin spinning={loading}>
             {contextHolder}
-            <Table<BorrowHistoryType> columns={columns} dataSource={data.map(item => ({...item, key: item.borrowHistoryId}))} />
+            <Button
+                danger
+                disabled={selectedRowKeys.length === 0}
+                onClick={() => handleDeleteSelected(true)}
+                className='mb-4'
+            >
+                Xoá các mục đã chọn
+            </Button>
+            <Table<BorrowHistoryType> rowSelection={rowSelection} columns={columns} dataSource={data.map(item => ({ ...item, key: item.borrowHistoryId }))} />
         </Spin>
     );
 };

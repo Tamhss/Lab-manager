@@ -284,7 +284,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
                 prevData.filter(item => !selectedRowKeys.includes(item.categoryId))
             );
 
-            setSelectedRowKeys([]); // clear selection
+            setSelectedRowKeys([]);
 
             setTimeout(() => {
                 api.success({

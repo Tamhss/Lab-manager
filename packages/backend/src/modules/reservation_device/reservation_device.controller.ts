@@ -8,8 +8,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '@core/global/auth/roles.decorator';
 import { Role } from '@prisma/client';
 
-
-
 @Controller('reservations-device')
 export class ReservationDeviceController {
   constructor(private readonly reservationService: ReservationDeviceService) {}

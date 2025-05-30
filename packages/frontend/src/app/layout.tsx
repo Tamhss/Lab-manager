@@ -37,8 +37,17 @@ export const metadata: Metadata = {
       'application/rss+xml': [{ url: 'https://repicle.com/feed.xml', title: 'Repicle Research Topic Particle' }],
     },
   },
-  viewport: 'viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0',
 };
+
+export function generateViewport() {
+  return {
+    viewport: 'viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0',
+    themeColor: [
+      { media: '(prefers-color-scheme: light)', color: 'white' },
+      { media: '(prefers-color-scheme: dark)', color: 'black' },
+    ],
+  };
+}
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (

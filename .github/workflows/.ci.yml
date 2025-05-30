@@ -1,0 +1,71 @@
+name: CI pipeline for Lab Management System
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  build-and-deploy:
+    runs-on: [self-hosted, windows]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install root dependencies
+        run: yarn install
+
+      - name: Install frontend dependencies
+        working-directory: packages/frontend
+        run: yarn install
+
+      - name: Install backend dependencies
+        working-directory: packages/backend
+        run: yarn install
+
+      - name: Build backend
+        working-directory: packages/backend
+        run: yarn build
+
+      - name: Build frontend
+        working-directory: packages/frontend
+        run: yarn build
+
+      - name: Deploy frontend to IIS site "fitlab"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $siteName = "fitlab"
+          $target = "C:\inetpub\wwwroot\$siteName"
+
+          Write-Host "Stopping IIS site: $siteName"
+          Stop-Website -Name $siteName
+
+          Write-Host "Clearing old files..."
+          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+          Write-Host "Copying new frontend build files..."
+          Copy-Item "packages\frontend\dist\*" -Destination $target -Recurse
+
+          Write-Host "Starting IIS site: $siteName"
+          Start-Website -Name $siteName
+        shell: powershell
+
+      - name: Deploy backend to IIS site "fitlabapi"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $siteName = "fitlabapi"
+          $target = "C:\inetpub\wwwroot\$siteName"
+
+          Write-Host "Stopping IIS site: $siteName"
+          Stop-Website -Name $siteName
+
+          Write-Host "Clearing old files..."
+          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+          Write-Host "Copying new backend build files..."
+          Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
+
+          Write-Host "Starting IIS site: $siteName"
+          Start-Website -Name $siteName
+        shell: powershell

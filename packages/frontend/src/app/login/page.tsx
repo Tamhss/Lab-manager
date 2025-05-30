@@ -1,7 +1,5 @@
 import SignIn from "@/components/molecules/FormLogin";
-import { Props } from '@/types';
-
-const Page = async ({ params }: Props) => {
+const Page = async () => {
   return (
     <main>
       <div className="mx-auto">

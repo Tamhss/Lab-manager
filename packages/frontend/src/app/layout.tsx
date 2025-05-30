@@ -1,10 +1,11 @@
+// app/layout.tsx (hoặc src/app/layout.tsx nếu bạn dùng cấu trúc src)
 import '@/styles/globals.css';
 import clsx from 'clsx';
 import { Metadata } from 'next';
 import { fontSans } from '@/config/fonts';
 import { siteConfig } from '@/config/site';
 import './globals.css';
-import { HeaderProvider } from '@/components/Context';
+import ClientLayout from '@/components/organisms/clientLayout';
 
 export const metadata: Metadata = {
   title: {
@@ -13,28 +14,20 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   keywords: ['AIoT Lab-DNU'],
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
-  icons: {
-    // icon: '/favicon.ico',
-    // shortcut: '/favicon-16x16.png',
-    // apple: '/apple-touch-icon.png',
-  },
   manifest: '/manifest.json',
   twitter: siteConfig.twitter,
   openGraph: siteConfig.openGraph,
-  authors: [
-    {
-      name: 'Tam',
-    },
-  ],
+  authors: [{ name: 'Tam' }],
   creator: 'Tam',
   alternates: {
     canonical: 'https://repicle.com',
     types: {
-      'application/rss+xml': [{ url: 'https://repicle.com/feed.xml', title: 'Repicle Research Topic Particle' }],
+      'application/rss+xml': [
+        {
+          url: 'https://repicle.com/feed.xml',
+          title: 'Repicle Research Topic Particle',
+        },
+      ],
     },
   },
 };
@@ -53,14 +46,11 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <HeaderProvider>
-        <body className={clsx('min-h-screen w-full bg-white font-sans antialiased', fontSans.variable)}>
-          <div className="relative h-screen overflow-hidden">
-            {children}
-
-          </div>
-        </body>
-      </HeaderProvider>
+      <body className={clsx('min-h-screen w-full bg-white font-sans antialiased', fontSans.variable)}>
+        <ClientLayout>
+          <div className="relative h-screen overflow-hidden">{children}</div>
+        </ClientLayout>
+      </body>
     </html>
   );
 };

@@ -40,7 +40,7 @@ jobs:
       # Build backend
       - name: Build backend
         working-directory: packages/backend
-        run: npm build
+        run: npm run build
 
       # Copy file .env vào thư mục dist backend để deploy
       - name: Copy environment file to backend dist folder

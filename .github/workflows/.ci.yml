@@ -22,7 +22,11 @@ jobs:
 
       - name: Build backend
         working-directory: packages/backend
-        run: yarn build
+        run: yarn 
+        
+      - name: Copy environment file to backend dist folder
+        run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\"
+        shell: powershell
 
       - name: Build frontend
         working-directory: packages/frontend

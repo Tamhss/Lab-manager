@@ -16,6 +16,7 @@ jobs:
       - name: Install frontend dependencies
         working-directory: packages/frontend
         run: npm install
+
       - name: Install backend dependencies
         working-directory: packages/backend
         run: yarn install
@@ -35,13 +36,27 @@ jobs:
           $target = "C:\inetpub\wwwroot\$siteName"
 
           Write-Host "Stopping IIS site: $siteName"
-          Stop-Website -Name $siteName
+          Stop-Website -Name $siteName -ErrorAction SilentlyContinue
 
           Write-Host "Clearing old files..."
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
 
           Write-Host "Copying new frontend build files..."
-          Copy-Item "packages\frontend\.next\*" -Destination $target -Recurse
+          Copy-Item "packages\frontend\*" -Destination $target -Recurse
+
+          Write-Host "Installing Node.js dependencies..."
+          Set-Location $target
+          npm install
+
+          Write-Host "Checking if pm2 is installed..."
+          if (-not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
+            Write-Host "Installing pm2 globally..."
+            npm install -g pm2
+          }
+
+          Write-Host "Starting Node.js server with pm2..."
+          pm2 delete "fitlab" -ErrorAction SilentlyContinue
+          pm2 start npm --name "fitlab" -- start -- --port 3000
 
           Write-Host "Starting IIS site: $siteName"
           Start-Website -Name $siteName

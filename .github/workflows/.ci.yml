@@ -37,6 +37,11 @@ jobs:
         working-directory: packages/backend
         run: yarn build
 
+      # Run Prisma migrate to update DB schema
+      - name: Run Prisma migrate
+        working-directory: packages/backend
+        run: npx prisma migrate deploy
+
       # Copy file .env vào thư mục dist backend để deploy
       - name: Copy environment file to backend dist folder
         run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\"

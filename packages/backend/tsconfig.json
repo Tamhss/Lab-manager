@@ -10,6 +10,7 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": ".",
     "baseUrl": "./",
     "incremental": true,
     "paths": {
@@ -32,6 +33,6 @@
   },
   "exclude": [
     "node_modules",
-    "dist",
+    "dist"
   ]
 }

@@ -13,25 +13,41 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      # Tạo file .env cho backend từ secret ENV_FILE_CONTENT
+      - name: Create .env file for backend from secret
+        run: |
+          $envContent = @"
+          ${{ secrets.ENV_FILE_CONTENT }}
+          "@
+          Set-Content -Path "packages/backend/.env" -Value $envContent
+        shell: powershell
+
+      # Cài dependencies frontend
       - name: Install frontend dependencies
         working-directory: packages/frontend
         run: npm install
+
+      # Cài dependencies backend
       - name: Install backend dependencies
         working-directory: packages/backend
         run: yarn install
 
+      # Build backend
       - name: Build backend
         working-directory: packages/backend
-        run: yarn 
-        
+        run: yarn build
+
+      # Copy file .env vào thư mục dist backend để deploy
       - name: Copy environment file to backend dist folder
         run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\"
         shell: powershell
 
+      # Build frontend
       - name: Build frontend
         working-directory: packages/frontend
         run: npm run build
 
+      # Deploy frontend lên IIS site "fitlab"
       - name: Deploy frontend to IIS site "fitlab"
         run: |
           $ErrorActionPreference = "Stop"
@@ -51,6 +67,7 @@ jobs:
           Start-Website -Name $siteName
         shell: powershell
 
+      # Deploy backend lên IIS site "fitlabapi"
       - name: Deploy backend to IIS site "fitlabapi"
         run: |
           $ErrorActionPreference = "Stop"
@@ -64,8 +81,4 @@ jobs:
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
 
           Write-Host "Copying new backend build files..."
-          Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
-
-          Write-Host "Starting IIS site: $siteName"
-          Start-Website -Name $siteName
-        shell: powershell
+          Copy-Item "packages\backend\dist\*" -Destination $target -R*

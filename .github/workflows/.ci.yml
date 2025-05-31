@@ -13,24 +13,21 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install root dependencies
-        run: yarn install
-
       - name: Install frontend dependencies
         working-directory: packages/frontend
-        run: yarn install
+        run: npm install
 
       - name: Install backend dependencies
         working-directory: packages/backend
-        run: yarn install
+        run: npm install
 
       - name: Build backend
         working-directory: packages/backend
-        run: yarn build
+        run: npm run build
 
       - name: Build frontend
         working-directory: packages/frontend
-        run: yarn build
+        run: npm run build
 
       - name: Deploy frontend to IIS site "fitlab"
         run: |

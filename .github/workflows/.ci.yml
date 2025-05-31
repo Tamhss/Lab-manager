@@ -41,7 +41,7 @@ jobs:
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
 
           Write-Host "Copying new frontend build files..."
-          Copy-Item "packages\frontend\.next\out\*" -Destination $target -Recurse
+          Copy-Item "packages\frontend\out\*" -Destination $target -Recurse
 
           Write-Host "Starting IIS site: $siteName"
           Start-Website -Name $siteName

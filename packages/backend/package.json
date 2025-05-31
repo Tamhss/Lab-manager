@@ -32,7 +32,7 @@
     "generate-prisma-prod": "prisma generate",
     "seed": "prisma db seed",
     "generate-prisma-dev": "prisma migrate dev --create-only --skip-seed",
-    "db:migrate": "prisma migrate dev --skip-seed",
+     "db:migrate": "prisma migrate dev --schema=src/prisma/schema.prisma --skip-seed",
     "reset-prisma-dev": "prisma migrate reset",
     "migrate-prisma-prod": "prisma migrate deploy --preview-feature",
     "lint-staged": "lint-staged",

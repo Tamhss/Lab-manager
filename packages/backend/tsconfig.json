@@ -9,20 +9,15 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
+    "rootDir": "./src",
     "outDir": "./dist",
-    "rootDir": ".",
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@core/*": [
-        "src/core/*"
-      ],
-      "@modules/*": [
-        "src/modules/*"
-      ],
-      "@helper/*": [
-        "src/helper/*"
-      ]
+      "@core/*": ["src/core/*"],
+      "@modules/*": ["src/modules/*"],
+      "@helper/*": ["src/helper/*"],
+      "@prisma/*": ["src/prisma/*"]
     },
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -31,8 +26,6 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "swagger-generator.ts"]
 }

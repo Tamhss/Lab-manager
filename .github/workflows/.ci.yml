@@ -81,4 +81,10 @@ jobs:
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
 
           Write-Host "Copying new backend build files..."
-          Copy-Item "packages\backend\dist\*" -Destination $target -R*
+          Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
+
+          Write-Host "Starting IIS site: $siteName"
+          Start-Website -Name $siteName
+        shell: powershell
+
+

@@ -194,7 +194,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
             try {
                 const token = localStorage.getItem("token");
 
-                const labsResponse = await axios.get("http://localhost:3009/api/v1/labs", {
+                const labsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -207,7 +207,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
                     return;
                 }
 
-                const reservationsResponse = await axios.get("http://localhost:3009/api/v1/reservations-lab", {
+                const reservationsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -267,7 +267,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:3009/api/v1/lecturers")
+            .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lecturers`)
             .then((response) => {
                 if (Array.isArray(response.data.data.data)) {
                     const data = response.data.data.data.map((user: ApiLecturer) => ({
@@ -339,7 +339,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
 
         try {
             await axios.post(
-                "http://localhost:3009/api/v1/reservations-lab",
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`,
                 requestData,
                 {
                     headers: {

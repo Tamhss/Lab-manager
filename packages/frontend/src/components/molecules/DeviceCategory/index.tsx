@@ -74,7 +74,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const fetchLabs = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3009/api/v1/labs`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`);
             if (Array.isArray(response.data?.data)) {
                 setLabs(response.data.data);
             } else {
@@ -91,7 +91,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const fetchData = async (labId: string) => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:3009/api/v1/devices-category/lab/${labId}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/lab/${labId}`);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -109,7 +109,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const fetchDevicesByCategory = async (categoryId: string) => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3009/api/v1/devices?categoryId=${categoryId}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices?categoryId=${categoryId}`);
             if (Array.isArray(response.data?.data)) {
                 setDeviceList(response.data.data);
             } else {
@@ -150,7 +150,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:3009/api/v1/upload/device-categories', formData, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload/device-categories`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -197,10 +197,10 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             };
 
             if (isEditing && currentId) {
-                await axios.put(`http://localhost:3009/api/v1/devices-category/${currentId}`, payload);
+                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${currentId}`, payload);
                 message.success('Cập nhật loại thiết bị thành công!');
             } else {
-                await axios.post('http://localhost:3009/api/v1/devices-category', payload);
+                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category`, payload);
                 message.success('Tạo mới loại thiết bị thành công!');
             }
 
@@ -245,7 +245,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
 
     const handleDelete = async (categoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/devices-category/${categoryId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${categoryId}`);
             setTimeout(() => {
                 api.success({
                     message: 'Xoá thành công',
@@ -276,7 +276,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
         try {
             await Promise.all(
                 selectedRowKeys.map((categoryId) =>
-                    axios.delete(`http://localhost:3009/api/v1/devices-category/${categoryId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${categoryId}`)
                 )
             );
 

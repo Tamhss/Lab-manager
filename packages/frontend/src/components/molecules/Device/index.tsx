@@ -58,7 +58,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const fetchData = async (labId: string) => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:3009/api/v1/devices/lab/${labId}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/lab/${labId}`);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -75,7 +75,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const fetchCategories = async (labId: string) => {
         try {
             setCategories([]);
-            const response = await axios.get(`http://localhost:3009/api/v1/devices-category/lab/${labId}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/lab/${labId}`);
             if (Array.isArray(response.data?.data)) {
                 setCategories(response.data.data);
             } else {
@@ -106,7 +106,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:3009/api/v1/upload/devices', formData, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload/devices`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -138,7 +138,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
 
     const handleExport = async (labId: string) => {
         try {
-            const response = await fetch(`http://localhost:3009/api/v1/upload/device/export/${labId}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload/device/export/${labId}`);
 
             if (!response.ok) {
                 throw new Error("Có lỗi xảy ra khi xuất file Excel");
@@ -172,10 +172,10 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
         try {
             setLoading(true);
             if (isEditing && currentId) {
-                await axios.put(`http://localhost:3009/api/v1/devices/${currentId}`, values);
+                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${currentId}`, values);
                 message.success("Cập nhật thiết bị thành công!");
             } else {
-                await axios.post('http://localhost:3009/api/v1/devices', values);
+                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`, values);
                 message.success("Tạo mới thiết bị thành công!");
             }
             fetchData(labId);
@@ -216,7 +216,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
 
     const handleDelete = async (deviceId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/devices/${deviceId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${deviceId}`);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -247,7 +247,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
         try {
             await Promise.all(
                 selectedRowKeys.map((id) =>
-                    axios.delete(`http://localhost:3009/api/v1/devices/${id}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${id}`)
                 )
             );
 

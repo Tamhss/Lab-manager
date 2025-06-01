@@ -35,9 +35,9 @@ const LabBorrowHistory: React.FC = () => {
         setLoading(true);
         try {
             const [historyRes, labRes, userRes] = await Promise.all([
-                axios.get('http://localhost:3009/api/v1/lab-borrow-history'),
-                axios.get('http://localhost:3009/api/v1/labs'),
-                axios.get('http://localhost:3009/api/v1/user'),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history`),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`),
             ]);
     
             const historyData = historyRes.data?.data || [];
@@ -91,7 +91,7 @@ const LabBorrowHistory: React.FC = () => {
 
     const handleDelete = async (borrowHistoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/lab-borrow-history/${borrowHistoryId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history/${borrowHistoryId}`);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -114,7 +114,7 @@ const LabBorrowHistory: React.FC = () => {
         try {
             await Promise.all(
                 selectedRowKeys.map((borrowHistoryId) =>
-                    axios.delete(`http://localhost:3009/api/v1/lab-borrow-history/${borrowHistoryId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history/${borrowHistoryId}`)
                 )
             );
 

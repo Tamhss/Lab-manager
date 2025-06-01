@@ -59,7 +59,7 @@ const Lab: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:3009/api/v1/labs');
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -86,10 +86,10 @@ const Lab: React.FC = () => {
         try {
             setLoading(true);
             if (isEditing && currentId) {
-                await axios.put(`http://localhost:3009/api/v1/labs/${currentId}`, values);
+                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${currentId}`, values);
                 message.success("Cập nhật phòng lab thành công!");
             } else {
-                await axios.post('http://localhost:3009/api/v1/labs', values);
+                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, values);
                 message.success("Tạo mới phòng lab thành công!");
             }
             fetchData();
@@ -130,7 +130,7 @@ const Lab: React.FC = () => {
 
     const handleDelete = async (labId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/labs/${labId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${labId}`);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",

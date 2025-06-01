@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         NProgress.start();
         try {
-            const response = await axios.get('http://localhost:3009/api/v1/devices');
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`);
             if (Array.isArray(response.data?.data)) {
                 const devicesData = response.data.data;
                 setDevices(devicesData);
@@ -110,9 +110,9 @@ const Dashboard: React.FC = () => {
                 },
             };
             const [deviceRes, labRes] = await Promise.all([
-                axios.get('http://localhost:3009/api/v1/reservations-device', config),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, config),
 
-                axios.get('http://localhost:3009/api/v1/reservations-lab', config),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, config),
             ]);
             console.log('Device reservations:', deviceRes.data);
             console.log('Lab reservations:', labRes.data);

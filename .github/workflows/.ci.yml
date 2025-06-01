@@ -6,14 +6,50 @@ on:
       - staging
 
 jobs:
-  build-and-deploy:
+  build-frontend:
     runs-on: [self-hosted, windows]
-
+    if: |
+      contains(join(github.event.commits.*.modified, github.event.commits.*.added, github.event.commits.*.renamed), 'packages/frontend')
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # Tạo file .env cho backend từ secret ENV_FILE_CONTENT
+      - name: Install frontend dependencies
+        working-directory: packages/frontend
+        run: npm install
+
+      - name: Create .env.production for frontend from secret
+        run: |
+          $envContent = @"
+          ${{ secrets.ENV_FRONT_END }}
+          "@
+          Set-Content -Path "packages/frontend/.env.production" -Value $envContent
+        shell: powershell
+
+      - name: Build frontend
+        working-directory: packages/frontend
+        run: npm run build
+
+      - name: Deploy frontend to IIS site "fitlab"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $siteName = "fitlab"
+          $target = "C:\inetpub\wwwroot\$siteName"
+
+          Stop-Website -Name $siteName
+          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+          Copy-Item "packages\frontend\out\*" -Destination $target -Recurse
+          Start-Website -Name $siteName
+        shell: powershell
+
+  build-backend:
+    runs-on: [self-hosted, windows]
+    if: |
+      contains(join(github.event.commits.*.modified, github.event.commits.*.added, github.event.commits.*.renamed), 'packages/backend')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Create .env file for backend from secret
         run: |
           $envContent = @"
@@ -22,81 +58,34 @@ jobs:
           Set-Content -Path "packages/backend/.env" -Value $envContent
         shell: powershell
 
-      # Cài dependencies frontend
-      - name: Install frontend dependencies
-        working-directory: packages/frontend
-        run: npm install
-
-      # Cài dependencies backend
       - name: Install backend dependencies
         working-directory: packages/backend
         run: npm install
 
-        # Run Prisma migrate to update DB schema
       - name: Run Prisma migrate
         working-directory: packages/backend
         run: npm run db:migrate
 
-      # Build backend
       - name: Build backend
         working-directory: packages/backend
         run: npm run build
 
-      # Copy file .env vào thư mục dist backend để deploy
-      - name: Copy environment file to backend dist folder
-        run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\"
+      - name: Copy .env to dist
+        run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\" -Force
         shell: powershell
 
-      # Build frontend
-      - name: Build frontend
-        working-directory: packages/frontend
-        run: npm run build
-
-      # Deploy frontend lên IIS site "fitlab"
-      - name: Deploy frontend to IIS site "fitlab"
-        run: |
-          $ErrorActionPreference = "Stop"
-          $siteName = "fitlab"
-          $target = "C:\inetpub\wwwroot\$siteName"
-
-          Write-Host "Stopping IIS site: $siteName"
-          Stop-Website -Name $siteName
-
-          Write-Host "Clearing old files..."
-          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
-
-          Write-Host "Copying new frontend build files..."
-          Copy-Item "packages\frontend\out\*" -Destination $target -Recurse
-
-          Write-Host "Starting IIS site: $siteName"
-          Start-Website -Name $siteName
-        shell: powershell
-
-      # Deploy backend lên IIS site "fitlabapi"
       - name: Deploy backend to IIS site "fitlabapi"
         run: |
           $ErrorActionPreference = "Stop"
           $siteName = "fitlabapi"
           $target = "C:\inetpub\wwwroot\$siteName"
 
-          Write-Host "Stopping IIS site: $siteName"
           Stop-Website -Name $siteName
-
-          Write-Host "Clearing old files..."
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
-
-          Write-Host "Copying new backend build files..."
           Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
           Copy-Item "packages\backend\package.json" -Destination $target -Force
           Copy-Item "packages\backend\package-lock.json" -Destination $target -Force
-
-          Write-Host "Running npm install --production..."
           cd $target
           npm install --production
-
-          Write-Host "Starting IIS site: $siteName"
           Start-Website -Name $siteName
         shell: powershell
-
-
-

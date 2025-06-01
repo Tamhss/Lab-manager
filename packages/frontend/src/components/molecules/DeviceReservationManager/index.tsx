@@ -117,7 +117,7 @@ const DeviceReservation: React.FC = () => {
                 statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
 
-            const response = await axios.get('http://localhost:3009/api/v1/reservations-device', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { status: statusFilter },
                 paramsSerializer: (params) => {
@@ -176,7 +176,7 @@ const DeviceReservation: React.FC = () => {
             const status = actualReturnTime ? "COMPLETED" : "BORROWED";
 
             const test = await axios.put(
-                `http://localhost:3009/api/v1/devices/${deviceId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${deviceId}`,
                 { borrowStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -187,7 +187,7 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
             const response = await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.deviceReservationId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${selectedRecord.deviceReservationId}`,
                 {
                     status,
                     actualBorrowTime,
@@ -209,7 +209,7 @@ const DeviceReservation: React.FC = () => {
             });
 
             await axios.post(
-                `http://localhost:3009/api/v1/device-borrow-history`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history`,
                 {
                     deviceReservationId: selectedRecord.deviceReservationId,
                     userId: selectedRecord.user.userId,
@@ -239,7 +239,7 @@ const DeviceReservation: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!selectedRecord) return;
             const response = await axios.get(
-                `http://localhost:3009/api/v1/reservations-device/${selectedRecord.deviceReservationId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${selectedRecord.deviceReservationId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -277,7 +277,7 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${deviceReservationId}/approve-lecturer`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${deviceReservationId}/approve-lecturer`,
                 { lecturerId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -305,7 +305,7 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${deviceReservationId}/approve-admin`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${deviceReservationId}/approve-admin`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -331,7 +331,7 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
 
-            await axios.delete(`http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${deviceReservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -360,7 +360,7 @@ const DeviceReservation: React.FC = () => {
         try {
             await Promise.all(
                 selectedRowKeys.map((deviceReservationId) =>
-                    axios.delete(`http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${deviceReservationId}`)
                 )
             );
 
@@ -416,7 +416,7 @@ const DeviceReservation: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-device/${deviceReservationId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${deviceReservationId}`,
                 { status: "REJECTED", deviceId },
                 {
                     headers: { Authorization: `Bearer ${token}` },

@@ -112,7 +112,7 @@ const LabReservationManager: React.FC = () => {
                 statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
 
-            const response = await axios.get('http://localhost:3009/api/v1/reservations-lab', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { status: statusFilter },
                 paramsSerializer: (params) => {
@@ -172,7 +172,7 @@ const LabReservationManager: React.FC = () => {
 
             await axios.put(
 
-                `http://localhost:3009/api/v1/labs/${labId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${labId}`,
                 { borrowStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -182,7 +182,7 @@ const LabReservationManager: React.FC = () => {
                 return;
             }
             const response = await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.labReservationId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${selectedRecord.labReservationId}`,
                 {
                     status: reservationStatus,
                     actualBorrowTime,
@@ -203,7 +203,7 @@ const LabReservationManager: React.FC = () => {
             });
 
             await axios.post(
-                `http://localhost:3009/api/v1/lab-borrow-history`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history`,
                 {
                     labReservationId: selectedRecord.labReservationId,
                     userId: selectedRecord.user.userId,
@@ -233,7 +233,7 @@ const LabReservationManager: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!selectedRecord) return;
             const response = await axios.get(
-                `http://localhost:3009/api/v1/reservations-lab/${selectedRecord.labReservationId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${selectedRecord.labReservationId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -271,7 +271,7 @@ const LabReservationManager: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${labReservationId}/approve-lecturer`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${labReservationId}/approve-lecturer`,
                 { lecturerId },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -299,7 +299,7 @@ const LabReservationManager: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${labReservationId}/approve-admin`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${labReservationId}/approve-admin`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -325,7 +325,7 @@ const LabReservationManager: React.FC = () => {
                 return;
             }
 
-            await axios.delete(`http://localhost:3009/api/v1/reservations-lab/${labReservationId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${labReservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -349,7 +349,7 @@ const LabReservationManager: React.FC = () => {
             }
             await Promise.all(
                 selectedRowKeys.map((labReservationId) =>
-                    axios.delete(`http://localhost:3009/api/v1/reservations-lab/${labReservationId}`, {
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${labReservationId}`, {
                         headers: { Authorization: `Bearer ${token}` },
                     })
                 )
@@ -407,7 +407,7 @@ const LabReservationManager: React.FC = () => {
             }
 
             await axios.put(
-                `http://localhost:3009/api/v1/reservations-lab/${labReservationId}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${labReservationId}`,
                 { status: "REJECTED", labId },
                 {
                     headers: { Authorization: `Bearer ${token}` },

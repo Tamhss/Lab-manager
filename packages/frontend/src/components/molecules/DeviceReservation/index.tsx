@@ -200,7 +200,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
         const fetchLabs = async () => {
             try {
                 setLabs([]);
-                const response = await axios.get(`http://localhost:3009/api/v1/labs`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`);
                 if (Array.isArray(response.data?.data)) {
                     setLabs(response.data.data);
                 } else {
@@ -226,7 +226,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
                 const token = localStorage.getItem("token");
 
                 const devicesResponse = await axios.get(
-                    `http://localhost:3009/api/v1/devices/lab/${selectedLab}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/lab/${selectedLab}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -240,7 +240,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
                     return;
                 }
 
-                const reservationsResponse = await axios.get("http://localhost:3009/api/v1/reservations-device", {
+                const reservationsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -301,7 +301,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
 
     useEffect(() => {
         axios
-            .get("http://localhost:3009/api/v1/lecturers")
+            .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lecturers`)
             .then((response) => {
                 if (Array.isArray(response.data.data.data)) {
                     const data = response.data.data.data.map((user: ApiLecturer) => ({
@@ -385,7 +385,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
 
         try {
             await axios.post(
-                "http://localhost:3009/api/v1/reservations-device",
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`,
                 requestData,
                 {
                     headers: {

@@ -37,7 +37,7 @@ const UserM: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:3009/api/v1/user');
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -74,10 +74,10 @@ const UserM: React.FC = () => {
             }
 
             if (isEditing && currentId) {
-                await axios.put(`http://localhost:3009/api/v1/user/${currentId}`, updatedValues);
+                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${currentId}`, updatedValues);
                 message.success("Cập nhật người dùng thành công!");
             } else {
-                await axios.post('http://localhost:3009/api/v1/user', updatedValues);
+                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`, updatedValues);
                 message.success("Tạo mới người dùng thành công!");
             }
 
@@ -135,7 +135,7 @@ const UserM: React.FC = () => {
 
     const handleDelete = async (userId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/user/${userId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${userId}`);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -166,7 +166,7 @@ const UserM: React.FC = () => {
         try {
             await Promise.all(
                 selectedRowKeys.map((userId) =>
-                    axios.delete(`http://localhost:3009/api/v1/user/${userId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${userId}`)
                 )
             );
 

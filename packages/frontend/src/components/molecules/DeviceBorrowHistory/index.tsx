@@ -40,9 +40,9 @@ const DeviceBorrowHistory: React.FC = () => {
         setLoading(true);
         try {
             const [historyRes, deviceRes, userRes] = await Promise.all([
-                axios.get('http://localhost:3009/api/v1/device-borrow-history'),
-                axios.get('http://localhost:3009/api/v1/devices'),
-                axios.get('http://localhost:3009/api/v1/user'),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history`),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`),
+                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`),
             ]);
     
             const historyData = historyRes.data?.data || [];
@@ -94,7 +94,7 @@ const DeviceBorrowHistory: React.FC = () => {
 
     const handleDelete = async (borrowHistoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`http://localhost:3009/api/v1/device-borrow-history/${borrowHistoryId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history/${borrowHistoryId}`);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -117,7 +117,7 @@ const DeviceBorrowHistory: React.FC = () => {
         try {
             await Promise.all(
                 selectedRowKeys.map((borrowHistoryId) =>
-                    axios.delete(`http://localhost:3009/api/v1/device-borrow-history/${borrowHistoryId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history/${borrowHistoryId}`)
                 )
             );
 

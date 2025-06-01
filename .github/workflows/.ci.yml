@@ -87,9 +87,16 @@ jobs:
 
           Write-Host "Copying new backend build files..."
           Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
+          Copy-Item "packages\backend\package.json" -Destination $target -Force
+          Copy-Item "packages\backend\package-lock.json" -Destination $target -Force
+
+          Write-Host "Running npm install --production..."
+          cd $target
+          npm install --production
 
           Write-Host "Starting IIS site: $siteName"
           Start-Website -Name $siteName
         shell: powershell
+
 
 

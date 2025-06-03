@@ -43,13 +43,15 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
     const [startMinute, setStartMinute] = useState<string | undefined>(undefined);
     const [endHour, setEndHour] = useState<string | undefined>(undefined);
     const [endMinute, setEndMinute] = useState<string | undefined>(undefined);
+    const [role, setRole] = useState<string>('');
 
-    const userString = localStorage.getItem('user');
-    let role = '';
-    if (userString) {
-        const user = JSON.parse(userString);
-        role = user.role || '';
-    }
+    useEffect(() => {
+        const userString = localStorage.getItem('user');
+        if (userString) {
+            const user = JSON.parse(userString);
+            setRole(user.role);
+        }
+    }, []);
 
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -71,6 +73,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
         const days = daysInMonth(displayMonth, displayYear);
         const firstDay = firstDayOfMonth(displayMonth, displayYear);
         const calendarDays = [];
+        const today = new Date();
 
         const adjustedFirstDay = (firstDay === 0 ? 6 : firstDay - 1);
 
@@ -80,21 +83,27 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
 
         for (let day = 1; day <= days; day++) {
             const date = new Date(displayYear, displayMonth, day);
+            const isPastDate = date < today;
             calendarDays.push(
                 <div
                     key={day}
-                    className={`p-3 text-center cursor-pointer rounded-full text-sm font-medium transition-all duration-200 ${selectedDate?.getDate() === day &&
-                        selectedDate.getMonth() === displayMonth &&
-                        selectedDate.getFullYear() === displayYear
-                        ? 'bg-blue-500 text-white'
-                        : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700'
+                    className={`p-3 text-center rounded-full text-sm font-medium transition-all duration-200 
+                    ${isPastDate
+                            ? 'text-gray-400 opacity-50 cursor-not-allowed'
+                            : selectedDate?.getDate() === day &&
+                                selectedDate.getMonth() === displayMonth &&
+                                selectedDate.getFullYear() === displayYear
+                            ? 'bg-blue-500 text-white cursor-pointer'
+                            : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 cursor-pointer'
                         }`}
                     onClick={() => {
-                        setSelectedDate(new Date(displayYear, displayMonth, day));
-                        if (setSelectedDate === setStartDate) {
-                            setCurrentStep(2);
-                        } else if (setSelectedDate === setEndDate) {
-                            setCurrentStep(3);
+                        if (!isPastDate) {
+                            setSelectedDate(new Date(displayYear, displayMonth, day));
+                            if (setSelectedDate === setStartDate) {
+                                setCurrentStep(2);
+                            } else if (setSelectedDate === setEndDate) {
+                                setCurrentStep(3);
+                            }
                         }
                     }}
                 >

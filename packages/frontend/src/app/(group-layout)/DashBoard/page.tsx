@@ -1,7 +1,7 @@
-import { DashBoardPage } from "@/components/organisms/DashBoardPage";
+import Dashboard from "@/components/molecules/DashBoard";
 
 const Page = () => {
-    return <DashBoardPage />;
+    return <Dashboard />;
 };
 
 export default Page;

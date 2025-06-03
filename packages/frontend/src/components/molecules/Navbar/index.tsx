@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
     ];
 
     return (
-        <nav className="bg-white px-6 py-3 flex justify-between items-center h-[60px] shadow-md">
+        <nav className="bg-white px-6 py-3 flex justify-between items-center h-[60px] shadow-md z-50 relative">
             <div className="flex items-center gap-3">
                 <span className="flex space-x-4">
                     <img src="https://raw.githubusercontent.com/FIT-DNU/IT-Internship-7-Business-Internship/refs/heads/main/docs/logo/aiotlab_logo.png" className="w-12 h-12" alt="Logo" />
@@ -87,7 +87,7 @@ export const Navbar: React.FC = () => {
                                         />
                                     </div>
                                 </Link>
-                                {currentPath === "/DashBoard" && (
+                                {currentPath.startsWith("/DashBoard") && (
                                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
                                 )}
                             </li>
@@ -103,7 +103,7 @@ export const Navbar: React.FC = () => {
                                         />
                                     </div>
                                 </Link>
-                                {currentPath === "/Reservation" && (
+                                {currentPath.startsWith("/Reservation") && (
                                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full" />
                                 )}
                             </li>

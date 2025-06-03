@@ -1,36 +1,24 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {
-    AppstoreOutlined, SettingOutlined, HomeOutlined, TeamOutlined,
-    UserOutlined, AppstoreAddOutlined, ApartmentOutlined, HistoryOutlined,
-    LaptopOutlined, ClusterOutlined
-} from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Menu, Card } from 'antd';
-import { Pie, Bar, Line } from 'react-chartjs-2';
+import { Card } from 'antd';
+import { Pie, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     ArcElement, Tooltip, Legend,
     CategoryScale, LinearScale, BarElement,
-    PointElement, LineElement,
 } from 'chart.js';
-import NProgress from 'nprogress'; // Import NProgress
-import 'nprogress/nprogress.css'
-import Device from '../Device';
-import DeviceCategory from '../DeviceCategory';
-import UserM from '../UserM';
-import DeviceReservation from '../DeviceReservationManager';
-import Lab from '../Lab';
-import LabReservationManager from '../LabReservationManager';
-import DeviceBorrowHistory from '../DeviceBorrowHistory';
-import LabBorrowHistory from '../LabBorrowHistory';
-import ServerDashboard from '../ServerDashboard';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
-import { user } from '@nextui-org/react';
-dayjs.extend(isoWeek);
+import ServerDashboard from '../ServerDashboard';
+import Sidebar from '@/components/atom/SideBar';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
+dayjs.extend(isoWeek);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 interface BarChartData {
     labels: string[];
@@ -44,12 +32,10 @@ interface BarChartData {
 const Dashboard: React.FC = () => {
     const [devices, setDevices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [currentMenu, setCurrentMenu] = useState<string>('dashboard');
     const [userRole, setUserRole] = useState<string>('');
-    const [isMenuLoading, setIsMenuLoading] = useState(true);
 
     const [pieData, setPieData] = useState({
-        labels: ['Không sử dụng', 'Đang sử dụng', 'Hư hỏng', 'Đang thinh lí'],
+        labels: ['Không sử dụng', 'Đang sử dụng', 'Hư hỏng', 'Đang thanh lý'],
         datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#FF1493'] }],
     });
 
@@ -61,11 +47,6 @@ const Dashboard: React.FC = () => {
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
         }],
     });
-
-    const lineData = {
-        labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-        datasets: [{ label: 'Hoạt động người dùng', data: [65, 59, 80, 81, 56, 55, 40], borderColor: 'rgb(75, 192, 192)' }],
-    };
 
     const chartOptions = { responsive: true, maintainAspectRatio: false };
 
@@ -111,11 +92,10 @@ const Dashboard: React.FC = () => {
             };
             const [deviceRes, labRes] = await Promise.all([
                 axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, config),
-
                 axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, config),
             ]);
 
-            const allReservations = [...deviceRes.data.data, ...labRes.data.data]
+            const allReservations = [...deviceRes.data.data, ...labRes.data.data];
 
             const monthlyCounts: Record<string, number> = {};
             allReservations.forEach((res: any) => {
@@ -140,7 +120,6 @@ const Dashboard: React.FC = () => {
             };
 
             setBarData(newBarData);
-            console.log('Bar Data:', newBarData);
         } catch (error) {
             console.error('Lỗi khi tải đơn đăng ký:', error);
         } finally {
@@ -148,7 +127,6 @@ const Dashboard: React.FC = () => {
             NProgress.done();
         }
     };
-
 
     useEffect(() => {
         NProgress.start();
@@ -161,22 +139,6 @@ const Dashboard: React.FC = () => {
         }
         NProgress.done();
     }, []);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedMenu = localStorage.getItem('currentMenu');
-            if (savedMenu) {
-                setCurrentMenu(savedMenu);
-            }
-            setIsMenuLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('currentMenu', currentMenu);
-        }
-    }, [currentMenu]);
 
     const renderDashboard = () => (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -221,159 +183,16 @@ const Dashboard: React.FC = () => {
             </Card>
             {userRole === 'ADMIN' && (
                 <div className='md:col-span-4'>
-                <ServerDashboard />
-            </div>
+                    <ServerDashboard />
+                </div>
             )}
         </div>
     );
 
-    const onClick: MenuProps['onClick'] = (e) => {
-        NProgress.start();
-        setCurrentMenu(e.key);
-        NProgress.done();
-    }
-
-    const isLimitedRole = ['LECTURER', 'STUDENT'].includes(userRole);
-
-    const getMenuItems = (): MenuProps['items'] => {
-
-        const labLabel = isLimitedRole ? 'Sử dụng phòng' : 'Quản lý phòng';
-        const deviceLabel = isLimitedRole ? 'Sử dụng thiết bị' : 'Quản lý thiết bị';
-
-        if (isLimitedRole) {
-            return [
-                { key: 'dashboard', label: 'Dashboard', icon: <HomeOutlined /> },
-                {
-                    key: 'sub1',
-                    label: labLabel,
-                    icon: <ApartmentOutlined />,
-                    children: [
-                        { key: '2', label: 'Đặt lịch phòng', icon: <ApartmentOutlined /> },
-                        { key: '3', label: 'Lịch sử đặt phòng', icon: <HistoryOutlined /> },
-                    ],
-                },
-                {
-                    key: 'sub2',
-                    label: deviceLabel,
-                    icon: <AppstoreOutlined />,
-                    children: [
-                        { key: 't1', label: 'Đặt lịch thiết bị', icon: <ApartmentOutlined /> },
-                        { key: 't2', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
-                    ],
-                },
-            ];
-        }
-
-        return [
-            { key: 'dashboard', label: 'Dashboard', icon: <HomeOutlined /> },
-            {
-                key: 'sub1',
-                label: labLabel,
-                icon: <ApartmentOutlined />,
-                children: [
-                    { key: '1', label: 'Danh sách phòng', icon: <LaptopOutlined /> },
-                    { key: '2', label: 'Đặt lịch phòng', icon: <ApartmentOutlined /> },
-                    { key: '3', label: 'Lịch sử đặt phòng', icon: <HistoryOutlined /> },
-                ],
-            },
-            {
-                key: 'sub2',
-                label: deviceLabel,
-                icon: <AppstoreOutlined />,
-                children: [
-                    {
-                        key: 'lab-1',
-                        label: 'Phòng Lab 301',
-                        icon: <ClusterOutlined />,
-                        children: [
-                            { key: '4', label: 'Loại thiết bị', icon: <SettingOutlined /> },
-                            { key: '5', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
-                        ],
-                    },
-                    {
-                        key: 'lab-2',
-                        label: 'Phòng máy 302',
-                        icon: <ClusterOutlined />,
-                        children: [
-                            { key: '6', label: 'Loại thiết bị', icon: <SettingOutlined /> },
-                            { key: '7', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
-                        ],
-                    },
-                    {
-                        key: 'lab-3',
-                        label: 'Phòng máy 306',
-                        icon: <ClusterOutlined />,
-                        children: [
-                            { key: '8', label: 'Loại thiết bị', icon: <SettingOutlined /> },
-                            { key: '9', label: 'Danh sách thiết bị', icon: <LaptopOutlined /> },
-                        ],
-                    },
-                    { key: 't1', label: 'Đặt lịch thiết bị', icon: <ApartmentOutlined /> },
-                    { key: 't2', label: 'Lịch sử đặt thiết bị', icon: <HistoryOutlined /> },
-                ],
-            },
-            {
-                key: 'grp',
-                label: 'Quản lý người dùng',
-                icon: <TeamOutlined />,
-                children: [
-                    { key: '10', label: 'Danh sách người dùng', icon: <UserOutlined /> },
-                ],
-            },
-            { type: 'divider' },
-        ];
-    };
-
-    const renderContent = () => {
-        if (isMenuLoading) {
-            return <div>Loading...</div>;
-        }
-        switch (currentMenu) {
-            case 'dashboard':
-                return renderDashboard();
-            case '2':
-                return <LabReservationManager />;
-            case '3':
-                return <LabBorrowHistory />;
-            case 't1':
-                return <DeviceReservation />;
-            case 't2':
-                return <DeviceBorrowHistory />;
-
-            case '1':
-                return isLimitedRole ? deny() : <Lab />;
-            case '4':
-                return isLimitedRole ? deny() : <DeviceCategory labId="lab-301" />;
-            case '5':
-                return isLimitedRole ? deny() : <Device labId="lab-301" />;
-            case '6':
-                return isLimitedRole ? deny() : <DeviceCategory labId="P-302" />;
-            case '7':
-                return isLimitedRole ? deny() : <Device labId="P-302" />;
-            case '8':
-                return isLimitedRole ? deny() : <DeviceCategory labId="P-306" />;
-            case '9':
-                return isLimitedRole ? deny() : <Device labId="P-306" />;
-            case '10':
-                return isLimitedRole ? deny() : <UserM />;
-            default:
-                return renderDashboard();
-        }
-    };
-
-    const deny = () => <div className="text-red-500 text-lg">Bạn không có quyền truy cập chức năng này.</div>;
-
     return (
         <div className="flex h-screen">
-            <Menu
-                onClick={onClick}
-                className="w-64 h-full bg-gray-50"
-                defaultSelectedKeys={[currentMenu]}
-                mode="inline"
-                items={getMenuItems()}
-            />
             <div className="flex-1 overflow-auto bg-gray-100 p-4">
-                {renderContent()}
+                {renderDashboard()}
             </div>
         </div>
     );

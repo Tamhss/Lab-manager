@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Checkbox, Spin } from "antd";
+import { Checkbox, Input, Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 
 const SignIn = () => {
@@ -61,7 +61,12 @@ const SignIn = () => {
             localStorage.removeItem("rememberPassword");
         }
 
-        router.push("/DashBoard");
+        const userRole = data.data?.user?.role;
+        if (userRole === "ADMIN") {
+            router.push("/DashBoard");
+        } else {
+            router.push("/");
+        }
     };
 
     return (
@@ -73,7 +78,7 @@ const SignIn = () => {
                 <form onSubmit={handleSubmit} className="mt-6">
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm mb-2">Mã đăng nhập</label>
-                        <input
+                        <Input
                             type="code"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
@@ -84,8 +89,7 @@ const SignIn = () => {
 
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm mb-2">Mật khẩu</label>
-                        <input
-                            type="password"
+                        <Input.Password
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Mật khẩu"

@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
     const [barData, setBarData] = useState<BarChartData>({
         labels: [],
         datasets: [{
-            label: 'Số lượng đăng ký',
+            label: 'Số lượng đơn đặt lịch',
             data: [],
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
         }],
@@ -114,8 +114,6 @@ const Dashboard: React.FC = () => {
 
                 axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, config),
             ]);
-            console.log('Device reservations:', deviceRes.data);
-            console.log('Lab reservations:', labRes.data);
 
             const allReservations = [...deviceRes.data.data, ...labRes.data.data]
 
@@ -135,7 +133,7 @@ const Dashboard: React.FC = () => {
             const newBarData: BarChartData = {
                 labels: sortedMonths,
                 datasets: [{
-                    label: 'Số lượng đăng ký',
+                    label: 'Số lượng đơn đặt lịch',
                     data: sortedMonths.map(month => monthlyCounts[month]),
                     backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 }],
@@ -218,7 +216,7 @@ const Dashboard: React.FC = () => {
             <Card title="Trạng thái thiết bị" className="shadow-lg md:col-span-2">
                 <div className="h-[300px]"><Pie data={pieData} options={chartOptions} /></div>
             </Card>
-            <Card title="Thống kê đăng ký" className="shadow-lg md:col-span-2">
+            <Card title="Thống kê đặt lịch" className="shadow-lg md:col-span-2">
                 <div className="h-[300px]"><Bar data={barData} options={chartOptions} /></div>
             </Card>
             {userRole === 'ADMIN' && (

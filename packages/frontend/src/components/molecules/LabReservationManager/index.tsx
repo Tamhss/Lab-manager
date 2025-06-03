@@ -261,7 +261,7 @@ const LabReservationManager: React.FC = () => {
         form.resetFields();
     };
 
-    const approveByLecturer = async (labReservationId: string, lecturerId: string) => {
+    const approveByLecturer = async (labReservationId: string, lecturerId: string, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -278,7 +278,15 @@ const LabReservationManager: React.FC = () => {
                 }
             );
 
-            message.success("Phê duyệt bởi giảng viên thành công!");
+            setTimeout(() => {
+                api.success({
+                    message: "Phê duyệt thành công",
+                    description: `Đơn có id ${labReservationId} đã được gửi mail phê duyệt`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
             fetchData();
         } catch (error) {
             console.error("Lỗi khi phê duyệt:", error);
@@ -288,7 +296,7 @@ const LabReservationManager: React.FC = () => {
         }
     };
 
-    const approveByAdmin = async (labReservationId: string, labId: string) => {
+    const approveByAdmin = async (labReservationId: string, labId: string, pauseOnHover: boolean) => {
         console.log("labReservationId:", labReservationId);
         try {
             setLoading(true);
@@ -306,7 +314,15 @@ const LabReservationManager: React.FC = () => {
                 }
             );
 
-            message.success("Phê duyệt bởi admin thành công!");
+            setTimeout(() => {
+                api.success({
+                    message: "Phê duyệt thành công",
+                    description: `Đơn có id ${labReservationId} đã được gửi mail phê duyệt`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
             fetchData();
         } catch (error) {
             console.error("Lỗi khi phê duyệt:", error);
@@ -316,7 +332,7 @@ const LabReservationManager: React.FC = () => {
         }
     };
 
-    const handleDelete = async (labReservationId: string) => {
+    const handleDelete = async (labReservationId: string, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -328,7 +344,15 @@ const LabReservationManager: React.FC = () => {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab/${labReservationId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
+            setTimeout(() => {
+                api.success({
+                    message: "Xoá thành công",
+                    description: `${selectedRowKeys.length} mục đã được xoá`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            });
             fetchData();
         } catch (error) {
             console.error("Lỗi khi xóa dữ liệu:", error);
@@ -359,7 +383,7 @@ const LabReservationManager: React.FC = () => {
                 prevData.filter(item => !selectedRowKeys.includes(item.labReservationId))
             );
 
-            setSelectedRowKeys([]); // clear selection
+            setSelectedRowKeys([]);
 
             setTimeout(() => {
                 api.success({
@@ -397,7 +421,7 @@ const LabReservationManager: React.FC = () => {
         setSearchText('');
     };
 
-    const rejectReservation = async (labReservationId: string, labId: string) => {
+    const rejectReservation = async (labReservationId: string, labId: string, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -415,7 +439,15 @@ const LabReservationManager: React.FC = () => {
             );
             console.log("Request body:", { status: "REJECTED", labId });
 
-            message.success("Đã từ chối đặt lịch!");
+            setTimeout(() => {
+                api.success({
+                    message: "Đã hủy đặt lịch",
+                    description: `Đơn có id ${labReservationId} đã được gửi mail hủy đặt lịch`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
             fetchData();
         } catch (error) {
             console.error("Lỗi khi từ chối:", error);
@@ -553,7 +585,7 @@ const LabReservationManager: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByLecturer(record.labReservationId, record.lecturerId || '')}
+                                onClick={() => approveByLecturer(record.labReservationId, record.lecturerId || '', true)}
                                 style={{ color: 'orange' }}
                             />
                         </Tooltip>
@@ -563,7 +595,7 @@ const LabReservationManager: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByAdmin(record.labReservationId, record.lab.labId)}
+                                onClick={() => approveByAdmin(record.labReservationId, record.lab.labId, true)}
                                 style={{ color: 'green' }}
                             />
                         </Tooltip>
@@ -573,7 +605,7 @@ const LabReservationManager: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}
-                                onClick={() => rejectReservation(record.labReservationId, record.labId)}
+                                onClick={() => rejectReservation(record.labReservationId, record.labId, true)}
                                 style={{ color: 'red' }}
                             />
                         </Tooltip>
@@ -596,7 +628,7 @@ const LabReservationManager: React.FC = () => {
                                 type="text"
                                 danger
                                 icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(record.labReservationId)}
+                                onClick={() => handleDelete(record.labReservationId, true)}
                             />
                         </Tooltip>
                     )}

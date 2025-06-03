@@ -267,7 +267,7 @@ const DeviceReservation: React.FC = () => {
         form.resetFields();
     };
 
-    const approveByLecturer = async (deviceReservationId: string, lecturerId: string) => {
+    const approveByLecturer = async (deviceReservationId: string, lecturerId: string, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -284,7 +284,15 @@ const DeviceReservation: React.FC = () => {
                 }
             );
 
-            message.success("Phê duyệt bởi giảng viên thành công!");
+            setTimeout(() => {
+                api.success({
+                    message: "Phê duyệt thành công",
+                    description: `Đơn có id ${deviceReservationId} đã được gửi mail phê duyệt`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
             fetchData();
         } catch (error) {
             console.error("Lỗi khi phê duyệt:", error);
@@ -294,7 +302,7 @@ const DeviceReservation: React.FC = () => {
         }
     };
 
-    const approveByAdmin = async (deviceReservationId: string, deviceId: string) => {
+    const approveByAdmin = async (deviceReservationId: string, deviceId: string, pauseOnHover: boolean) => {
         console.log("deviceReservationId:", deviceReservationId);
         try {
             setLoading(true);
@@ -312,7 +320,15 @@ const DeviceReservation: React.FC = () => {
                 }
             );
 
-            message.success("Phê duyệt bởi admin thành công!");
+            setTimeout(() => {
+                api.success({
+                    message: "Phê duyệt thành công",
+                    description: `Đơn có id ${deviceReservationId} đã được gửi mail phê duyệt`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
             fetchData();
         } catch (error) {
             console.error("Lỗi khi phê duyệt:", error);
@@ -406,7 +422,7 @@ const DeviceReservation: React.FC = () => {
         setSearchText('');
     };
 
-    const rejectReservation = async (deviceReservationId: string, deviceId: string) => {
+    const rejectReservation = async (deviceReservationId: string, deviceId: string, pauseOnHover: boolean) => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
@@ -424,7 +440,15 @@ const DeviceReservation: React.FC = () => {
             );
             console.log("Request body:", { status: "REJECTED", deviceId });
 
-            message.success("Đã từ chối đặt lịch!");
+            setTimeout(() => {
+                api.success({
+                    message: "Đã hủy đặt lịch",
+                    description: `Đơn có id ${deviceReservationId} đã được gửi mail hủy đặt lịch`,
+                    placement: 'bottomRight',
+                    showProgress: true,
+                    pauseOnHover,
+                });
+            }, 0);
             fetchData();
         } catch (error) {
             console.error("Lỗi khi từ chối:", error);
@@ -569,7 +593,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByLecturer(record.deviceReservationId, record.lecturerId || '')}
+                                onClick={() => approveByLecturer(record.deviceReservationId, record.lecturerId || '', true)}
                                 style={{ color: 'orange' }}
                             />
                         </Tooltip>
@@ -579,7 +603,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CheckOutlined />}
-                                onClick={() => approveByAdmin(record.deviceReservationId, record.device.deviceId)}
+                                onClick={() => approveByAdmin(record.deviceReservationId, record.device.deviceId, true)}
                                 style={{ color: 'green' }}
                             />
                         </Tooltip>
@@ -589,7 +613,7 @@ const DeviceReservation: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<CloseOutlined />}
-                                onClick={() => rejectReservation(record.deviceReservationId, record.deviceId)}
+                                onClick={() => rejectReservation(record.deviceReservationId, record.deviceId, true)}
                                 style={{ color: 'red' }}
                             />
                         </Tooltip>

@@ -25,6 +25,7 @@ interface DeviceReservationType {
     user: {
         userId: string;
         userName: string;
+        role: string;
     };
     device: {
         deviceId: string;
@@ -79,25 +80,6 @@ const DeviceReservation: React.FC = () => {
         }
     }, [isModalVisible, selectedRecord?.deviceReservationId]);
 
-    const formattedData = useMemo(() => {
-        if (data.length > 0) {
-            const filteredItems = role === 'STUDENT'
-                ? data.filter(item => item.userId === currentUserId)
-                : data;
-
-            return filteredItems.map((item) => ({
-                ...item,
-                startTime: item.startTime
-                    ? dayjs.utc(item.startTime).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm')
-                    : 'Không xác định',
-                endTime: item.endTime
-                    ? dayjs.utc(item.endTime).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm')
-                    : 'Không xác định',
-            }));
-        }
-        return [];
-    }, [data, role, currentUserId])
-
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -112,7 +94,7 @@ const DeviceReservation: React.FC = () => {
                 statusFilter = 'PENDING'
             }
             if (role === 'LECTURER') {
-                statusFilter = 'PENDING';
+                statusFilter = ['PENDING', 'APPROVED_BY_LECTURER'];
             } else if (role === 'ADMIN') {
                 statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
@@ -141,6 +123,47 @@ const DeviceReservation: React.FC = () => {
             setLoading(false);
         }
     };
+
+    const formattedData = useMemo(() => {
+        if (data.length > 0) {
+            let filteredItems = data;
+
+            if (role === 'STUDENT') {
+                filteredItems = data.filter(item => item.userId === currentUserId);
+            } else if (role === 'LECTURER') {
+                filteredItems = data.filter(item =>
+                    item.status === 'PENDING' ||
+                    (item.status === 'APPROVED_BY_LECTURER' && item.userId === currentUserId)
+                );
+            } else if (role === 'ADMIN') {
+                filteredItems = data.filter(item =>
+                    ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'].includes(item.status)
+                );
+            }
+
+            return filteredItems.map((item) => {
+                let displayStatusKey = item.status;
+
+                if (role === 'LECTURER' && item.userId === currentUserId && item.status === 'APPROVED_BY_LECTURER') {
+                    displayStatusKey = 'PENDING';
+                } else if (role === 'ADMIN' && item.status === 'APPROVED_BY_LECTURER' && item.user?.role === 'LECTURER') {
+                    displayStatusKey = 'PENDING';
+                }
+
+                return {
+                    ...item,
+                    startTime: item.startTime
+                        ? dayjs.utc(item.startTime).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm')
+                        : 'Không xác định',
+                    endTime: item.endTime
+                        ? dayjs.utc(item.endTime).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm')
+                        : 'Không xác định',
+                    displayStatusKey,
+                };
+            });
+        }
+        return [];
+    }, [data, role, currentUserId])
 
     const showModal = (record: DeviceReservationType) => {
         setSelectedRecord(record);
@@ -573,8 +596,8 @@ const DeviceReservation: React.FC = () => {
         },
         {
             title: 'Trạng thái',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'displayStatusKey',
+            key: 'displayStatusKey',
             render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'BORROWED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
                     {statusMap[status] || status}

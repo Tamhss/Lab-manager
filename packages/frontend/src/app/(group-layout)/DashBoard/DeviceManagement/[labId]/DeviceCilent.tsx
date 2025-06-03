@@ -1,11 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import DeviceCategory from '@/components/molecules/DeviceCategory';
+import Device from "@/components/molecules/Device";
 
 export default function DeviceClient() {
   const params = useParams();
   const labId = params.labId as string;
 
-  return <DeviceCategory labId={labId} />;
+    return <Device labId={labId} />;
 }

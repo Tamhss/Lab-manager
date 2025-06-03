@@ -423,7 +423,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const getStatusBorrowColor = (status: string) => {
         switch (status) {
             case 'PENDING_BORROW': return 'gold';
-            case 'BORROWED': return 'orange';
+            case 'BORROWED': return 'blue';
             case 'COMPLETED': return 'green';
             default: return 'gray';
         }

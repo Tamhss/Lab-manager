@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Popup from "@/components/atom/PopupSuccess";
 import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, LeftCircleOutlined, LeftOutlined, RightCircleOutlined, RightOutlined } from "@ant-design/icons";
+import { useRouter } from 'next/navigation';
 
 interface Lab {
     labId: string;
@@ -44,6 +45,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
     const [endHour, setEndHour] = useState<string | undefined>(undefined);
     const [endMinute, setEndMinute] = useState<string | undefined>(undefined);
     const [role, setRole] = useState<string>('');
+    const router = useRouter();
 
     useEffect(() => {
         const userString = localStorage.getItem('user');
@@ -74,6 +76,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
         const firstDay = firstDayOfMonth(displayMonth, displayYear);
         const calendarDays = [];
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
         const adjustedFirstDay = (firstDay === 0 ? 6 : firstDay - 1);
 
@@ -553,7 +556,19 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
                     title="Đặt lịch phòng thành công!"
                     content="Yêu cầu của bạn đã được gửi. Vui lòng chờ xác nhận."
                     onClose={() => setPopupVisible(false)}
-                />
+                >
+                    <div className="mt-8 text-center">
+                        <Button
+                            className="custom-button"
+                            onClick={() => {
+                                setPopupVisible(false);
+                                router.push('/DashBoard/LabReservation');
+                            }}
+                        >
+                            Xem danh sách đặt lịch
+                        </Button>
+                    </div>
+                </Popup>
             </div>
         </>
     );

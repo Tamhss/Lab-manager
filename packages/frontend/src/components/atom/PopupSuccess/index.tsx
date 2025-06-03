@@ -9,9 +9,10 @@ interface PopupProps {
     title: string;
     content: string;
     onClose: () => void;
+    children?: React.ReactNode;
 }
 
-const Popup: React.FC<PopupProps> = ({ visible, title, content, onClose }) => {
+const Popup: React.FC<PopupProps> = ({ visible, title, content, onClose, children }) => {
     const [isOpen, setIsOpen] = useState(visible);
 
     useEffect(() => {
@@ -34,17 +35,19 @@ const Popup: React.FC<PopupProps> = ({ visible, title, content, onClose }) => {
             footer={null}
             styles={{
                 body: {
-                    padding: '32px 24px',
+                    padding: '20px 12px',
                     textAlign: 'center',
                     borderRadius: 12,
                 }
             }}
         >
-            <CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: 64, marginBottom: 16 }} />
+            <CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: 64 }} />
 
             <Title level={3} style={{ marginBottom: 12 }}>{title}</Title>
 
             <Paragraph style={{ fontSize: 16 }}>{content}</Paragraph>
+
+            {children}
         </Modal>
     );
 };

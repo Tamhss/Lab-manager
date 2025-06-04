@@ -8,6 +8,9 @@ import axios from 'axios';
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { get } from 'http';
+import { getAuthConfig } from '@/config/get_token';
+import axiosInstance from '@/components/utils/token_expiration';
 
 interface BorrowHistoryType {
     borrowHistoryId: string;
@@ -29,6 +32,8 @@ const DeviceBorrowHistory: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [api, contextHolder] = notification.useNotification();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const getToken = getAuthConfig();
+
     dayjs.extend(utc);
     dayjs.extend(timezone);
 
@@ -40,9 +45,9 @@ const DeviceBorrowHistory: React.FC = () => {
         setLoading(true);
         try {
             const [historyRes, deviceRes, userRes] = await Promise.all([
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history`),
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`),
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history`, getToken),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`, getToken),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`, getToken),
             ]);
     
             const historyData = historyRes.data?.data || [];
@@ -94,7 +99,7 @@ const DeviceBorrowHistory: React.FC = () => {
 
     const handleDelete = async (borrowHistoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history/${borrowHistoryId}`);
+            await axiosInstance.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history/${borrowHistoryId}`, getToken);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -117,7 +122,7 @@ const DeviceBorrowHistory: React.FC = () => {
         try {
             await Promise.all(
                 selectedRowKeys.map((borrowHistoryId) =>
-                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history/${borrowHistoryId}`)
+                    axiosInstance.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/device-borrow-history/${borrowHistoryId},`, getToken)
                 )
             );
 

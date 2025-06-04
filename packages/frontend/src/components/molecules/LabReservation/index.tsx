@@ -5,6 +5,7 @@ import axios from "axios";
 import Popup from "@/components/atom/PopupSuccess";
 import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, LeftCircleOutlined, LeftOutlined, RightCircleOutlined, RightOutlined } from "@ant-design/icons";
 import { useRouter } from 'next/navigation';
+import axiosInstance from "@/components/utils/token_expiration";
 
 interface Lab {
     labId: string;
@@ -206,7 +207,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
             try {
                 const token = localStorage.getItem("token");
 
-                const labsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, {
+                const labsResponse = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -219,7 +220,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
                     return;
                 }
 
-                const reservationsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, {
+                const reservationsResponse = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -278,7 +279,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
     }, [startTime, endTime]);
 
     useEffect(() => {
-        axios
+        axiosInstance
             .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lecturers`)
             .then((response) => {
                 if (Array.isArray(response.data.data.data)) {
@@ -350,7 +351,7 @@ const LabReservationForm: React.FC<LabReservationFormProps> = ({ onBack }) => {
         };
 
         try {
-            await axios.post(
+            await axiosInstance.post(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`,
                 requestData,
                 {

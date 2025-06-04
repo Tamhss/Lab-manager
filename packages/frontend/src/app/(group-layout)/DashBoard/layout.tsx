@@ -28,11 +28,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (path === "/DashBoard/LabReservation") return "2";
         if (path === "/DashBoard/LabBorrowHistory") return "3";
         if (path === "/DashBoard/DeviceCategory/lab-301") return "4";
-        if (path === "/DashBoard/Device/lab-301") return "5";
+        if (path === "/DashBoard/DeviceManagement/lab-301") return "5";
         if (path === "/DashBoard/DeviceCategory/P-302") return "6";
-        if (path === "/DashBoard/Device/P-302") return "7";
+        if (path === "/DashBoard/DeviceManagement/P-302") return "7";
         if (path === "/DashBoard/DeviceCategory/P-306") return "8";
-        if (path === "/DashBoard/Device/P-306") return "9";
+        if (path === "/DashBoard/DeviceManagement/P-306") return "9";
         if (path === "/DashBoard/DeviceReservation") return "t1";
         if (path === "/DashBoard/DeviceBorrowHistory") return "t2";
         if (path === "/DashBoard/UserManagement") return "10";

@@ -5,6 +5,8 @@ import { Button, Input, Space, Table, Spin, message, notification, Upload, Tag }
 import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
+import { getAuthConfig } from '@/config/get_token';
+import axiosInstance from '@/components/utils/token_expiration';
 
 interface LabBorrowHistoryType {
     borrowHistoryId: string;
@@ -26,6 +28,7 @@ const LabBorrowHistory: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [api, contextHolder] = notification.useNotification();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const getToken = getAuthConfig();
 
     useEffect(() => {
         fetchData();
@@ -35,9 +38,9 @@ const LabBorrowHistory: React.FC = () => {
         setLoading(true);
         try {
             const [historyRes, labRes, userRes] = await Promise.all([
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history`),
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`),
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history`, getToken),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, getToken),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`, getToken),
             ]);
     
             const historyData = historyRes.data?.data || [];
@@ -91,7 +94,7 @@ const LabBorrowHistory: React.FC = () => {
 
     const handleDelete = async (borrowHistoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history/${borrowHistoryId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history/${borrowHistoryId}`, getToken);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -114,7 +117,7 @@ const LabBorrowHistory: React.FC = () => {
         try {
             await Promise.all(
                 selectedRowKeys.map((borrowHistoryId) =>
-                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history/${borrowHistoryId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lab-borrow-history/${borrowHistoryId}`, getToken)
                 )
             );
 

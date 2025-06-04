@@ -5,6 +5,8 @@ import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notifi
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
+import { getAuthConfig } from '@/config/get_token';
+import axiosInstance from '@/components/utils/token_expiration';
 interface LabType {
     labId: string;
     labName: string;
@@ -25,6 +27,7 @@ const Lab: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState<string | null>(null);
     const [api, contextHolder] = notification.useNotification();
+    const getToken = getAuthConfig();
     const statusMap = {
         AVAILABLE: 'Không sử dụng',
         IN_USE: 'Đang sử dụng',
@@ -59,7 +62,7 @@ const Lab: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`);
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, getToken);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -86,10 +89,10 @@ const Lab: React.FC = () => {
         try {
             setLoading(true);
             if (isEditing && currentId) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${currentId}`, values);
+                await axiosInstance.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${currentId}`, values, getToken);
                 message.success("Cập nhật phòng lab thành công!");
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, values);
+                await axiosInstance.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, values, getToken);
                 message.success("Tạo mới phòng lab thành công!");
             }
             fetchData();
@@ -130,7 +133,7 @@ const Lab: React.FC = () => {
 
     const handleDelete = async (labId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${labId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs/${labId}`, getToken);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",

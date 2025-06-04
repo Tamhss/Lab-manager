@@ -8,6 +8,7 @@ import Highlighter from 'react-highlight-words';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import axiosInstance from '@/components/utils/token_expiration';
 interface LabReservationType {
     labReservationId: string;
     lecturerId: string;
@@ -94,7 +95,7 @@ const LabReservationManager: React.FC = () => {
                 statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
 
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, {
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { status: statusFilter },
                 paramsSerializer: (params) => {

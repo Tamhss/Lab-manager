@@ -174,7 +174,7 @@ const UserM: React.FC = () => {
                 prevData.filter(item => !selectedRowKeys.includes(item.userId))
             );
 
-            setSelectedRowKeys([]); // clear selection
+            setSelectedRowKeys([]);
 
             setTimeout(() => {
                 api.success({

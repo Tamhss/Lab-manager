@@ -6,6 +6,8 @@ import axios from "axios";
 import Popup from "@/components/atom/PopupSuccess";
 import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, LeftCircleOutlined, LeftOutlined, RightCircleOutlined, RightOutlined } from "@ant-design/icons";
 import { useRouter } from 'next/navigation';
+import { getAuthConfig } from "@/config/get_token";
+import axiosInstance from "@/components/utils/token_expiration";
 
 interface Device {
     deviceId: string;
@@ -55,6 +57,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
     const [endMinute, setEndMinute] = useState<string | undefined>(undefined);
     const [role, setRole] = useState<string>('');
     const router = useRouter();
+    const getToken = getAuthConfig();
 
     useEffect(() => {
         const userString = localStorage.getItem('user');
@@ -213,7 +216,7 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
         const fetchLabs = async () => {
             try {
                 setLabs([]);
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`);
+                const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, getToken);
                 if (Array.isArray(response.data?.data)) {
                     setLabs(response.data.data);
                 } else {
@@ -238,26 +241,15 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
             try {
                 const token = localStorage.getItem("token");
 
-                const devicesResponse = await axios.get(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/lab/${selectedLab}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
+                const devicesResponse = await axiosInstance.get(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/lab/${selectedLab}`, getToken);
                 const allDevices = devicesResponse.data.data;
                 if (!Array.isArray(allDevices)) {
                     setDevices([]);
                     return;
                 }
 
-                const reservationsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                const reservationsResponse = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, getToken);
                 const reservations = reservationsResponse.data.data;
 
                 const activeReservations = reservations.filter(
@@ -313,8 +305,8 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
     }, [selectedLab, startTime, endTime]);
 
     useEffect(() => {
-        axios
-            .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lecturers`)
+        axiosInstance
+            .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lecturers`, getToken)
             .then((response) => {
                 if (Array.isArray(response.data.data.data)) {
                     const data = response.data.data.data.map((user: ApiLecturer) => ({
@@ -367,7 +359,6 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
             return;
         }
 
-        const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
         const user = storedUser ? JSON.parse(storedUser) : null;
         const userId = user ? user.userId : null;
@@ -397,15 +388,10 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
         };
 
         try {
-            await axios.post(
+            await axiosInstance.post(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`,
                 requestData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                }
+                getToken
             );
             setPopupVisible(true);
 
@@ -579,7 +565,9 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
                                     onChange={(value) => {
                                         setSelectedDevice(value);
                                     }}
-                                    options={devices.map(device => ({
+                                    options={Array.from(
+                                        new Map(devices.map(device => [device.deviceName, device])).values()
+                                    ).map(device => ({
                                         value: device.deviceId,
                                         label: device.deviceName,
                                     }))}
@@ -589,7 +577,6 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
                                         if (!option) return false;
                                         return option.label.toLowerCase().includes(input.toLowerCase());
                                     }}
-
                                 />
                             </div>
                             {role === 'STUDENT' && (

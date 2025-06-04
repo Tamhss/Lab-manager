@@ -5,6 +5,8 @@ import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notifi
 import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
+import axiosInstance from '@/components/utils/token_expiration';
+import { getAuthConfig } from '@/config/get_token';
 interface DeviceType {
     deviceId: string;
     deviceName: string;
@@ -39,6 +41,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<File | null>(null);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const getToken = getAuthConfig();
     const statusMap = {
         NOT_IN_USE: 'Không sử dụng',
         IN_USE: 'Đang sử dụng',
@@ -58,7 +61,13 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const fetchData = async (labId: string) => {
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/lab/${labId}`);
+            const token = localStorage.getItem("token");
+            if (!token) {
+                message.error("Không tìm thấy token, vui lòng đăng nhập lại!");
+                return;
+            }
+
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/lab/${labId}`, getToken);;
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -75,7 +84,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const fetchCategories = async (labId: string) => {
         try {
             setCategories([]);
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/lab/${labId}`);
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/lab/${labId}`, getToken);
             if (Array.isArray(response.data?.data)) {
                 setCategories(response.data.data);
             } else {
@@ -172,10 +181,10 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
         try {
             setLoading(true);
             if (isEditing && currentId) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${currentId}`, values);
+                await axiosInstance.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${currentId}`, values, getToken);
                 message.success("Cập nhật thiết bị thành công!");
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`, values);
+                await axiosInstance.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`, values, getToken);
                 message.success("Tạo mới thiết bị thành công!");
             }
             fetchData(labId);
@@ -216,7 +225,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
 
     const handleDelete = async (deviceId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${deviceId}`);
+            await axiosInstance.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${deviceId}`, getToken);
             setTimeout(() => {
                 api.success({
                     message: "Xóa thành công",
@@ -247,7 +256,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
         try {
             await Promise.all(
                 selectedRowKeys.map((id) =>
-                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${id}`)
+                    axiosInstance.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${id}`, getToken)
                 )
             );
 
@@ -255,7 +264,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
                 prevData.filter(item => !selectedRowKeys.includes(item.deviceId))
             );
 
-            setSelectedRowKeys([]); // clear selection
+            setSelectedRowKeys([]);
 
             setTimeout(() => {
                 api.success({

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Card } from 'antd';
+import { Card, message } from 'antd';
 import { Pie, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -16,6 +16,8 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import ServerDashboard from '../ServerDashboard';
 import Sidebar from '@/components/atom/SideBar';
+import axiosInstance from '@/components/utils/token_expiration';
+import { getAuthConfig } from '@/config/get_token';
 
 dayjs.extend(isoWeek);
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
@@ -33,6 +35,7 @@ const Dashboard: React.FC = () => {
     const [devices, setDevices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [userRole, setUserRole] = useState<string>('');
+    const getToken = getAuthConfig();
 
     const [pieData, setPieData] = useState({
         labels: ['Không sử dụng', 'Đang sử dụng', 'Hư hỏng', 'Đang thanh lý'],
@@ -54,7 +57,12 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         NProgress.start();
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`);
+            const token = localStorage.getItem("token");
+            if (!token) {
+                message.error("Không tìm thấy token, vui lòng đăng nhập lại!");
+                return;
+            }
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices`, getToken);
             if (Array.isArray(response.data?.data)) {
                 const devicesData = response.data.data;
                 setDevices(devicesData);
@@ -84,15 +92,9 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         NProgress.start();
         try {
-            const token = localStorage.getItem('token');
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            };
             const [deviceRes, labRes] = await Promise.all([
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, config),
-                axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, config),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, getToken),
+                axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-lab`, getToken),
             ]);
 
             const allReservations = [...deviceRes.data.data, ...labRes.data.data];

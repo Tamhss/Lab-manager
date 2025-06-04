@@ -12,6 +12,9 @@ import { Button, Input, Space, Table, Spin, message, Form, Modal, notification, 
 import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
+import { get } from 'http';
+import { getAuthConfig } from '@/config/get_token';
+import axiosInstance from '@/components/utils/token_expiration';
 
 interface DeviceCategoryType {
     categoryId: string;
@@ -59,6 +62,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const [isLabModalOpen, setIsLabModalOpen] = useState(false);
     const [labs, setLabs] = useState<LabType[]>([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const getToken = getAuthConfig();
     const statusMap = {
         NOT_IN_USE: 'Không sử dụng',
         IN_USE: 'Đang sử dụng',
@@ -74,7 +78,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const fetchLabs = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`);
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/labs`, getToken);
             if (Array.isArray(response.data?.data)) {
                 setLabs(response.data.data);
             } else {
@@ -91,7 +95,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const fetchData = async (labId: string) => {
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/lab/${labId}`);
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/lab/${labId}`, getToken);
             if (Array.isArray(response.data?.data)) {
                 setData(response.data.data);
             } else {
@@ -109,7 +113,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
     const fetchDevicesByCategory = async (categoryId: string) => {
         try {
             setLoading(true);
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices?categoryId=${categoryId}`);
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices?categoryId=${categoryId}`, getToken);
             if (Array.isArray(response.data?.data)) {
                 setDeviceList(response.data.data);
             } else {
@@ -197,10 +201,10 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
             };
 
             if (isEditing && currentId) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${currentId}`, payload);
+                await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${currentId}`, payload, getToken);
                 message.success('Cập nhật loại thiết bị thành công!');
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category`, payload);
+                await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category`, payload, getToken);
                 message.success('Tạo mới loại thiết bị thành công!');
             }
 
@@ -245,7 +249,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
 
     const handleDelete = async (categoryId: string, pauseOnHover: boolean) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${categoryId}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${categoryId}`, getToken);
             setTimeout(() => {
                 api.success({
                     message: 'Xoá thành công',
@@ -276,7 +280,7 @@ const DeviceCategory: React.FC<DeviceCategoryProps> = ({ labId }) => {
         try {
             await Promise.all(
                 selectedRowKeys.map((categoryId) =>
-                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${categoryId}`)
+                    axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/devices-category/${categoryId}`, getToken)
                 )
             );
 

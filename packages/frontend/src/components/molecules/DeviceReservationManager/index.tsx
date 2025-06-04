@@ -8,6 +8,8 @@ import Highlighter from 'react-highlight-words';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { getAuthConfig } from '@/config/get_token';
+import axiosInstance from '@/components/utils/token_expiration';
 interface DeviceReservationType {
     deviceReservationId: string;
     lecturerId: string;
@@ -99,7 +101,7 @@ const DeviceReservation: React.FC = () => {
                 statusFilter = ['APPROVED_BY_LECTURER', 'APPROVED', 'BORROWED'];
             }
 
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, {
+            const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { status: statusFilter },
                 paramsSerializer: (params) => {
@@ -198,7 +200,7 @@ const DeviceReservation: React.FC = () => {
             const borrowStatus = actualReturnTime ? "COMPLETED" : "BORROWED";
             const status = actualReturnTime ? "COMPLETED" : "BORROWED";
 
-            const test = await axios.put(
+            const test = await axiosInstance.put(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/devices/${deviceId}`,
                 { borrowStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -209,7 +211,7 @@ const DeviceReservation: React.FC = () => {
                 message.error("Không tìm thấy thông tin thiết bị!");
                 return;
             }
-            const response = await axios.put(
+            const response = await axiosInstance.put(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${selectedRecord.deviceReservationId}`,
                 {
                     status,
@@ -261,7 +263,7 @@ const DeviceReservation: React.FC = () => {
         try {
             const token = localStorage.getItem("token");
             if (!selectedRecord) return;
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${selectedRecord.deviceReservationId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -299,7 +301,7 @@ const DeviceReservation: React.FC = () => {
                 return;
             }
 
-            await axios.put(
+            await axiosInstance.put(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservations-device/${deviceReservationId}/approve-lecturer`,
                 { lecturerId },
                 {

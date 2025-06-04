@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@core/global/prisma/prisma.service';
-import { Lecturer, Prisma } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -97,6 +96,22 @@ export class UserService {
         }
 
         return this.prisma.$transaction(async (prisma) => {
+            await prisma.deviceBorrowHistory.deleteMany({
+                where: { userId },
+            });
+
+            await prisma.reservationDevice.deleteMany({
+                where: { userId },
+            });
+
+            await prisma.labBorrowHistory.deleteMany({
+                where: { userId },
+            });
+
+            await prisma.reservationLab.deleteMany({
+                where: { userId },
+            });
+
             await prisma.lecturer.deleteMany({
                 where: { userId },
             });

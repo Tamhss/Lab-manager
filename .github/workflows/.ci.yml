@@ -13,79 +13,59 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # # Tạo file .env cho backend từ secret ENV_FILE_CONTENT
-      # - name: Create .env file for backend from secret
-      #   run: |
-      #     $envContent = @"
-      #     ${{ secrets.ENV_FILE_CONTENT }}
-      #     "@
-      #     Set-Content -Path "packages/backend/.env" -Value $envContent
-      #   shell: powershell
-
-      # Cài dependencies frontend
-      - name: Install frontend dependencies
-        working-directory: packages/frontend
-        run: npm install
-
-      # Tạo file .env cho frontend từ secret ENV_FRONT_END
-      - name: Create .env.production for frontend from secret
+      # Tạo file .env cho backend từ secret ENV_FILE_CONTENT
+      - name: Create .env file for backend from secret
         run: |
           $envContent = @"
-          ${{ secrets.ENV_FRONT_END }}
+          ${{ secrets.ENV_FILE_CONTENT }}
           "@
-          Set-Content -Path "packages/frontend/.env.production" -Value $envContent
+          Set-Content -Path "packages/backend/.env" -Value $envContent
         shell: powershell
 
-      # # Cài dependencies backend
-      # - name: Install backend dependencies
-      #   working-directory: packages/backend
+      # # Cài dependencies frontend
+      # - name: Install frontend dependencies
+      #   working-directory: packages/frontend
       #   run: npm install
 
-      #   # Run Prisma migrate to update DB schema
-      # - name: Run Prisma migrate
-      #   working-directory: packages/backend
-      #   run: npm run db:migrate
-
-      # # Build backend
-      # - name: Build backend
-      #   working-directory: packages/backend
-      #   run: npm run build
-
-      # # Copy file .env vào thư mục dist backend để deploy
-      # - name: Copy environment file to backend dist folder
-      #   run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\"
+      # # Tạo file .env cho frontend từ secret ENV_FRONT_END
+      # - name: Create .env.production for frontend from secret
+      #   run: |
+      #     $envContent = @"
+      #     ${{ secrets.ENV_FRONT_END }}
+      #     "@
+      #     Set-Content -Path "packages/frontend/.env.production" -Value $envContent
       #   shell: powershell
 
-      # Build frontend
-      - name: Build frontend
-        working-directory: packages/frontend
+      # Cài dependencies backend
+      - name: Install backend dependencies
+        working-directory: packages/backend
+        run: npm install
+
+        # Run Prisma migrate to update DB schema
+      - name: Run Prisma migrate
+        working-directory: packages/backend
+        run: npm run db:migrate
+
+      # Build backend
+      - name: Build backend
+        working-directory: packages/backend
         run: npm run build
 
-      # Deploy frontend lên IIS site "fitlab"
-      - name: Deploy frontend to IIS site "fitlab"
-        run: |
-          $ErrorActionPreference = "Stop"
-          $siteName = "fitlab"
-          $target = "C:\inetpub\wwwroot\$siteName"
-
-          Write-Host "Stopping IIS site: $siteName"
-          Stop-Website -Name $siteName
-
-          Write-Host "Clearing old files..."
-          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
-
-          Write-Host "Copying new frontend build files..."
-          Copy-Item "packages\frontend\out\*" -Destination $target -Recurse
-
-          Write-Host "Starting IIS site: $siteName"
-          Start-Website -Name $siteName
+      # Copy file .env vào thư mục dist backend để deploy
+      - name: Copy environment file to backend dist folder
+        run: Copy-Item "packages\backend\.env" -Destination "packages\backend\dist\"
         shell: powershell
 
-      # # Deploy backend lên IIS site "fitlabapi"
-      # - name: Deploy backend to IIS site "fitlabapi"
+      # # Build frontend
+      # - name: Build frontend
+      #   working-directory: packages/frontend
+      #   run: npm run build
+
+      # # Deploy frontend lên IIS site "fitlab"
+      # - name: Deploy frontend to IIS site "fitlab"
       #   run: |
       #     $ErrorActionPreference = "Stop"
-      #     $siteName = "fitlabapi"
+      #     $siteName = "fitlab"
       #     $target = "C:\inetpub\wwwroot\$siteName"
 
       #     Write-Host "Stopping IIS site: $siteName"
@@ -94,18 +74,38 @@ jobs:
       #     Write-Host "Clearing old files..."
       #     Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
 
-      #     Write-Host "Copying new backend build files..."
-      #     Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
-      #     Copy-Item "packages\backend\package.json" -Destination $target -Force
-      #     Copy-Item "packages\backend\package-lock.json" -Destination $target -Force
-
-      #     Write-Host "Running npm install --production..."
-      #     cd $target
-      #     npm install --production
+      #     Write-Host "Copying new frontend build files..."
+      #     Copy-Item "packages\frontend\out\*" -Destination $target -Recurse
 
       #     Write-Host "Starting IIS site: $siteName"
       #     Start-Website -Name $siteName
       #   shell: powershell
+
+      # Deploy backend lên IIS site "fitlabapi"
+      - name: Deploy backend to IIS site "fitlabapi"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $siteName = "fitlabapi"
+          $target = "C:\inetpub\wwwroot\$siteName"
+
+          Write-Host "Stopping IIS site: $siteName"
+          Stop-Website -Name $siteName
+
+          Write-Host "Clearing old files..."
+          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+          Write-Host "Copying new backend build files..."
+          Copy-Item "packages\backend\dist\*" -Destination $target -Recurse
+          Copy-Item "packages\backend\package.json" -Destination $target -Force
+          Copy-Item "packages\backend\package-lock.json" -Destination $target -Force
+
+          Write-Host "Running npm install --production..."
+          cd $target
+          npm install --production
+
+          Write-Host "Starting IIS site: $siteName"
+          Start-Website -Name $siteName
+        shell: powershell
 
 
 

@@ -41,6 +41,11 @@ jobs:
         working-directory: packages/backend
         run: npm install
 
+        # Run Prisma migrate to update DB schema
+      - name: Run Prisma migrate
+        working-directory: packages/backend
+        run: npx prisma migrate deploy
+
       # Build backend
       - name: Build backend
         working-directory: packages/backend

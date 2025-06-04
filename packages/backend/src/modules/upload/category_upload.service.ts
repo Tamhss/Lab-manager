@@ -43,32 +43,39 @@ export class DeviceCategoryUploadService {
         continue;
       }
 
-      const categoryName = row["Loại Thiết Bị"]?.trim();
-      if (!categoryName) {
-        console.error("Thiếu tên loại thiết bị trong hàng:", row);
+      const name = row["Loại Thiết Bị"]?.trim();
+      const categoryId = row["Mã loại thiết bị"]?.trim();
+      const quantity = row["Số lượng"] || 0;
+
+      if (!name || !categoryId) {
+        console.error("Thiếu tên hoặc mã loại thiết bị trong hàng:", row);
         continue;
       }
 
       try {
-        const normalizedCategoryName = categoryName;
         let category = await this.prisma.deviceCategory.findFirst({
-          where: { labId: lab.labId, name: normalizedCategoryName },
+          where: {
+            labId: lab.labId,
+            categoryId: categoryId
+          },
         });
 
         if (!category) {
           category = await this.prisma.deviceCategory.create({
             data: {
-              name: normalizedCategoryName,
-              quantity: 0,
+              categoryId: categoryId,
+              name: name,
+              quantity: quantity,
               labId: lab.labId,
             },
           });
           successCount++;
+          console.log(`Đã thêm loại thiết bị mới: ${name} (${categoryId})`);
+        } else {
+          console.log(`Loại thiết bị đã tồn tại: ${name} (${categoryId})`);
         }
-
-        console.log(`Loại thiết bị: ${normalizedCategoryName} -> ${category.categoryId}`);
       } catch (error) {
-        console.error(`Lỗi khi nhập loại thiết bị ${categoryName}:`, error);
+        console.error(`Lỗi khi nhập loại thiết bị ${name}:`, error);
       }
     }
 

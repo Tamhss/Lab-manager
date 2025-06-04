@@ -308,8 +308,8 @@ const DeviceReservationForm: React.FC<DeviceReservationFormProps> = ({ onBack })
         axiosInstance
             .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/lecturers`, getToken)
             .then((response) => {
-                if (Array.isArray(response.data.data.data)) {
-                    const data = response.data.data.data.map((user: ApiLecturer) => ({
+                if (Array.isArray(response.data.data)) {
+                    const data = response.data.data.map((user: ApiLecturer) => ({
                         lecturerId: user.lecturerId,
                         userName: user.userName,
                     }));

@@ -20,6 +20,9 @@ interface BorrowHistoryType {
     actualBorrowTime: string;
     actualReturnTime: string;
     deviceCondition: string;
+    createdAt: string;
+    userName?: string;
+    deviceName?: string;
 }
 
 type DataIndex = keyof BorrowHistoryType;
@@ -185,26 +188,21 @@ const DeviceBorrowHistory: React.FC = () => {
             </div>
         ),
         filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-        onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange(open) {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+        onFilter: (value, record) => {
+            switch (dataIndex) {
+                case 'deviceReservationId':
+                    return record.deviceReservationId.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'userName':
+                    return record.userName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'deviceName':
+                    return record.deviceName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                default:
+                    const recordValue = (record as any)[dataIndex];
+                    return recordValue?.toString().toLowerCase().includes((value as string).toLowerCase()) || false;
+            }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
+        render: (text) => text
+
     });
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -230,6 +228,7 @@ const DeviceBorrowHistory: React.FC = () => {
             key: 'userName',
             width: '15%',
             render: (text) => text || 'Không xác định',
+            ...getColumnSearchProps('userName'),
         },
         {
             title: 'Tên thiết bị',
@@ -237,6 +236,7 @@ const DeviceBorrowHistory: React.FC = () => {
             key: 'deviceName',
             width: '15%',
             render: (text) => text || 'Không xác định',
+            ...getColumnSearchProps('deviceName'),
         },
         {
             title: 'Thời gian lấy thiết bị',
@@ -289,7 +289,16 @@ const DeviceBorrowHistory: React.FC = () => {
             >
                 Xoá các mục đã chọn
             </Button>
-            <Table<BorrowHistoryType> rowSelection={rowSelection} columns={columns} dataSource={data.map(item => ({ ...item, key: item.borrowHistoryId }))} />
+            <Table<BorrowHistoryType>
+                rowSelection={rowSelection}
+                columns={columns}
+                dataSource={
+                    [...data]
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .map(item => ({ ...item, key: item.borrowHistoryId }))
+                }
+            />
+
         </Spin>
     );
 };

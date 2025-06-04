@@ -36,6 +36,8 @@ interface DeviceReservationType {
     startTime: string;
     endTime: string;
     status: string;
+    updatedAt: string;
+    displayStatusKey: string;
 }
 
 type DataIndex = keyof DeviceReservationType;
@@ -52,7 +54,7 @@ const DeviceReservation: React.FC = () => {
     const [form] = Form.useForm();
     const [api, contextHolder] = notification.useNotification();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const statusMap = {
+    const statusMap: Record<string, string> = {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Giảng viên đã phê duyệt',
         APPROVED: 'Đã phê duyệt',
@@ -513,27 +515,28 @@ const DeviceReservation: React.FC = () => {
                 </Space>
             </div>
         ),
-        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-        onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange(open) {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+        filterIcon: (filtered: boolean) => <SearchOutlined />,
+        onFilter: (value, record) => {
+            switch (dataIndex) {
+                case 'user':
+                    return record.user?.userName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'lecturer':
+                    return record.lecturer?.userName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'lab':
+                    return record.lab?.labName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'device':
+                    return record.device?.deviceName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'displayStatusKey':
+                    const statusSearchValue = (value as string).toLowerCase();
+                    return record.displayStatusKey.toLowerCase() === statusSearchValue ||
+                        statusMap[record.displayStatusKey].toLowerCase().includes(statusSearchValue);
+                default:
+                    const recordValue = (record as any)[dataIndex];
+                    return recordValue?.toString().toLowerCase().includes((value as string).toLowerCase()) || false;
+            }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
+
+        render: (text) => text
     });
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -558,24 +561,28 @@ const DeviceReservation: React.FC = () => {
             title: 'Tên người dùng',
             dataIndex: 'user',
             key: 'user',
+            ...getColumnSearchProps('user'),
             render: (user) => user?.userName || 'Không xác định',
         },
         {
             title: 'Giảng viên',
             dataIndex: 'lecturer',
             key: 'lecturer',
+            ...getColumnSearchProps('lecturer'),
             render: (lecturer) => lecturer?.user.userName || 'Không xác định',
         },
         {
             title: 'Phòng',
             dataIndex: 'lab',
             key: 'lab',
+            ...getColumnSearchProps('lab'),
             render: (lab) => lab?.labName || 'Không xác định',
         },
         {
             title: 'Tên thiết bị',
             dataIndex: 'device',
             key: 'device',
+            ...getColumnSearchProps('device'),
             render: (device) => device?.deviceName || 'Không xác định',
         },
         {
@@ -600,6 +607,7 @@ const DeviceReservation: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'displayStatusKey',
             key: 'displayStatusKey',
+            ...getColumnSearchProps('displayStatusKey'),
             render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'BORROWED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
                     {statusMap[status] || status}
@@ -696,8 +704,13 @@ const DeviceReservation: React.FC = () => {
             <Table<DeviceReservationType>
                 rowSelection={rowSelection}
                 columns={columns}
-                dataSource={formattedData.map(item => ({ ...item, key: item.deviceReservationId }))}
+                dataSource={
+                    [...formattedData]
+                        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                        .map(item => ({ ...item, key: item.deviceReservationId }))
+                }
             />
+
             <Modal
                 title="Nhập thời gian mượn thực tế"
                 open={isModalVisible}

@@ -30,6 +30,8 @@ interface LabReservationType {
     startTime: string;
     endTime: string;
     status: string;
+    updatedAt: string;
+    displayStatusKey: string;
 }
 
 type DataIndex = keyof LabReservationType;
@@ -46,7 +48,7 @@ const LabReservationManager: React.FC = () => {
     const [form] = Form.useForm();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [api, contextHolder] = notification.useNotification();
-    const statusMap = {
+    const statusMap: Record<string, string> = {
         PENDING: 'Đang chờ',
         APPROVED_BY_LECTURER: 'Đã được giảng viên phê duyệt',
         APPROVED: 'Đã phê duyệt',
@@ -512,26 +514,24 @@ const LabReservationManager: React.FC = () => {
             </div>
         ),
         filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-        onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange(open) {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+        onFilter: (value, record) => {
+            switch (dataIndex) {
+                case 'user':
+                    return record.user?.userName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'lecturer':
+                    return record.lecturer?.userName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'lab':
+                    return record.lab?.labName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'displayStatusKey':
+                    const statusSearchValue = (value as string).toLowerCase();
+                    return record.displayStatusKey.toLowerCase() === statusSearchValue ||
+                        statusMap[record.displayStatusKey].toLowerCase().includes(statusSearchValue);
+                default:
+                    const recordValue = (record as any)[dataIndex];
+                    return recordValue?.toString().toLowerCase().includes((value as string).toLowerCase()) || false;
+            }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
+        render: (text) => text
     });
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -591,6 +591,7 @@ const LabReservationManager: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'displayStatusKey',
             key: 'displayStatusKey',
+            ...getColumnSearchProps('displayStatusKey'),
             render: (status: 'PENDING' | 'APPROVED_BY_LECTURER' | 'APPROVED' | 'BORROWED' | 'REJECTED' | 'COMPLETED') => (
                 <Tag color={getStatusColor(status)}>
                     {statusMap[status] || status}
@@ -687,7 +688,11 @@ const LabReservationManager: React.FC = () => {
             <Table<LabReservationType>
                 rowSelection={rowSelection}
                 columns={columns}
-                dataSource={formattedData.map(item => ({ ...item, key: item.labReservationId }))}
+                dataSource={
+                    [...formattedData]
+                        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                        .map(item => ({ ...item, key: item.labReservationId }))
+                }
             />
             <Modal
                 title="Nhập thời mượn thực tế"

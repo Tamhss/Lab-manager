@@ -42,13 +42,14 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
     const [file, setFile] = useState<File | null>(null);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const getToken = getAuthConfig();
-    const statusMap = {
+    const statusMap: Record<string, string> = {
         NOT_IN_USE: 'Không sử dụng',
         IN_USE: 'Đang sử dụng',
         DAMAGED: 'Hư hỏng',
         DISPOSING: 'Đang thanh lý'
     }
-    const statusBorrowMap = {
+
+    const statusBorrowMap: Record<string, string> = {
         BORROWED: 'Đang được sử dụng',
         COMPLETED: 'Trống lịch'
     }
@@ -319,27 +320,29 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
                 </Space>
             </div>
         ),
-        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-        onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange(open) {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+        filterIcon: (filtered: boolean) => <SearchOutlined />,
+        onFilter: (value, record) => {
+            switch (dataIndex) {
+                case 'deviceId':
+                    return record.deviceId?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'deviceName':
+                    return record.deviceName.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'category':
+                    return record.category.name.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'status':
+                    const statusSearchValue = (value as string).toLowerCase();
+                    return record.status.toLowerCase() === statusSearchValue ||
+                        statusMap[record.status].toLowerCase().includes(statusSearchValue);
+                case 'borrowStatus':
+                    const borrowSearchValue = (value as string).toLowerCase();
+                    return record.status.toLowerCase() === borrowSearchValue ||
+                        statusBorrowMap[record.borrowStatus].toLowerCase().includes(borrowSearchValue);
+                default:
+                    const recordValue = (record as any)[dataIndex];
+                    return recordValue?.toString().toLowerCase().includes((value as string).toLowerCase()) || false;
+            }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
+        render: (text) => text
     });
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -378,6 +381,7 @@ const Device: React.FC<DeviceProps> = ({ labId }) => {
             dataIndex: 'category',
             key: 'category',
             width: '15%',
+            ...getColumnSearchProps('category'),
             render: (category) => category?.name || 'Không xác định',
         },
         {

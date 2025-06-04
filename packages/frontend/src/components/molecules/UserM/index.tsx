@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload } from 'antd';
+import { Button, Input, Space, Table, Spin, message, Form, Modal, Select, notification, Upload, Tag } from 'antd';
 import type { FilterDropdownProps, TableRowSelection } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import axios from 'axios';
@@ -13,6 +13,7 @@ interface UserMType {
     email: string;
     role: string;
     code: string;
+    updatedAt: string;
 }
 
 type DataIndex = keyof UserMType;
@@ -30,7 +31,11 @@ const UserM: React.FC = () => {
     const [api, contextHolder] = notification.useNotification();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [file, setFile] = useState<File | null>(null);
-
+    const roleMap = {
+        ADMIN: 'Quản trị viên',
+        LECTURER: 'Giảng viên',
+        STUDENT: 'Sinh viên',
+    }
     useEffect(() => {
         fetchData();
     }, []);
@@ -278,27 +283,25 @@ const UserM: React.FC = () => {
                 </Space>
             </div>
         ),
-        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-        onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange(open) {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+        filterIcon: (filtered: boolean) => <SearchOutlined />,
+        onFilter: (value, record) => {
+            switch (dataIndex) {
+                case 'code':
+                    return record.code?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'userName':
+                    return record.userName?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'email':
+                    return record.email?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'role':
+                    const roleSearchValue = (value as string).toLowerCase();
+                    return record.role.toLowerCase() === roleSearchValue ||
+                        roleMap[record.role as keyof typeof roleMap].toLowerCase().includes(roleSearchValue);
+                default:
+                    const recordValue = (record as any)[dataIndex];
+                    return recordValue?.toString().toLowerCase().includes((value as string).toLowerCase()) || false;
+            }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
+        render: (text) => text
     });
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -338,6 +341,14 @@ const UserM: React.FC = () => {
             key: 'role',
             width: '20%',
             ...getColumnSearchProps('role'),
+            render: (role: 'ADMIN' | 'LECTURER' | 'STUDENT') => {
+                const roleColorMap: Record<string, string> = {
+                    ADMIN: 'red',
+                    LECTURER: 'blue',
+                    STUDENT: 'green',
+                };
+                return <Tag color={roleColorMap[role]}>{roleMap[role]}</Tag>;
+            }
         },
         {
             title: 'Hành động',
@@ -377,8 +388,15 @@ const UserM: React.FC = () => {
                     Xoá các mục đã chọn
                 </Button>
             </div>
-            <Table<UserMType> rowSelection={rowSelection} columns={columns} dataSource={data.map(item => ({ ...item, key: item.userId }))} />
-
+            <Table<UserMType>
+                rowSelection={rowSelection}
+                columns={columns}
+                dataSource={
+                    [...data]
+                        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                        .map(item => ({ ...item, key: item.userId }))
+                }
+            />
             <Modal title={isEditing ? "Chỉnh sửa người dùng" : "Tạo mới người dùng"} open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={(values) => handleSave(values, true)}>
                     <Form.Item

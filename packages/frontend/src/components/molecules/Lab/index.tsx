@@ -180,27 +180,23 @@ const Lab: React.FC = () => {
                 </Space>
             </div>
         ),
-        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-        onFilter: (value, record) =>
-            record[dataIndex]?.toString().toLowerCase().includes((value as string).toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange(open) {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+        filterIcon: (filtered: boolean) => <SearchOutlined />,
+        onFilter: (value, record) => {
+            switch (dataIndex) {
+                case 'labId':
+                    return record.labId?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'labName':
+                    return record.labName.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'status':
+                    return record.status.toLowerCase().includes((value as string).toLowerCase()) || false;
+                case 'borrowStatus':
+                    return record.borrowStatus?.toLowerCase().includes((value as string).toLowerCase()) || false;
+                default:
+                    const recordValue = (record as any)[dataIndex];
+                    return recordValue?.toString().toLowerCase().includes((value as string).toLowerCase()) || false;
+            }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
+        render: (text) => text 
     });
 
     const columns: TableColumnsType<LabType> = [

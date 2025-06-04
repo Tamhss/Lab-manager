@@ -45,8 +45,6 @@ jobs:
       - name: Run Prisma migrate
         working-directory: packages/backend/src
         run: npx prisma migrate deploy --schema=prisma/schema.prisma
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       # Build backend
       - name: Build backend

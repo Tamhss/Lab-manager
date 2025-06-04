@@ -24,7 +24,7 @@ import { UserModule } from '@modules/user/user.module';
 import { DeviceModule } from '@modules/device/device.module';
 import { DeviceCategoryModule } from '@modules/devices_category/category.module';
 import { ReservationDeviceModule } from '@modules/reservation_device/reservation_device.module';
-import { UploadModule } from './modules/upload_device/upload.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { LecturerModule } from '@modules/lecturer/lecturer.module';
 import { DeviceBorrowHistoryModule } from '@modules/device_borrow_history/borrow_history.module';
 import { LabModule } from '@modules/Lab/lab.module';

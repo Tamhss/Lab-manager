@@ -10,7 +10,7 @@ export class JwtAuthGuard implements CanActivate {
         const token = request.headers.authorization?.split(' ')[1];
 
         if (!token) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Token không hợp lệ');
         }
 
         try {
@@ -18,7 +18,7 @@ export class JwtAuthGuard implements CanActivate {
             request.user = decoded;
             return true;
         } catch (error) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Token không hợp lệ');
         }
     }
 }

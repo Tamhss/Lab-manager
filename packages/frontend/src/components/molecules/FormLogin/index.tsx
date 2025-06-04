@@ -34,6 +34,7 @@ const SignIn = () => {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
+            body: JSON.stringify({ code, password }),
         });
 
         const data = await res.json();

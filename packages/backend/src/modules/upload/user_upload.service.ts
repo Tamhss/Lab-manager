@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import * as XLSX from "xlsx";
-import { PrismaService } from "@core/global/prisma/prisma.service";
 import * as bcrypt from "bcrypt";
+import { PrismaService } from "@core/global/prisma/prisma.service";
+import { UserService } from "@modules/user/user.service";
 
 @Injectable()
 export class UserUploadService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private userService: UserService
+    ) { }
 
     async importUsers(file: Express.Multer.File) {
         if (!file || !file.buffer) {
@@ -35,45 +39,43 @@ export class UserUploadService {
             const password = passwordRaw !== undefined && passwordRaw !== null ? String(passwordRaw).trim() : "";
             const role = row["Vai Trò"]?.toString().trim().toUpperCase();
 
-            if (!userName || !code || !email || !password || !role) {
-                errors.push({ row: rowIndex, error: "Thiếu thông tin bắt buộc" });
-                continue;
-            }
+          if (!userName || !code || !email || !password || !role) {
+              errors.push({ row: rowIndex, error: "Thiếu thông tin bắt buộc" });
+              continue;
+          }
 
-            if (!validRoles.includes(role)) {
-                errors.push({ row: rowIndex, error: `Vai trò không hợp lệ: ${role}` });
-                continue;
-            }
+          if (!validRoles.includes(role)) {
+              errors.push({ row: rowIndex, error: `Vai trò không hợp lệ: ${role}` });
+              continue;
+          }
 
-            const existingUser = await this.prisma.user.findFirst({
-                where: {
-                    OR: [{ code }, { email }],
-                },
-            });
+          const existingUser = await this.prisma.user.findFirst({
+              where: {
+                  OR: [{ code }, { email }],
+              },
+          });
 
-            if (existingUser) {
-                errors.push({ row: rowIndex, error: "Trùng mã người dùng hoặc email" });
-                continue;
-            }
+          if (existingUser) {
+              errors.push({ row: rowIndex, error: "Trùng mã người dùng hoặc email" });
+              continue;
+          }
 
-            try {
-                const hashedPassword = await bcrypt.hash(password, 10);
+          try {
+              const hashedPassword = await bcrypt.hash(password, 10);
 
-                await this.prisma.user.create({
-                    data: {
-                        userName,
-                        code,
-                        email,
-                        password: hashedPassword,
-                        role,
-                    },
-                });
+            await this.userService.create({
+                userName,
+                code,
+                email,
+                password: hashedPassword,
+                role,
+          });
 
-                successCount++;
-            } catch (error) {
-                errors.push({ row: rowIndex, error: `Lỗi khi tạo user: ${error}` });
-            }
-        }
+              successCount++;
+          } catch (error) {
+              errors.push({ row: rowIndex, error: `Lỗi khi tạo user: ${error}` });
+          }
+      }
 
         if (successCount === 0) {
             throw new Error("Không có người dùng nào được nhập thành công");

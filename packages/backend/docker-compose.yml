@@ -1,25 +1,27 @@
+version: "3.9"
+
 services:
   postgres:
     container_name: postgres
-    image: postgres:latest
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: lab
     ports:
-      - '5432:5432'
-    env_file:
-      - docker.env
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    command: -p 5432
+      - ./pgdata:/var/lib/postgresql   # <-- mount cả thư mục postgres, không chỉ 'data'
 
   pgadmin:
-    depends_on:
-      - postgres
     container_name: pgadmin
     image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@root.com
+      PGADMIN_DEFAULT_PASSWORD: root
     ports:
-      - '8080:80'
-    env_file:
-      - docker.env
-
-volumes:
-  postgres_data:
-  mongo_data:
+      - "8080:80"
